@@ -13,9 +13,11 @@ interface Props {
   description?: string;
   image?: string;
   noindex?: boolean;
+  /** Structured data (schema.org JSON-LD) for this page. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const { title, description, image, noindex } = Astro.props;
+const { title, description, image, noindex, jsonLd } = Astro.props;
 const meta = pageMeta({ title, description, image, noindex, path: Astro.url.pathname });
 ---
 
@@ -24,7 +26,7 @@ const meta = pageMeta({ title, description, image, noindex, path: Astro.url.path
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <Seo meta={meta} />
+    <Seo meta={meta} jsonLd={jsonLd} />
     <Font cssVariable="--font-geist-face" preload />
     <meta name="generator" content={Astro.generator} />
     <script is:inline>

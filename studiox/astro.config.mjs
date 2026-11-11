@@ -33,7 +33,7 @@ const sanitizeHtmlTree = (() => {
 })();
 
 export default defineConfig({
-  site: 'https://gandariastudio.com',
+  site: 'https://www.gandariastudio.com',
 
   // Pages render on demand so CMS edits show up without a rebuild. Public pages are cached
   // at the Vercel edge for about a minute (see src/middleware.ts).
@@ -46,6 +46,8 @@ export default defineConfig({
       CLOUDINARY_CLOUD_NAME: envField.string({ context: 'server', access: 'secret', optional: true }),
       CLOUDINARY_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
       CLOUDINARY_API_SECRET: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // Google Search Console "HTML tag" verification: only the content value, not the whole tag.
+      GOOGLE_SITE_VERIFICATION: envField.string({ context: 'server', access: 'public', optional: true }),
     },
   },
 

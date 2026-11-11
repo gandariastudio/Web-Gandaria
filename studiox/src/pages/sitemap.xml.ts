@@ -7,7 +7,7 @@ const STATIC_PAGES = ['/', '/about', '/services', '/work', '/journal', '/contact
 const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
 export const GET: APIRoute = async ({ site }) => {
-  const base = site ?? new URL('https://gandariastudio.com');
+  const base = site ?? new URL('https://www.gandariastudio.com');
   const db = await getDb();
   const [projects, posts] = await Promise.all([listProjects(db), listPosts(db)]);
   const entries: { loc: string; lastmod?: Date }[] = [

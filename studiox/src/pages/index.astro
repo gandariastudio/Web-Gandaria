@@ -13,9 +13,10 @@ import Testimonials from '@/components/sections/home/Testimonials.astro';
 import Journal from '@/components/sections/home/Journal.astro';
 import Faq from '@/components/sections/home/Faq.astro';
 import Contact from '@/components/sections/home/Contact.astro';
+import { organizationLd } from '@/utils/seo';
 ---
 
-<BaseLayout>
+<BaseLayout jsonLd={organizationLd(Astro.locals.settings)}>
   <Hero />
   <Manifesto />
   <Studio />

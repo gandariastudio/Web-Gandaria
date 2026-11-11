@@ -1,17 +1,23 @@
 ---
+import { GOOGLE_SITE_VERIFICATION } from 'astro:env/server';
 import { SITE_NAME, type PageMeta } from '@/utils/seo';
 
 interface Props {
   meta: PageMeta;
+  /** Structured data for this page (schema.org JSON-LD). */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
 
-const { meta } = Astro.props;
+const { meta, jsonLd } = Astro.props;
+// Escape "<" so content can never close the script tag.
+const ld = jsonLd ? JSON.stringify(jsonLd).replace(/</g, '\\u003c') : null;
 ---
 
 <title>{meta.title}</title>
 <meta name="description" content={meta.description} />
 <link rel="canonical" href={meta.canonical} />
 <meta name="robots" content={meta.noindex ? 'noindex, follow' : 'index, follow'} />
+{GOOGLE_SITE_VERIFICATION && <meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />}
 <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <link rel="shortcut icon" href="/favicon.ico" />
@@ -34,3 +40,5 @@ const { meta } = Astro.props;
 <meta name="twitter:title" content={meta.title} />
 <meta name="twitter:description" content={meta.description} />
 <meta name="twitter:image" content={meta.image} />
+
+{ld && <script type="application/ld+json" set:html={ld} />}
