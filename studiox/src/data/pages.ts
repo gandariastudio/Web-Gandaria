@@ -48,7 +48,7 @@ export const journalPage = {
   tag: 'Journal',
   meta: '(Notes, 2026)',
   lines: ['Notes from', 'the studio.'] as [string, string],
-  intro: 'Short reads on brand, websites and the way we work — written by the people doing it.',
+  intro: 'Short reads on brand, websites and how we work, written by the people doing it.',
 };
 
 export const privacy = {
