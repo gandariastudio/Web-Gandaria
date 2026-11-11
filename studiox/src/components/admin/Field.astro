@@ -1,0 +1,32 @@
+---
+interface Props {
+  name: string;
+  label: string;
+  value?: string | number | null;
+  error?: string;
+  hint?: string;
+  type?: 'text' | 'textarea' | 'date' | 'email' | 'url' | 'number';
+  rows?: number;
+  required?: boolean;
+  placeholder?: string;
+  /** Extra attributes for the input, e.g. data-slug-source. */
+  attrs?: Record<string, string | boolean>;
+}
+
+const { name, label, value, error, hint, type = 'text', rows = 3, required = false, placeholder, attrs = {} } = Astro.props;
+const id = `f-${name.replace(/[^a-z0-9]+/gi, '-')}`;
+const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolean).join(' ') || undefined;
+---
+
+<div class:list={['a-field', error && 'has-error']}>
+  <label class="a-label" for={id}>{label}{required && <span class="text-muted"> *</span>}</label>
+  {
+    type === 'textarea' ? (
+      <textarea id={id} name={name} rows={rows} class="a-input" placeholder={placeholder} aria-invalid={error ? 'true' : undefined} aria-describedby={describedBy} {...attrs}>{value ?? ''}</textarea>
+    ) : (
+      <input id={id} name={name} type={type} value={value ?? ''} class="a-input" placeholder={placeholder} aria-invalid={error ? 'true' : undefined} aria-describedby={describedBy} {...attrs} />
+    )
+  }
+  {hint && <p id={`${id}-hint`} class="a-hint">{hint}</p>}
+  {error && <p id={`${id}-error`} class="a-error">{error}</p>}
+</div>

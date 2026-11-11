@@ -1,0 +1,20 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import AdminList from '@/components/admin/AdminList.astro';
+import { getDb } from '@/lib/db';
+import { adminListPosts } from '@/lib/db/admin';
+import { handleListPost, thumb } from '@/lib/cms/admin-page';
+
+const db = await getDb();
+const redirect = await handleListPost(Astro, db, 'posts');
+if (redirect) return redirect;
+const rows = (await adminListPosts(db)).map((p) => ({ id: p.id, title: p.title, meta: `${p.category} · ${p.publishedAt.toLocaleDateString('en-GB', { dateStyle: 'medium', timeZone: 'UTC' })}`, status: p.published, thumb: thumb(p.cover), viewHref: p.published ? `/journal/${p.slug}` : undefined }));
+---
+
+<AdminLayout title="Journal">
+  <div class="a-head">
+    <h1 class="a-title">Journal</h1>
+    <a class="a-btn" href="/admin/journal/new">New article</a>
+  </div>
+  <AdminList rows={rows} base="/admin/journal" noun="article" />
+</AdminLayout>

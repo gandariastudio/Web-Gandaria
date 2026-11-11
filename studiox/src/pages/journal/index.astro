@@ -1,0 +1,54 @@
+---
+import CmsImage from '@/components/ui/CmsImage.astro';
+import { getDb } from '@/lib/db';
+import { listPosts } from '@/lib/db/queries';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/sections/shared/PageHero.astro';
+import NextStep from '@/components/sections/shared/NextStep.astro';
+import { journalPage } from '@/data/pages';
+
+const posts = await listPosts(await getDb());
+const fmt = (d: Date) => d.toLocaleString('en-US', { dateStyle: 'medium', timeZone: 'UTC' });
+---
+
+<BaseLayout title="Journal" description={journalPage.intro}>
+  <PageHero {...journalPage} wide />
+
+  <section class="bg-paper px-5 pb-24 md:px-8 md:pb-[120px] lg:px-10 lg:pb-40" data-cursor="Read note" data-cursor-zone="[data-cover]">
+    <div class="mx-auto grid max-w-[1600px] auto-rows-fr grid-cols-1 gap-14 md:grid-cols-2 md:gap-x-6 md:gap-y-[72px]">
+      {
+        posts.map((post) => {
+          const p = post;
+          return (
+            <a href={`/journal/${post.slug}`} class="flex flex-col gap-[18px] self-start">
+              <div class="cover relative h-60 overflow-clip md:h-80 lg:h-[520px]" data-cover data-img-reveal>
+                <CmsImage image={p.cover} widths={[700, 1400]} sizes="(min-width: 810px) 50vw, 100vw" class="cover__img absolute inset-0 size-full object-cover" />
+              </div>
+              <p class="type-label flex items-center gap-2.5">
+                <span class="text-cobalt">{p.category}</span>
+                <span class="text-muted">·</span>
+                <time class="text-muted" datetime={p.publishedAt.toISOString()}>{fmt(p.publishedAt)}</time>
+              </p>
+              <h2 class="type-h2">{p.title}</h2>
+              <p class="type-body max-w-[560px] text-muted">{p.excerpt}</p>
+              <p class="type-small text-cobalt">Read note →</p>
+            </a>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <NextStep wide />
+</BaseLayout>
+
+<style>
+  .cover__img {
+    transition: transform 1.1s var(--ease-expo);
+  }
+  @media (hover: hover) {
+    .cover:hover .cover__img {
+      transform: scale(1.04);
+    }
+  }
+</style>

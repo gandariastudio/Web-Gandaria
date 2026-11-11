@@ -1,0 +1,36 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+---
+
+<BaseLayout title="Page not found" noindex>
+  <section class="bg-fog px-5 pt-40 pb-[120px] md:px-8 md:pt-[180px] md:pb-40 lg:px-10 lg:py-[200px]" data-cursor="Lost?">
+    <div class="mx-auto flex max-w-[1600px] flex-col items-center gap-7 text-center">
+      <p class="not-found text-cobalt" aria-hidden="true" data-text-reveal="line" data-tr-blur="10" data-tr-y="28" data-tr-stagger="0.05">404</p>
+      <h1 class="type-h2">This page took a different route.</h1>
+      <p class="type-body max-w-[440px] text-muted">The link may be old or mistyped. Everything we make is one click away.</p>
+      <div class="flex items-center justify-center gap-7">
+        <Button label="Back to home" href="/" />
+        <a href="/work" class="text-link type-small">See our work</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    font-size: 140px;
+    line-height: 0.85;
+    letter-spacing: -0.07em;
+  }
+  @media (width >= 810px) {
+    .not-found {
+      font-size: 220px;
+    }
+  }
+  @media (width >= 1440px) {
+    .not-found {
+      font-size: 320px;
+    }
+  }
+</style>

@@ -1,0 +1,56 @@
+---
+import { cn } from '@/utils/cn';
+
+interface Props {
+  city?: string;
+  timeZone?: string;
+  dot?: string;
+  class?: string;
+}
+
+const { city = 'Semarang', timeZone = 'Asia/Jakarta', dot = 'var(--color-sky)', class: className } = Astro.props;
+---
+
+<span class={cn('live-clock type-label inline-flex w-max items-center gap-2.5 tracking-[0.01em] tabular-nums', className)} data-clock={timeZone}>
+  <span class="live-clock__dot size-1.5 rounded-full" style={`--dot:${dot};background:${dot}`} aria-hidden="true"></span>
+  <span>{city} <span data-clock-h>14</span><span class="live-clock__colon" data-clock-colon>:</span><span data-clock-m>32</span></span>
+</span>
+
+<style>
+  .live-clock__dot {
+    animation: lc-pulse 2s infinite;
+  }
+  .live-clock__colon {
+    transition: opacity 0.3s ease;
+  }
+  @keyframes lc-pulse {
+    0% {
+      box-shadow: 0 0 0 0 var(--dot);
+    }
+    70% {
+      box-shadow: 0 0 0 6px transparent;
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-clock]').forEach((el) => {
+    const h = el.querySelector('[data-clock-h]')!;
+    const m = el.querySelector('[data-clock-m]')!;
+    const colon = el.querySelector<HTMLElement>('[data-clock-colon]')!;
+    const fmt = new Intl.DateTimeFormat('en-GB', { timeZone: el.dataset.clock, hour: '2-digit', minute: '2-digit', hour12: false });
+    const tick = () => {
+      if (document.hidden) return;
+      const now = new Date();
+      const parts = fmt.formatToParts(now);
+      h.textContent = parts.find((p) => p.type === 'hour')?.value ?? '';
+      m.textContent = parts.find((p) => p.type === 'minute')?.value ?? '';
+      colon.style.opacity = now.getSeconds() % 2 === 0 ? '1' : '0.25';
+    };
+    tick();
+    setInterval(tick, 1000);
+  });
+</script>

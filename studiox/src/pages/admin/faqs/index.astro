@@ -1,0 +1,20 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import AdminList from '@/components/admin/AdminList.astro';
+import { getDb } from '@/lib/db';
+import { adminListFaqs } from '@/lib/db/admin';
+import { handleListPost, excerpt } from '@/lib/cms/admin-page';
+
+const db = await getDb();
+const redirect = await handleListPost(Astro, db, 'faqs');
+if (redirect) return redirect;
+const rows = (await adminListFaqs(db)).map((f) => ({ id: f.id, title: f.question, meta: excerpt(f.answer) }));
+---
+
+<AdminLayout title="FAQ">
+  <div class="a-head">
+    <h1 class="a-title">FAQ</h1>
+    <a class="a-btn" href="/admin/faqs/new">New question</a>
+  </div>
+  <AdminList rows={rows} base="/admin/faqs" noun="question" ordered />
+</AdminLayout>

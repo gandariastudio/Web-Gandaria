@@ -1,0 +1,16 @@
+# OS and editor files
+.DS_Store
+.idea/
+.vscode/
+
+# local tooling
+.claude/
+
+# dependencies and secrets (studiox/.gitignore covers the app's build output and local database)
+node_modules/
+.env
+.env.*
+!.env.example
+
+# stale lockfile from the original theme; npm (package-lock.json) is the package manager
+studiox/bun.lock

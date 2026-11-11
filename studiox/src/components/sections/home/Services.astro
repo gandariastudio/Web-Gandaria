@@ -1,0 +1,111 @@
+---
+import { CLOUDINARY_CLOUD_NAME } from 'astro:env/server';
+import CmsImage from '@/components/ui/CmsImage.astro';
+import { getDb } from '@/lib/db';
+import { listServices } from '@/lib/db/queries';
+import { imageSrc } from '@/lib/cms/cloudinary';
+import BigTitle from '@/components/ui/BigTitle.astro';
+import Button from '@/components/ui/Button.astro';
+
+const services = await listServices(await getDb());
+
+const previews = services.map((s) => imageSrc(s.image, CLOUDINARY_CLOUD_NAME, 720));
+---
+
+<section class="relative bg-fog" data-cursor="What we do" data-services>
+  <div class="container-x mx-auto flex max-w-[1680px] flex-col gap-12 pt-10 pb-24 md:pb-[120px] xl:gap-[88px] xl:pb-[200px]">
+    <div class="flex flex-col items-center gap-5 md:gap-6 xl:gap-7">
+      <p class="tag">Services</p>
+      <BigTitle lines={['What we', 'do best.']} />
+      <a href="/services" class="text-link type-small">Explore services →</a>
+    </div>
+
+    <ul class="line-b" data-services-list>
+      {
+        services.map((s, i) => (
+          <li data-preview={previews[i]} class="service-row group relative flex flex-col pt-7 pb-8 md:flex-row md:gap-8 md:pt-11 md:pb-[52px] xl:gap-10" data-service-row>
+            <span class="pointer-events-none absolute inset-x-0 top-0 h-px bg-line" />
+            <span class="service-row__line pointer-events-none absolute -bottom-px left-0 z-[2] h-px w-0 bg-cobalt" />
+            <div class="flex flex-1 flex-col gap-3.5 xl:flex-row xl:gap-10">
+              <div class="flex flex-1 gap-4 md:gap-6">
+                <p class="service-row__num type-label w-10 shrink-0 text-muted">{String(i + 1).padStart(2, '0')}</p>
+                <h3 class="service-row__title type-h2 flex-1">{s.title}</h3>
+              </div>
+              <div class="flex flex-1 flex-col gap-3 pl-14 md:gap-[18px] md:pl-16 xl:pt-1.5 xl:pl-0">
+                <p class="service-row__summary type-body max-w-[380px] text-muted [text-wrap:pretty]">{s.summary}</p>
+                <p class="type-label text-muted">{s.deliverables}</p>
+              </div>
+            </div>
+            <div class="relative mt-6 ml-14 h-[220px] overflow-clip md:hidden" data-img-reveal>
+              <CmsImage image={s.image} widths={[400, 800]} sizes="calc(100vw - 88px)" class="absolute inset-0 size-full object-cover" />
+            </div>
+            <div class="hidden h-px w-[200px] shrink-0 md:block xl:w-[280px]" data-media-slot />
+            <div class="service-row__btn hidden md:block">
+              <Button label="Enquire" href="/#contact" variant="secondary" />
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <div class="services-preview pointer-events-none" aria-hidden="true" data-services-preview></div>
+</section>
+
+<style>
+  .service-row__num,
+  .service-row__title,
+  .service-row__summary {
+    transition: color 0.45s var(--ease-standard);
+  }
+  .service-row__line {
+    transition: width 0.8s var(--ease-swift);
+  }
+  .service-row__btn {
+    opacity: 0;
+    transition: opacity 0.45s var(--ease-standard);
+  }
+  @media (width >= 810px) {
+    .service-row {
+      cursor: pointer;
+    }
+    .service-row:hover .service-row__num,
+    .service-row:hover .service-row__title {
+      color: var(--color-cobalt);
+    }
+    .service-row:hover .service-row__summary {
+      color: var(--color-ink);
+    }
+    .service-row:hover .service-row__line {
+      width: 100%;
+    }
+    .service-row:hover .service-row__btn {
+      opacity: 1;
+    }
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .service-row {
+      transition: opacity 0.6s var(--ease-standard);
+    }
+    [data-services-list]:hover .service-row {
+      opacity: 0.3;
+    }
+    [data-services-list]:hover .service-row:hover {
+      opacity: 1;
+    }
+  }
+  .services-preview {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 300px;
+    height: 300px;
+    overflow: hidden;
+    border-radius: 4px;
+    visibility: hidden;
+    opacity: 0;
+    clip-path: inset(50% 0% 50% 0% round 4px);
+    z-index: 9;
+    background: var(--color-bone);
+    will-change: transform, clip-path;
+  }
+</style>

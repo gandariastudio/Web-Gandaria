@@ -1,0 +1,274 @@
+---
+const EMAIL = Astro.locals.settings.email;
+
+const services = ['Brand', 'Website', 'Content design', 'Not sure yet'];
+const budgets = ['Under Rp50 jt', 'Rp50–150 jt', 'Rp150 jt+', 'Not sure yet'];
+const inputs: { name: string; label: string; required: boolean; type: 'text' | 'email'; placeholder: string; auto: string; full: boolean }[] = [
+  { name: 'name', label: 'Your name', required: true, type: 'text', placeholder: 'Jane Doe', auto: 'name', full: false },
+  { name: 'email', label: 'Email', required: true, type: 'email', placeholder: 'jane@company.com', auto: 'email', full: false },
+  { name: 'company', label: 'Company', required: false, type: 'text', placeholder: 'Company or project name', auto: 'organization', full: true },
+];
+---
+
+<form class="cf relative w-full" novalidate data-contact-form data-email={EMAIL}>
+  <div class="cf-grid">
+    {
+      inputs.map((f) => (
+        <label class:list={['cf-field', f.full && 'cf-full']} data-field={f.name}>
+          <span class="cf-label">
+            <span>
+              {f.label}
+              {f.required && ' *'}
+            </span>
+            <i>{f.name === 'email' ? 'Add a valid email' : 'Required'}</i>
+          </span>
+          <input name={f.name} type={f.type} class="cf-input" placeholder={f.placeholder} autocomplete={f.auto} />
+          <span class="cf-line" aria-hidden="true" />
+        </label>
+      ))
+    }
+    <div class="cf-field cf-full" role="group" aria-label="What do you need?">
+      <span class="cf-label"><span>What do you need?</span></span>
+      <div class="cf-chips" data-chips="multi">
+        {services.map((s) => <button type="button" class="cf-chip" aria-pressed="false">{s}</button>)}
+      </div>
+    </div>
+    <div class="cf-field cf-full" role="group" aria-label="Budget">
+      <span class="cf-label"><span>Budget</span></span>
+      <div class="cf-chips" data-chips="single">
+        {budgets.map((s) => <button type="button" class="cf-chip" aria-pressed="false">{s}</button>)}
+      </div>
+    </div>
+    <label class="cf-field cf-full" data-field="message">
+      <span class="cf-label"><span>Tell us about the project</span></span>
+      <textarea name="message" class="cf-input" rows="1" placeholder="Goals, timing, anything we should know"></textarea>
+      <span class="cf-line" aria-hidden="true"></span>
+    </label>
+    <div class="cf-foot cf-full">
+      <span class="max-w-[300px] text-[13px] leading-[1.4] text-muted">Your details stay with us. No newsletters, ever.</span>
+      <button type="submit" class="cf-submit">
+        <span class="cf-roll"><span>Send enquiry</span><span aria-hidden="true">Send enquiry</span></span>
+        <span class="cf-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+  </div>
+  <div class="cf-done hidden" role="status" data-cf-done>
+    <span class="cf-check" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 11.5l4.5 4.5L18 6.5" stroke="#fff" stroke-width="1.6"></path></svg>
+    </span>
+    <p class="text-[40px] leading-[1.05] tracking-[-0.04em]">Thank you.</p>
+    <p class="max-w-[420px] text-[17px] leading-[1.5] text-muted">We’ve got your note and will reply within one business day.</p>
+  </div>
+</form>
+
+<style>
+  .cf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px 32px;
+  }
+  .cf-full {
+    grid-column: 1 / -1;
+  }
+  .cf-field {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .cf-label {
+    font-size: 13px;
+    line-height: normal;
+    letter-spacing: 0.01em;
+    color: var(--color-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  .cf-label i {
+    font-style: normal;
+    color: var(--color-cobalt);
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 0.4s ease,
+      transform 0.6s var(--ease-expo);
+  }
+  .cf-field.err .cf-label i {
+    opacity: 1;
+    transform: none;
+  }
+  .cf-input {
+    all: unset;
+    box-sizing: border-box;
+    width: 100%;
+    font: 400 22px/1.3 var(--font-geist);
+    letter-spacing: -0.015em;
+    color: var(--color-ink);
+    padding: 6px 0 14px;
+    caret-color: var(--color-cobalt);
+  }
+  .cf-input::placeholder {
+    color: var(--color-muted);
+    opacity: 0.45;
+  }
+  textarea.cf-input {
+    resize: none;
+    overflow: hidden;
+    white-space: pre-wrap;
+    display: block;
+  }
+  .cf-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--color-line);
+  }
+  .cf-line::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-cobalt);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.9s var(--ease-swift);
+  }
+  .cf-field:focus-within .cf-line::after,
+  .cf-field.err .cf-line::after {
+    transform: scaleX(1);
+  }
+  .cf-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .cf-chip {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    font: 400 15px/1 var(--font-geist);
+    color: var(--color-ink);
+    padding: 13px 18px;
+    border: 1px solid var(--color-line);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition:
+      background-color 0.5s var(--ease-expo),
+      color 0.5s var(--ease-expo),
+      border-color 0.5s var(--ease-expo);
+  }
+  .cf-chip::before {
+    content: '';
+    width: 0;
+    height: 6px;
+    margin-right: -10px;
+    background: currentColor;
+    transform: scale(0);
+    transition:
+      transform 0.5s var(--ease-expo),
+      width 0.5s var(--ease-expo),
+      margin 0.5s var(--ease-expo);
+  }
+  .cf-chip:hover {
+    border-color: var(--color-ink);
+  }
+  .cf-chip[aria-pressed='true'] {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: #fff;
+  }
+  .cf-chip[aria-pressed='true']::before {
+    transform: scale(1);
+    width: 6px;
+    margin-right: 0;
+  }
+  .cf-chip:focus-visible,
+  .cf-submit:focus-visible {
+    outline: 2px solid var(--color-cobalt);
+    outline-offset: 3px;
+  }
+  .cf-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding-top: 8px;
+  }
+  .cf-submit {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 26px;
+    background: var(--color-cobalt);
+    color: #fff;
+    font: 500 16px/1 var(--font-geist);
+    letter-spacing: -0.01em;
+    box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.35);
+    transition: transform 0.6s var(--ease-expo);
+  }
+  .cf-submit:hover {
+    transform: translateY(-2px);
+  }
+  .cf-roll {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    height: 1em;
+  }
+  .cf-roll span {
+    display: block;
+    transition: transform 0.7s var(--ease-swift);
+  }
+  .cf-roll span + span {
+    position: absolute;
+    left: 0;
+    top: 100%;
+  }
+  .cf-submit:hover .cf-roll span {
+    transform: translateY(-100%);
+  }
+  .cf-arrow {
+    display: inline-block;
+    transition: transform 0.7s var(--ease-swift);
+  }
+  .cf-submit:hover .cf-arrow {
+    transform: translateX(4px);
+  }
+  .cf-done {
+    flex-direction: column;
+    gap: 18px;
+    padding: 24px 0;
+  }
+  .cf-check {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-cobalt);
+    display: grid;
+    place-items: center;
+  }
+  .cf-check path {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+  }
+  @media (max-width: 809px) {
+    .cf-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .cf-input {
+      font-size: 19px;
+    }
+    .cf-foot {
+      flex-direction: column-reverse;
+      align-items: flex-start;
+    }
+  }
+</style>

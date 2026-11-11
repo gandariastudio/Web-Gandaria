@@ -1,0 +1,104 @@
+---
+import LogoMark from '@/components/ui/LogoMark.astro';
+---
+
+<div class="loader fixed inset-0 z-[2147483000] bg-cobalt" aria-hidden="true" data-loader>
+  <span class="loader__mark fixed top-1/2 left-1/2 size-6 text-paper" data-loader-mark>
+    <LogoMark class="size-6" />
+  </span>
+</div>
+
+<div class="curtain fixed inset-0 z-[2147483000] flex items-center justify-center bg-cobalt text-paper" aria-hidden="true" data-curtain>
+  <div class="curtain__inner flex flex-col items-center gap-[18px]">
+    <LogoMark class="size-7" />
+    <span class="curtain__label flex items-center gap-2 text-[13px] leading-none font-medium tracking-[0.02em]" data-curtain-label>
+      Gandaria
+    </span>
+  </div>
+</div>
+<script is:inline>
+  (function () {
+    var pt = document.documentElement.dataset.ptLabel;
+    if (pt) document.querySelector('[data-curtain-label]').textContent = pt;
+  })();
+</script>
+
+<style>
+  .loader {
+    clip-path: inset(0 0 0% 0);
+    pointer-events: all;
+    animation: kfx-failsafe 0.4s ease 4s forwards;
+  }
+  .loader__mark {
+    transform: translate(-50%, -50%) scale(2);
+    will-change: transform;
+  }
+  :global(html.no-loader) .loader {
+    display: none;
+  }
+  .loader__mark :global(rect) {
+    animation-duration: 0.25s;
+    animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+    animation-fill-mode: both;
+  }
+  .loader__mark :global(rect:nth-child(odd)) {
+    animation-name: mark-x;
+  }
+  .loader__mark :global(rect:nth-child(even)) {
+    animation-name: mark-y;
+  }
+  .loader__mark :global(rect:nth-child(2)),
+  .loader__mark :global(rect:nth-child(3)) {
+    animation-delay: 0.25s;
+  }
+  .loader__mark :global(rect:nth-child(4)),
+  .loader__mark :global(rect:nth-child(5)) {
+    animation-delay: 0.5s;
+  }
+  @keyframes mark-x {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes mark-y {
+    from {
+      transform: scaleY(0);
+    }
+  }
+
+  .curtain {
+    transform: translate3d(0, 100%, 0);
+    pointer-events: none;
+    will-change: transform;
+  }
+  :global(html.pt-arriving) .curtain {
+    transform: none;
+  }
+  .curtain__inner {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.3s ease,
+      transform 0.6s var(--ease-swift);
+  }
+  .curtain.on .curtain__inner,
+  :global(html.pt-arriving) .curtain__inner {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.05s;
+  }
+  .curtain__label::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: currentColor;
+    display: block;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loader,
+    .curtain {
+      display: none !important;
+    }
+  }
+</style>

@@ -1,0 +1,55 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import EditHeader from '@/components/admin/EditHeader.astro';
+import Field from '@/components/admin/Field.astro';
+import Checkbox from '@/components/admin/Checkbox.astro';
+import { getDb } from '@/lib/db';
+import { findById, saveTestimonial } from '@/lib/db/admin';
+import { readers, testimonialSchema, validate, type FieldErrors } from '@/lib/cms/validation';
+import { parseId, saveErrorMessage } from '@/lib/cms/admin-page';
+
+const id = parseId(Astro.params.id);
+if (id === null) return Astro.rewrite('/404');
+const db = await getDb();
+const row = id === 'new' ? null : await findById(db, 'testimonials', id);
+if (id !== 'new' && !row) return Astro.rewrite('/404');
+
+let values: any = row ?? { quote: '', name: '', role: '', published: true };
+let errors: FieldErrors = {};
+
+if (Astro.request.method === 'POST') {
+  values = readers.testimonial(await Astro.request.formData());
+  const result = validate(testimonialSchema, values);
+  if (!result.ok) errors = result.errors;
+  else {
+    try {
+      const savedId = await saveTestimonial(db, row?.id ?? null, result.data);
+      return Astro.redirect(`/admin/testimonials/${savedId}?saved=1`, 303);
+    } catch (error) {
+      errors = { _form: saveErrorMessage(error) };
+    }
+  }
+  Astro.response.status = 422;
+}
+const title = row ? row.name : 'New testimonial';
+---
+
+<AdminLayout title={title}>
+  <EditHeader title={title} back={{ href: '/admin/testimonials', label: 'Testimonials' }} errors={errors} />
+
+  <form method="post" class="flex flex-col gap-5" data-edit-form>
+    <section class="a-card">
+      <h2>Testimonial</h2>
+      <Field name="quote" type="textarea" rows={4} label="Quote" value={values.quote} error={errors.quote} required hint="Without quotation marks; the cards add them." />
+      <div class="a-grid">
+        <Field name="name" label="Name" value={values.name} error={errors.name} required />
+        <Field name="role" label="Role and company" value={values.role} error={errors.role} required placeholder="Marketing Director, Rasakota" />
+      </div>
+      <Checkbox name="published" label="Published" checked={values.published} hint="Hidden testimonials stay in the list but not on the site." />
+    </section>
+    <div class="a-savebar">
+      <span class="a-hint">{row ? `Last saved ${row.updatedAt.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}` : 'Not saved yet'}</span>
+      <button type="submit" class="a-btn">{row ? 'Save changes' : 'Create testimonial'}</button>
+    </div>
+  </form>
+</AdminLayout>

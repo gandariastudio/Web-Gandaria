@@ -1,0 +1,29 @@
+---
+import { cn } from '@/utils/cn';
+
+interface Props {
+  value: number;
+  from?: number;
+  delay?: number;
+  duration?: number;
+  suffix?: string;
+  prefix?: string;
+  trigger?: 'load' | 'scroll';
+  class?: string;
+}
+
+const { value, from = 0, delay = 0, duration = 1.8, suffix = '', prefix = '', trigger = 'scroll', class: className } = Astro.props;
+---
+
+<number-flow
+  class={cn('inline-block', className)}
+  aria-label={`${prefix}${value}${suffix}`}
+  data-number-flow
+  data-value={value}
+  data-from={from}
+  data-delay={delay}
+  data-duration={duration}
+  data-suffix={suffix}
+  data-prefix={prefix}
+  data-trigger={trigger}>{prefix}{value}{suffix}</number-flow
+>

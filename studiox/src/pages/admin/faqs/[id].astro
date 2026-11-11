@@ -1,0 +1,50 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import EditHeader from '@/components/admin/EditHeader.astro';
+import Field from '@/components/admin/Field.astro';
+import { getDb } from '@/lib/db';
+import { findById, saveFaq } from '@/lib/db/admin';
+import { faqSchema, readers, validate, type FieldErrors } from '@/lib/cms/validation';
+import { parseId, saveErrorMessage } from '@/lib/cms/admin-page';
+
+const id = parseId(Astro.params.id);
+if (id === null) return Astro.rewrite('/404');
+const db = await getDb();
+const row = id === 'new' ? null : await findById(db, 'faqs', id);
+if (id !== 'new' && !row) return Astro.rewrite('/404');
+
+let values: any = row ?? { question: '', answer: '' };
+let errors: FieldErrors = {};
+
+if (Astro.request.method === 'POST') {
+  values = readers.faq(await Astro.request.formData());
+  const result = validate(faqSchema, values);
+  if (!result.ok) errors = result.errors;
+  else {
+    try {
+      const savedId = await saveFaq(db, row?.id ?? null, result.data);
+      return Astro.redirect(`/admin/faqs/${savedId}?saved=1`, 303);
+    } catch (error) {
+      errors = { _form: saveErrorMessage(error) };
+    }
+  }
+  Astro.response.status = 422;
+}
+const title = row?.question ?? 'New question';
+---
+
+<AdminLayout title={title}>
+  <EditHeader title={title} back={{ href: '/admin/faqs', label: 'FAQ' }} errors={errors} />
+
+  <form method="post" class="flex flex-col gap-5" data-edit-form>
+    <section class="a-card">
+      <h2>Question</h2>
+      <Field name="question" label="Question" value={values.question} error={errors.question} required />
+      <Field name="answer" type="textarea" rows={4} label="Answer" value={values.answer} error={errors.answer} required />
+    </section>
+    <div class="a-savebar">
+      <span class="a-hint">{row ? `Last saved ${row.updatedAt.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}` : 'Not saved yet'}</span>
+      <button type="submit" class="a-btn">{row ? 'Save changes' : 'Create question'}</button>
+    </div>
+  </form>
+</AdminLayout>

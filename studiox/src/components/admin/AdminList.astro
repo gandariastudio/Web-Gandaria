@@ -1,0 +1,71 @@
+---
+export type AdminListRow = {
+  id: number;
+  title: string;
+  meta?: string;
+  status?: boolean;
+  thumb?: string;
+  viewHref?: string;
+};
+
+interface Props {
+  rows: AdminListRow[];
+  /** e.g. /admin/projects */
+  base: string;
+  ordered?: boolean;
+  noun: string;
+}
+
+const { rows, base, ordered = false, noun } = Astro.props;
+---
+
+<div class="a-card p-0!">
+  {
+    rows.length === 0 ? (
+      <p class="p-6 text-[14px] text-muted">No {noun}s yet.</p>
+    ) : (
+      <table class="a-table">
+        <thead>
+          <tr>
+            <th>{noun[0].toUpperCase() + noun.slice(1)}</th>
+            <th>Status</th>
+            <th class="sr-only">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr>
+              <td>
+                <a href={`${base}/${row.id}`} class="flex items-center gap-3">
+                  {row.thumb && <img src={row.thumb} alt="" class="h-10 w-14 shrink-0 rounded-[4px] bg-fog object-cover" loading="lazy" />}
+                  <span class="flex flex-col">
+                    <span class="font-medium">{row.title}</span>
+                    {row.meta && <span class="text-[12px] text-muted">{row.meta}</span>}
+                  </span>
+                </a>
+              </td>
+              <td>{row.status === undefined ? <span class="a-pill">—</span> : <span class:list={['a-pill', row.status && 'a-pill--on']}>{row.status ? 'Published' : 'Draft'}</span>}</td>
+              <td>
+                <div class="a-actions">
+                  {ordered && (
+                    <form method="post">
+                      <input type="hidden" name="id" value={row.id} />
+                      <button class="a-btn a-btn--ghost a-btn--sm" name="intent" value="up" aria-label={`Move ${row.title} up`} disabled={i === 0}>↑</button>
+                      <button class="a-btn a-btn--ghost a-btn--sm" name="intent" value="down" aria-label={`Move ${row.title} down`} disabled={i === rows.length - 1}>↓</button>
+                    </form>
+                  )}
+                  {row.viewHref && <a class="a-btn a-btn--ghost a-btn--sm" href={row.viewHref} target="_blank" rel="noopener">View ↗</a>}
+                  <a class="a-btn a-btn--ghost a-btn--sm" href={`${base}/${row.id}`}>Edit</a>
+                  <form method="post" data-confirm={`Delete “${row.title}”? This cannot be undone.`}>
+                    <input type="hidden" name="id" value={row.id} />
+                    <button class="a-btn a-btn--danger a-btn--sm" name="intent" value="delete">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )
+  }
+</div>

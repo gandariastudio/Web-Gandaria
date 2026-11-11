@@ -1,0 +1,348 @@
+---
+import { Font } from 'astro:assets';
+import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME } from 'astro:env/server';
+import '@/styles/global.css';
+import LogoMark from '@/components/ui/LogoMark.astro';
+import { getDbHandle } from '@/lib/db';
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+const path = Astro.url.pathname;
+const nav = [
+  { label: 'Dashboard', href: '/admin' },
+  { label: 'Projects', href: '/admin/projects' },
+  { label: 'Journal', href: '/admin/journal' },
+  { label: 'Services', href: '/admin/services' },
+  { label: 'Testimonials', href: '/admin/testimonials' },
+  { label: 'Clients', href: '/admin/clients' },
+  { label: 'FAQ', href: '/admin/faqs' },
+  { label: 'Settings', href: '/admin/settings' },
+];
+const active = (href: string) => (href === '/admin' ? path === '/admin' : path.startsWith(href));
+
+const params = Astro.url.searchParams;
+const flash = params.has('saved') ? 'Saved. The public site updates within about a minute.' : params.get('done') === 'delete' ? 'Deleted.' : params.has('done') ? 'Order updated.' : null;
+
+const { kind } = await getDbHandle();
+const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
+---
+
+<!doctype html>
+<html lang="en" class="admin">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} · Gandaria Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <Font cssVariable="--font-geist-face" preload />
+  </head>
+  <body class="bg-fog text-ink">
+    <div class="admin-shell">
+      <aside class="admin-side">
+        <a href="/admin" class="flex items-center gap-2.5 px-2 pb-6">
+          <LogoMark class="size-5" />
+          <span class="text-[17px] font-medium tracking-[-0.03em]">Gandaria Admin</span>
+        </a>
+        <nav aria-label="Admin">
+          <ul class="flex flex-col gap-0.5">
+            {
+              nav.map((item) => (
+                <li>
+                  <a href={item.href} class:list={['admin-nav', active(item.href) && 'is-active']} aria-current={active(item.href) ? 'page' : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
+        <a href="/" target="_blank" rel="noopener" class="admin-nav mt-auto">View site ↗</a>
+      </aside>
+
+      <main class="admin-main">
+        {
+          kind === 'pglite' && (
+            <p class="admin-banner">
+              Local database (PGlite). Changes stay on this computer until Neon is connected with <code>npm run db:setup</code>.
+            </p>
+          )
+        }
+        {
+          !cloudinaryReady && (
+            <p class="admin-banner">
+              Cloudinary is not configured, so image upload is off. Add the <code>CLOUDINARY_*</code> keys to <code>.env</code>.
+            </p>
+          )
+        }
+        {flash && <p class="admin-flash" role="status">{flash}</p>}
+        <slot />
+      </main>
+    </div>
+
+    <script>
+      import '@/scripts/admin/index';
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  html.admin {
+    scrollbar-width: auto;
+  }
+  .admin-shell {
+    display: grid;
+    min-height: 100vh;
+    grid-template-columns: 232px minmax(0, 1fr);
+  }
+  .admin-side {
+    position: sticky;
+    top: 0;
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+    gap: 4px;
+    padding: 24px 14px;
+    border-right: 1px solid var(--color-line);
+    background: var(--color-paper);
+  }
+  .admin-nav {
+    display: block;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 14px;
+    color: var(--color-muted);
+  }
+  .admin-nav:hover {
+    background: var(--color-fog);
+    color: var(--color-ink);
+  }
+  .admin-nav.is-active {
+    background: var(--color-fog);
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+  .admin-main {
+    display: flex;
+    min-width: 0;
+    max-width: 1080px;
+    flex-direction: column;
+    gap: 20px;
+    padding: 36px 40px 96px;
+  }
+  .admin-banner,
+  .admin-flash {
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  .admin-banner {
+    border: 1px solid var(--color-line);
+    background: var(--color-paper);
+    color: var(--color-muted);
+  }
+  .admin-flash {
+    background: color-mix(in srgb, var(--color-cobalt) 12%, white);
+    color: var(--color-cobalt-deep);
+  }
+  .admin-main code {
+    font-size: 0.9em;
+    background: var(--color-fog);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  .a-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .a-title {
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  .a-sub {
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--color-muted);
+  }
+  .a-card {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    background: var(--color-paper);
+    padding: 22px;
+  }
+  .a-card > h2 {
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .a-grid {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+  .a-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 6px;
+    padding: 9px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--color-cobalt);
+    background-image: var(--gradient-accent);
+    color: var(--color-paper);
+    cursor: pointer;
+  }
+  .a-btn:hover {
+    background-image: var(--gradient-accent-deep);
+  }
+  .a-btn--ghost {
+    background: var(--color-paper);
+    background-image: none;
+    color: var(--color-ink);
+    box-shadow: inset 0 0 0 1px var(--color-line);
+  }
+  .a-btn--ghost:hover {
+    background: var(--color-fog);
+    background-image: none;
+  }
+  .a-btn--danger {
+    background: var(--color-paper);
+    background-image: none;
+    color: #b42318;
+    box-shadow: inset 0 0 0 1px #f1c3bd;
+  }
+  .a-btn--danger:hover {
+    background: #fff4f2;
+    background-image: none;
+  }
+  .a-btn--sm {
+    padding: 5px 10px;
+    font-size: 13px;
+  }
+  .a-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+  .a-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .a-label {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .a-hint {
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+  .a-input {
+    width: 100%;
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+    background: var(--color-paper);
+    padding: 9px 11px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .a-input:focus {
+    outline: 2px solid color-mix(in srgb, var(--color-cobalt) 45%, transparent);
+    outline-offset: 0;
+    border-color: var(--color-cobalt);
+  }
+  textarea.a-input {
+    resize: vertical;
+  }
+  .a-error {
+    font-size: 12px;
+    color: #b42318;
+  }
+  .a-field.has-error .a-input {
+    border-color: #e5958b;
+  }
+  .a-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .a-table th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-muted);
+    border-bottom: 1px solid var(--color-line);
+  }
+  .a-table td {
+    padding: 10px 12px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--color-line);
+  }
+  .a-table tr:last-child td {
+    border-bottom: 0;
+  }
+  .a-pill {
+    display: inline-block;
+    border-radius: 999px;
+    padding: 2px 9px;
+    font-size: 12px;
+    background: var(--color-fog);
+    color: var(--color-muted);
+  }
+  .a-pill--on {
+    background: color-mix(in srgb, #16a34a 14%, white);
+    color: #166534;
+  }
+  .a-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .a-savebar {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 -40px -96px;
+    border-top: 1px solid var(--color-line);
+    background: color-mix(in srgb, var(--color-fog) 92%, transparent);
+    backdrop-filter: blur(6px);
+    padding: 14px 40px;
+  }
+  @media (max-width: 809.98px) {
+    .admin-shell {
+      grid-template-columns: 1fr;
+    }
+    .admin-side {
+      position: static;
+      height: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--color-line);
+    }
+    .admin-side ul {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+    .admin-main {
+      padding: 24px 16px 96px;
+    }
+    .a-savebar {
+      margin: 0 -16px -96px;
+      padding: 12px 16px;
+    }
+  }
+</style>

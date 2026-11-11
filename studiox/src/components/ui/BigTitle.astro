@@ -1,0 +1,19 @@
+---
+import { cn } from '@/utils/cn';
+
+interface Props {
+  lines: [string, string];
+  tag?: 'h1' | 'h2';
+  accent?: string;
+  class?: string;
+  reveal?: boolean;
+}
+
+const { lines, tag: Tag = 'h2', accent = 'text-cobalt', class: className, reveal = true } = Astro.props;
+const fx = reveal ? { 'data-text-reveal': 'line', 'data-tr-blur': '8', 'data-tr-y': '28' } : {};
+---
+
+<Tag class={cn('type-display flex flex-col items-center text-center', className)}>
+  <span class="block" {...fx} data-tr-stagger="0.05">{lines[0]}</span>
+  <span class={cn('block', accent)} {...fx} data-tr-stagger="0.15">{lines[1]}</span>
+</Tag>

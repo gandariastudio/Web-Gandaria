@@ -1,0 +1,20 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import AdminList from '@/components/admin/AdminList.astro';
+import { getDb } from '@/lib/db';
+import { adminListProjects } from '@/lib/db/admin';
+import { handleListPost, thumb } from '@/lib/cms/admin-page';
+
+const db = await getDb();
+const redirect = await handleListPost(Astro, db, 'projects');
+if (redirect) return redirect;
+const rows = (await adminListProjects(db)).map((p) => ({ id: p.id, title: p.title, meta: `${p.sector} · ${p.year}`, status: p.published, thumb: thumb(p.cover), viewHref: p.published ? `/work/${p.slug}` : undefined }));
+---
+
+<AdminLayout title="Projects">
+  <div class="a-head">
+    <h1 class="a-title">Projects</h1>
+    <a class="a-btn" href="/admin/projects/new">New project</a>
+  </div>
+  <AdminList rows={rows} base="/admin/projects" noun="project" ordered />
+</AdminLayout>

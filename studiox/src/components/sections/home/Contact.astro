@@ -1,0 +1,29 @@
+---
+import Button from '@/components/ui/Button.astro';
+import ContactForm from '@/components/ui/ContactForm.astro';
+
+const EMAIL = Astro.locals.settings.email;
+---
+
+<section id="contact" class="px-4 pb-24 md:px-6 md:pb-[120px] xl:px-10 xl:pb-40" data-cursor="Say hello">
+  <div class="mx-auto flex max-w-[1600px] flex-col gap-12">
+    <div class="line-t pt-7">
+      <p class="tag">Contact</p>
+    </div>
+    <div class="flex flex-col gap-12 md:gap-16 xl:flex-row xl:gap-24">
+      <div class="flex flex-col gap-10 xl:flex-1">
+        <h2 class="type-h1 max-w-[560px] [text-wrap:balance]" data-text-reveal="line" data-tr-blur="10" data-tr-y="28" data-tr-stagger="0.05">
+          Have a project in mind? Let’s make something worth noticing.
+        </h2>
+        <div class="flex flex-col items-start gap-5" data-reveal>
+          <Button label="Book an intro call" href={`mailto:${EMAIL}`} />
+          <a href={`mailto:${EMAIL}`} class="text-link type-h4">{EMAIL}</a>
+          <p class="type-label text-muted">We reply within one business day.</p>
+        </div>
+      </div>
+      <div class="xl:flex-[1.2]">
+        <ContactForm />
+      </div>
+    </div>
+  </div>
+</section>

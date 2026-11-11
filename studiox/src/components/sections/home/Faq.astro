@@ -1,0 +1,29 @@
+---
+import FaqList from '@/components/ui/FaqList.astro';
+import { getDb } from '@/lib/db';
+import { listFaqs } from '@/lib/db/queries';
+import { cn } from '@/utils/cn';
+
+interface Props {
+  class?: string;
+  page?: boolean;
+}
+
+const { class: className, page = false } = Astro.props;
+const EMAIL = Astro.locals.settings.email;
+const faqs = await listFaqs(await getDb());
+---
+
+<section class={cn('px-4 pb-24 md:px-6 md:pb-[120px] xl:px-10 xl:pb-[180px]', className)} data-cursor="Questions">
+  <div class:list={['mx-auto flex max-w-[1600px] flex-col xl:flex-row xl:gap-10', page ? 'gap-6 md:gap-12' : 'gap-8 pt-7']}>
+    <div class="flex flex-col gap-6 xl:flex-1">
+      <p class="tag">Questions</p>
+      <h2 class="type-h1" data-text-reveal="line" data-tr-blur="10" data-tr-y="28" data-tr-stagger="0.05">Before we talk.</h2>
+      <p class="type-body max-w-[340px] text-muted">The questions we hear most in a first call. If yours isn’t here, just ask.</p>
+      <a href={`mailto:${EMAIL}`} class="text-link type-small w-max">{EMAIL}</a>
+    </div>
+    <div class="xl:flex-[2]">
+      <FaqList items={faqs} />
+    </div>
+  </div>
+</section>

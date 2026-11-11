@@ -1,0 +1,60 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import EditHeader from '@/components/admin/EditHeader.astro';
+import Field from '@/components/admin/Field.astro';
+import ImageField from '@/components/admin/ImageField.astro';
+import { getDb } from '@/lib/db';
+import { findById, saveService, slugTaken } from '@/lib/db/admin';
+import { readers, serviceSchema, validate, type FieldErrors } from '@/lib/cms/validation';
+import { parseId, saveErrorMessage } from '@/lib/cms/admin-page';
+
+const id = parseId(Astro.params.id);
+if (id === null) return Astro.rewrite('/404');
+const db = await getDb();
+const row = id === 'new' ? null : await findById(db, 'services', id);
+if (id !== 'new' && !row) return Astro.rewrite('/404');
+
+let values: any = row ?? { slug: '', title: '', summary: '', deliverables: '', image: null };
+let errors: FieldErrors = {};
+
+if (Astro.request.method === 'POST') {
+  values = readers.service(await Astro.request.formData());
+  const result = validate(serviceSchema, values);
+  if (!result.ok) errors = result.errors;
+  else if (await slugTaken(db, 'services', result.data.slug, row?.id)) errors = { slug: 'Another service already uses this slug' };
+  else {
+    try {
+      const savedId = await saveService(db, row?.id ?? null, result.data);
+      return Astro.redirect(`/admin/services/${savedId}?saved=1`, 303);
+    } catch (error) {
+      errors = { _form: saveErrorMessage(error) };
+    }
+  }
+  Astro.response.status = 422;
+}
+const title = row?.title ?? 'New service';
+---
+
+<AdminLayout title={title}>
+  <EditHeader title={title} back={{ href: '/admin/services', label: 'Services' }} errors={errors} />
+
+  <form method="post" class="flex flex-col gap-5" data-edit-form>
+    <section class="a-card">
+      <h2>Service</h2>
+      <div class="a-grid">
+        <Field name="title" label="Title" value={values.title} error={errors.title} required attrs={{ 'data-slug-source': true }} />
+        <Field name="slug" label="Slug" value={values.slug} error={errors.slug} required hint="Internal identifier." attrs={{ 'data-slug-target': true, 'data-autoslug': String(!row) }} />
+      </div>
+      <Field name="summary" type="textarea" rows={2} label="Summary" value={values.summary} error={errors.summary} required />
+      <Field name="deliverables" label="Deliverables" value={values.deliverables} error={errors.deliverables} required hint="Separate with · for example: Logo · Type · Colour · Guidelines" />
+    </section>
+    <section class="a-card">
+      <h2>Image</h2>
+      <ImageField name="image" label="Service image" value={values.image} folder="services" errors={errors} hint="Recommended 1600 × 1200 (4:3). Also used as the hover preview on the home page." />
+    </section>
+    <div class="a-savebar">
+      <span class="a-hint">{row ? `Last saved ${row.updatedAt.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}` : 'Not saved yet'}</span>
+      <button type="submit" class="a-btn">{row ? 'Save changes' : 'Create service'}</button>
+    </div>
+  </form>
+</AdminLayout>

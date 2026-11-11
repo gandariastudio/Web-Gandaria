@@ -1,0 +1,75 @@
+---
+import CmsImage from '@/components/ui/CmsImage.astro';
+import { getDb } from '@/lib/db';
+import { listProjects } from '@/lib/db/queries';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/sections/shared/PageHero.astro';
+import NextStep from '@/components/sections/shared/NextStep.astro';
+import { workPage } from '@/data/pages';
+
+const projects = await listProjects(await getDb());
+---
+
+<BaseLayout title="Work" description={workPage.intro}>
+  <PageHero {...workPage} />
+
+  <section class="bg-paper px-5 pb-24 md:px-8 md:pb-[120px] xl:px-10 xl:pb-40" data-cursor="View project" data-cursor-zone="[data-cover]">
+    <div class="mx-auto flex max-w-[1600px] flex-col gap-[72px] md:gap-24 xl:gap-[120px]">
+      {
+        projects.map((project) => {
+          const p = project;
+          return (
+            <a href={`/work/${project.slug}`} class="flex flex-col gap-7">
+              <div class="cover relative h-[280px] overflow-clip md:h-[480px] xl:h-[760px]" data-cover data-img-reveal>
+                <CmsImage image={p.cover} widths={[800, 1400, 2400]} sizes="(min-width: 1440px) 1360px, 100vw" class="cover__img absolute inset-0 size-full object-cover" />
+              </div>
+              <div class="flex flex-col gap-6 md:flex-row md:gap-10" data-reveal>
+                <div class="flex flex-col gap-3 md:flex-1">
+                  <p class="type-label flex items-center gap-2.5">
+                    <span class="text-cobalt">{p.sector}</span>
+                    <span class="text-muted">·</span>
+                    <span class="text-muted">{p.year}</span>
+                  </p>
+                  <h2 class="project-title">{p.title}</h2>
+                </div>
+                <div class="flex flex-col gap-4 md:flex-1 md:pt-2">
+                  <p class="type-h4 max-w-[520px] text-muted">{p.summary}</p>
+                  <p class="type-small">{p.services}</p>
+                  <p class="type-small text-cobalt">View project →</p>
+                </div>
+              </div>
+            </a>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  <NextStep />
+</BaseLayout>
+
+<style>
+  .cover__img {
+    transition: transform 1.1s var(--ease-expo);
+  }
+  @media (hover: hover) {
+    .cover:hover .cover__img {
+      transform: scale(1.04);
+    }
+  }
+  .project-title {
+    font-size: 48px;
+    line-height: 1;
+    letter-spacing: -0.045em;
+  }
+  @media (width >= 810px) {
+    .project-title {
+      font-size: 72px;
+    }
+  }
+  @media (width >= 1440px) {
+    .project-title {
+      font-size: 96px;
+    }
+  }
+</style>

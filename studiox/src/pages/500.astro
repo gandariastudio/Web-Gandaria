@@ -1,0 +1,35 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Button from '@/components/ui/Button.astro';
+---
+
+<BaseLayout title="Something went wrong" noindex>
+  <section class="bg-fog px-5 pt-40 pb-[120px] md:px-8 md:pt-[180px] md:pb-40 lg:px-10 lg:py-[200px]" data-cursor="Oops">
+    <div class="mx-auto flex max-w-[1600px] flex-col items-center gap-7 text-center">
+      <p class="server-error text-cobalt" aria-hidden="true">500</p>
+      <h1 class="type-h2">Something went wrong on our side.</h1>
+      <p class="type-body max-w-[440px] text-muted">The page could not load just now. Try again in a minute, or write to us if it keeps happening.</p>
+      <div class="flex items-center justify-center gap-7">
+        <Button label="Back to home" href="/" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .server-error {
+    font-size: 140px;
+    line-height: 0.85;
+    letter-spacing: -0.07em;
+  }
+  @media (width >= 810px) {
+    .server-error {
+      font-size: 220px;
+    }
+  }
+  @media (width >= 1440px) {
+    .server-error {
+      font-size: 320px;
+    }
+  }
+</style>

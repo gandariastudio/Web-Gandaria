@@ -1,0 +1,20 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import AdminList from '@/components/admin/AdminList.astro';
+import { getDb } from '@/lib/db';
+import { adminListClients } from '@/lib/db/admin';
+import { handleListPost, thumb } from '@/lib/cms/admin-page';
+
+const db = await getDb();
+const redirect = await handleListPost(Astro, db, 'clients');
+if (redirect) return redirect;
+const rows = (await adminListClients(db)).map((c) => ({ id: c.id, title: c.name, meta: `Shown at ${c.displayWidth} × ${c.displayHeight}px`, thumb: thumb(c.logo) }));
+---
+
+<AdminLayout title="Clients">
+  <div class="a-head">
+    <h1 class="a-title">Clients</h1>
+    <a class="a-btn" href="/admin/clients/new">New client</a>
+  </div>
+  <AdminList rows={rows} base="/admin/clients" noun="client" ordered />
+</AdminLayout>

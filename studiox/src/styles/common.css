@@ -1,0 +1,246 @@
+* {
+  @apply box-border;
+}
+
+html {
+  @apply bg-paper;
+  -webkit-text-size-adjust: 100%;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+body {
+  overflow-x: clip;
+}
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* Every accent fill carries the brand gradient; the solid tokens stay as the fallback colours. */
+.bg-cobalt,
+.bg-cobalt-deep {
+  background-image: var(--gradient-accent);
+}
+
+@utility container-x {
+  @apply w-full px-4 md:px-6 xl:px-10;
+}
+
+@utility tag {
+  @apply type-label flex items-center gap-2.5 before:size-[7px] before:shrink-0 before:bg-current before:content-[''];
+}
+
+.btn {
+  @apply type-button relative inline-flex h-[51px] shrink-0 items-center justify-center px-7 py-4 whitespace-nowrap select-none;
+  transition:
+    background-color 0.45s var(--ease-sine),
+    box-shadow 0.45s var(--ease-sine),
+    color 0.45s var(--ease-sine);
+  box-shadow:
+    -10px 16px 28px 0 rgba(0, 0, 0, 0.16),
+    -24px 36px 60px 0 rgba(0, 0, 0, 0.1);
+}
+
+.btn-cobalt {
+  @apply bg-cobalt text-paper;
+  background-image: var(--gradient-accent);
+}
+.btn-ink {
+  @apply bg-ink text-paper;
+}
+.btn-light {
+  @apply bg-paper text-ink;
+}
+.btn-secondary {
+  @apply bg-paper text-ink;
+  box-shadow: inset 0 0 0 1px var(--color-ink);
+}
+
+@media (hover: hover) {
+  .btn:hover {
+    box-shadow:
+      -12px 20px 32px 0 rgba(0, 0, 0, 0.2),
+      -30px 46px 72px 0 rgba(0, 0, 0, 0.12);
+  }
+  .btn-cobalt:hover {
+    @apply bg-cobalt-deep;
+    background-image: var(--gradient-accent-deep);
+  }
+  .btn-ink:hover {
+    @apply bg-black;
+  }
+  .btn-light:hover {
+    @apply bg-fog;
+  }
+  .btn-secondary:hover {
+    @apply bg-ink text-paper;
+    box-shadow: inset 0 0 0 1px var(--color-ink);
+  }
+}
+
+.btn__mask {
+  @apply relative block overflow-clip;
+}
+.btn__label {
+  @apply absolute top-0 left-0 block;
+  transition: top 0.45s var(--ease-sine);
+}
+.btn__label + .btn__label {
+  top: 100%;
+}
+@media (hover: hover) {
+  .btn:hover .btn__label {
+    top: -100%;
+  }
+  .btn:hover .btn__label + .btn__label {
+    top: 0;
+  }
+}
+
+.text-link {
+  @apply relative -mb-1 inline-block pb-1;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  background-position: 100% 100%;
+  transition: background-size 0.55s var(--ease-sine);
+
+  &::after {
+    @apply pointer-events-none absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-current content-[''];
+    transition: transform 0.55s var(--ease-sine);
+  }
+}
+@media (hover: hover) {
+  .text-link:hover {
+    background-size: 0% 1px;
+  }
+  .text-link:hover::after {
+    transform: scaleX(1);
+    transition-delay: 0.28s;
+  }
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.js [data-text-reveal],
+.js main :is(h1, h2, h3):not([data-no-text-reveal], [data-zoom-left], [data-zoom-right]),
+.js [data-reveal] {
+  visibility: hidden;
+}
+.js main :is(p, .btn, .text-link):not(
+    :is([data-reveal], [data-text-reveal], [data-no-reveal], [data-hero-meta], [data-zoom], [data-pixel-stat], [data-deck], [data-project-card], .cf, .fq-list, h1, h2, h3),
+    :is([data-reveal], [data-text-reveal], [data-no-reveal], [data-hero-meta], [data-zoom], [data-pixel-stat], [data-deck], [data-project-card], .cf, .fq-list, h1, h2, h3) *
+  ) {
+  visibility: hidden;
+}
+.tr-line {
+  clip-path: inset(-0.15em -1em);
+}
+.js [data-img-reveal] {
+  clip-path: inset(100% 0% 0% 0%);
+}
+
+.kc-hide-cursor,
+.kc-hide-cursor * {
+  cursor: none;
+}
+.kc-hide-cursor a,
+.kc-hide-cursor a *,
+.kc-hide-cursor button,
+.kc-hide-cursor button * {
+  cursor: pointer;
+}
+
+html.k-preview-active .kc-layer {
+  opacity: 0 !important;
+  transition: opacity 0.4s ease;
+}
+
+@keyframes kfx-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hover-row {
+    position: relative;
+    transition: opacity 0.6s var(--ease-standard);
+  }
+  .hover-list:hover .hover-row {
+    opacity: 0.35;
+  }
+  .hover-list:hover .hover-row:hover {
+    opacity: 1;
+  }
+  .hover-row::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 1;
+    height: 1px;
+    background: var(--hover-line, var(--color-cobalt));
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.8s var(--ease-swift);
+    pointer-events: none;
+  }
+  .hover-row:hover::before {
+    transform: scaleX(1);
+  }
+}
+
+@utility line-t {
+  box-shadow: inset 0 1px 0 var(--line, var(--color-line));
+}
+@utility line-b {
+  box-shadow: inset 0 -1px 0 var(--line, var(--color-line));
+}
+@utility line-l {
+  box-shadow: inset 1px 0 0 var(--line, var(--color-line));
+}
+@utility line-y {
+  box-shadow:
+    inset 0 1px 0 var(--line, var(--color-line)),
+    inset 0 -1px 0 var(--line, var(--color-line));
+}
+
+.article-body {
+  @apply type-h4 flex flex-col gap-5;
+
+  h2 {
+    @apply type-h2 pt-5;
+  }
+}

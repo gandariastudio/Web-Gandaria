@@ -1,0 +1,23 @@
+---
+import { getDb } from '@/lib/db';
+import { listPosts } from '@/lib/db/queries';
+import PostCard from '@/components/ui/PostCard.astro';
+
+const posts = await listPosts(await getDb());
+---
+
+<section class="bg-paper px-5 pb-[104px] md:px-8 md:pb-[140px] xl:px-10 xl:pb-[180px]" data-cursor="Read note" data-cursor-zone="[data-cover]">
+  <div class="mx-auto flex max-w-[1600px] flex-col gap-14">
+    <div class="flex flex-col gap-4 pt-7 md:gap-5 xl:flex-row xl:items-end xl:gap-10">
+      <div class="flex flex-col gap-5 xl:w-[900px]">
+        <p class="tag">Journal</p>
+        <h2 class="type-h1">Notes from the studio.</h2>
+        <a href="/journal" class="text-link type-small w-max">All notes →</a>
+      </div>
+      <p class="type-body max-w-[420px] text-muted xl:ml-auto">Short reads on brand, websites and how we work, written by the people doing it.</p>
+    </div>
+    <div class="flex flex-col gap-10 md:gap-12 xl:flex-row xl:items-start xl:gap-6">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  </div>
+</section>

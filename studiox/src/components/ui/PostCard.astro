@@ -1,0 +1,37 @@
+---
+import CmsImage from '@/components/ui/CmsImage.astro';
+import type { Post } from '@/lib/db/queries';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+const p = post;
+const date = p.publishedAt.toLocaleString('en-US', { dateStyle: 'medium', timeZone: 'UTC' });
+---
+
+<a href={`/journal/${post.slug}`} class="post-card flex flex-1 flex-col gap-5" data-post-card>
+  <div class="relative h-60 overflow-clip md:h-100 xl:h-80" data-cover data-img-reveal>
+    <CmsImage image={p.cover} widths={[480, 900, 1500]} sizes="(min-width: 1440px) 440px, 100vw" class="post-card__img absolute inset-0 size-full object-cover" />
+  </div>
+  <p class="type-label flex items-center gap-2.5">
+    <span class="text-cobalt">{p.category}</span>
+    <span class="text-muted">·</span>
+    <time class="text-muted" datetime={p.publishedAt.toISOString()}>{date}</time>
+  </p>
+  <h3 class="type-h3">{p.title}</h3>
+  <p class="type-small text-muted">{p.excerpt}</p>
+  <p class="type-small">Read note →</p>
+</a>
+
+<style>
+  .post-card__img {
+    transition: transform 0.9s var(--ease-expo);
+  }
+  @media (hover: hover) {
+    .post-card [data-cover]:hover .post-card__img {
+      transform: scale(1.05);
+    }
+  }
+</style>

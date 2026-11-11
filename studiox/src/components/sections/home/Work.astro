@@ -1,0 +1,30 @@
+---
+import { getDb } from '@/lib/db';
+import { listProjects } from '@/lib/db/queries';
+import ProjectCard from '@/components/ui/ProjectCard.astro';
+
+const projects = await listProjects(await getDb());
+---
+
+<section id="work" class="bg-fog pt-[88px] pb-24 md:pt-[110px] md:pb-[120px] xl:pt-[140px] xl:pb-40" data-cursor="View project" data-cursor-zone="[data-project-card]" data-parallax>
+  <div class="flex flex-col items-center gap-12 px-2.5 md:gap-14 md:px-3 xl:gap-[72px] xl:px-[15px]">
+    <div class="flex w-full max-w-[1650px] flex-col gap-7 px-1.5 md:gap-8 md:px-3 xl:gap-10 xl:px-[25px]">
+      <h2 class="type-h1 max-w-[760px] [text-wrap:balance]">Brands and websites with a point of view.</h2>
+      <div class="type-small flex flex-col gap-6 md:flex-row md:gap-12">
+        <div class="flex flex-col gap-2.5 md:w-[230px]">
+          <p>What we do</p>
+          <p class="text-muted">Brand strategy, identity and websites, plus the content design that keeps them alive, all made by one senior team.</p>
+        </div>
+        <div class="flex flex-col gap-2.5 md:w-[230px]">
+          <p>Availability</p>
+          <p class="text-muted">Booking new projects from {Astro.locals.settings.bookingFrom}, so write early if your launch date is fixed.</p>
+        </div>
+      </div>
+      <a href="/work" class="text-link type-small w-max">All work →</a>
+    </div>
+
+    <div class="flex w-full flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3 xl:gap-[15px]">
+      {projects.map((project) => <ProjectCard project={project} />)}
+    </div>
+  </div>
+</section>

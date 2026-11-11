@@ -1,0 +1,16 @@
+---
+import { Image } from 'astro:assets';
+import StatsRow from '@/components/ui/StatsRow.astro';
+import craft from '@/assets/images/zoom-2.jpg';
+---
+
+<section class="flex flex-col gap-16 bg-fog pb-24 md:pb-[120px] xl:pb-[180px]" data-cursor="In numbers">
+  <div class="relative h-[56vh] overflow-clip md:h-[60vh] xl:h-[88vh]" data-img-reveal>
+    <Image src={craft} alt="An empty stadium pool in black and white" widths={[828, 1440, 2400]} sizes="100vw" class="absolute inset-0 size-full object-cover grayscale" />
+  </div>
+
+  <div class="flex flex-col gap-8 px-4 md:gap-12 md:px-6 xl:px-10">
+    <p class="tag mx-auto w-full max-w-[1600px] md:max-xl:hidden">In numbers</p>
+    <StatsRow />
+  </div>
+</section>

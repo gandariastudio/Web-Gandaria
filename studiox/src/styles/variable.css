@@ -1,0 +1,28 @@
+@theme {
+  --font-geist: var(--font-geist-face), 'Geist', ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #252320;
+  --color-muted: #6f6c67;
+  /* Accent: orange. The token keeps its historical name so existing bg-cobalt / text-cobalt classes still work. */
+  --color-cobalt: #f15822;
+  --color-cobalt-deep: #d9441a;
+  --color-cobalt-line: #f8a37a;
+  --color-sky: #fde0cc;
+
+  --gradient-accent: linear-gradient(90deg, #f68a1e 0%, #f15822 100%);
+  --gradient-accent-deep: linear-gradient(90deg, #e8731a 0%, #d9441a 100%);
+  --color-line: #dcdbd7;
+  --color-bone: #e6e5dd;
+  --color-fog: #f6f6f6;
+  --color-paper: #ffffff;
+
+  --breakpoint-md: 810px;
+  --breakpoint-lg: 1200px;
+  --breakpoint-xl: 1440px;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-swift: cubic-bezier(0.87, 0, 0.13, 1);
+  --ease-quart: cubic-bezier(0.76, 0, 0.24, 1);
+  --ease-sine: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}

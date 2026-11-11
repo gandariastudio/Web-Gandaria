@@ -1,0 +1,66 @@
+---
+import { Image } from 'astro:assets';
+import { zoomImages } from '@/data/home';
+
+const START = 300;
+---
+
+<section class="relative h-[260vh] bg-fog md:h-[300vh] xl:h-[340vh]" data-cursor="Keep scrolling" data-zoom>
+  <div class="sticky top-0 h-screen w-full overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden" style={`clip-path:inset(calc(50% - ${(START * 1.25) / 2}px) calc(50% - ${START / 2}px) round 2px)`} data-zoom-clip>
+      <div class="absolute inset-0 origin-center scale-[1.35]" data-zoom-scale>
+        {
+          zoomImages.map((img, i) => (
+            <Image
+              src={img.src}
+              alt={img.alt}
+              widths={[828, 1440, 2400]}
+              sizes="100vw"
+              loading={i === 0 ? 'eager' : 'lazy'}
+              class:list={['zoom-img absolute inset-0 size-full object-cover', i === 0 && 'is-current']}
+              data-zoom-img
+            />
+          ))
+        }
+      </div>
+    </div>
+    <p class="zoom-label" data-zoom-top>Since 2020 — Semarang</p>
+    <h2 class="zoom-word" data-zoom-left>Strategy</h2>
+    <h2 class="zoom-word text-cobalt" data-zoom-right>Craft</h2>
+    <p class="zoom-label tabular-nums" data-zoom-count>01 / {String(zoomImages.length).padStart(2, '0')}</p>
+  </div>
+</section>
+
+<style>
+  .zoom-img {
+    opacity: 0;
+    transform: scale(1.08);
+    z-index: 1;
+    transition:
+      opacity 0.5s var(--ease-standard),
+      transform 1.2s var(--ease-expo);
+  }
+  .zoom-img.is-current {
+    opacity: 1;
+    transform: scale(1);
+    z-index: 2;
+  }
+  .zoom-word,
+  .zoom-label {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: 0;
+    white-space: nowrap;
+    will-change: transform, opacity;
+    pointer-events: none;
+  }
+  .zoom-word {
+    font-size: clamp(32px, 4.4444vw, 64px);
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+  }
+  .zoom-label {
+    font-size: 13px;
+  }
+</style>

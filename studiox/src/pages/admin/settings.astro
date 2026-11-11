@@ -1,0 +1,60 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import EditHeader from '@/components/admin/EditHeader.astro';
+import Field from '@/components/admin/Field.astro';
+import { getDb } from '@/lib/db';
+import { saveSettings } from '@/lib/db/admin';
+import { getSettings } from '@/lib/db/queries';
+import { readers, settingsSchema, validate, type FieldErrors } from '@/lib/cms/validation';
+import { saveErrorMessage } from '@/lib/cms/admin-page';
+
+const db = await getDb();
+let values: any = await getSettings(db);
+let errors: FieldErrors = {};
+
+if (Astro.request.method === 'POST') {
+  values = readers.settings(await Astro.request.formData());
+  const result = validate(settingsSchema, values);
+  if (!result.ok) errors = result.errors;
+  else {
+    try {
+      await saveSettings(db, result.data);
+      return Astro.redirect('/admin/settings?saved=1', 303);
+    } catch (error) {
+      errors = { _form: saveErrorMessage(error) };
+    }
+  }
+  Astro.response.status = 422;
+}
+const links = [...values.socialLinks, ...Array(6).fill({ label: '', href: '' })].slice(0, 6);
+---
+
+<AdminLayout title="Settings">
+  <EditHeader title="Settings" back={{ href: '/admin', label: 'Dashboard' }} errors={errors} />
+
+  <form method="post" class="flex flex-col gap-5" data-edit-form>
+    <section class="a-card">
+      <h2>Contact</h2>
+      <div class="a-grid">
+        <Field name="email" type="email" label="Studio email" value={values.email} error={errors.email} required hint="Header menu, footer, contact page, FAQ and the contact form." />
+        <Field name="bookingFrom" label="Booking from" value={values.bookingFrom} error={errors.bookingFrom} required hint="Fills “booking Q1 2027” in the hero, the Work section and the footer." />
+      </div>
+    </section>
+    <section class="a-card">
+      <h2>Social links</h2>
+      <p class="a-hint -mt-2">Footer and contact page. Leave a row empty to skip it.</p>
+      {
+        links.map((link, i) => (
+          <div class="grid gap-3 md:grid-cols-[200px_1fr]">
+            <Field name={`social.${i}.label`} label={`Label ${i + 1}`} value={link.label} error={errors[`socialLinks.${i}.label`]} placeholder="Instagram" />
+            <Field name={`social.${i}.href`} type="url" label="URL" value={link.href} error={errors[`socialLinks.${i}.href`]} placeholder="https://instagram.com/gandariastudio" />
+          </div>
+        ))
+      }
+    </section>
+    <div class="a-savebar">
+      <span class="a-hint">Used across every page.</span>
+      <button type="submit" class="a-btn">Save settings</button>
+    </div>
+  </form>
+</AdminLayout>

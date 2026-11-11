@@ -1,0 +1,20 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import AdminList from '@/components/admin/AdminList.astro';
+import { getDb } from '@/lib/db';
+import { adminListTestimonials } from '@/lib/db/admin';
+import { handleListPost, excerpt } from '@/lib/cms/admin-page';
+
+const db = await getDb();
+const redirect = await handleListPost(Astro, db, 'testimonials');
+if (redirect) return redirect;
+const rows = (await adminListTestimonials(db)).map((t) => ({ id: t.id, title: `${t.name}, ${t.role}`, meta: excerpt(t.quote), status: t.published }));
+---
+
+<AdminLayout title="Testimonials">
+  <div class="a-head">
+    <h1 class="a-title">Testimonials</h1>
+    <a class="a-btn" href="/admin/testimonials/new">New testimonial</a>
+  </div>
+  <AdminList rows={rows} base="/admin/testimonials" noun="testimonial" ordered />
+</AdminLayout>

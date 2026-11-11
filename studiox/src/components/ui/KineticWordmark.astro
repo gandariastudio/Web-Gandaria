@@ -1,0 +1,71 @@
+---
+import { cn } from '@/utils/cn';
+
+interface Props {
+  text?: string;
+  tag?: 'h1' | 'h2' | 'p';
+  color?: string;
+  peak?: number;
+  space?: number;
+  class?: string;
+}
+
+const { text = 'Gandaria', tag: Tag = 'p', color = 'var(--color-cobalt)', peak = 500, space = 0, class: className } = Astro.props;
+const letters = Array.from(text);
+const face = 'font-family:var(--font-geist);letter-spacing:-0.065em;font-weight:500;font-variation-settings:"wght" 500';
+---
+
+<div class={cn('kinetic relative w-full', className)} data-kinetic data-peak={peak} data-space={space}>
+  <span class="kinetic__measure" aria-hidden="true" style={face} data-measure>
+    {letters.map((l) => <span class="inline-block">{l === ' ' ? ' ' : l}</span>)}
+  </span>
+  <span class="kinetic__measure" aria-hidden="true" style={`${face.replace(/500/g, '700')}`} data-measure-peak>
+    {letters.map((l) => <span class="inline-block">{l === ' ' ? ' ' : l}</span>)}
+  </span>
+  <Tag class="kinetic__word" aria-label={text} style={`${face};color:${color}`} data-word>
+    {
+      letters.map((l) => (
+        <span class="kinetic__slot" aria-hidden="true">
+          <span class="kinetic__glyph">{l === ' ' ? ' ' : l}</span>
+        </span>
+      ))
+    }
+  </Tag>
+</div>
+
+<style>
+  .kinetic__measure {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    white-space: pre;
+    font-size: 100px;
+  }
+  .kinetic__word {
+    margin: 0;
+    display: flex;
+    justify-content: flex-start;
+    white-space: pre;
+    font-size: var(--kw-size, 25vw);
+    line-height: 0.82;
+    user-select: none;
+    touch-action: pan-y;
+    transform-origin: 0% 100%;
+    will-change: transform;
+    clip-path: inset(-40% -25% 0 -25%);
+  }
+  .kinetic__slot {
+    display: inline-block;
+    flex: none;
+    text-align: center;
+    white-space: nowrap;
+    overflow: visible;
+    will-change: transform;
+  }
+  .kinetic__glyph {
+    display: inline-block;
+    white-space: pre;
+    will-change: transform, font-variation-settings;
+  }
+</style>

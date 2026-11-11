@@ -1,0 +1,124 @@
+---
+import { cn } from '@/utils/cn';
+import { CLOUDINARY_CLOUD_NAME } from 'astro:env/server';
+import { getDb } from '@/lib/db';
+import { listClients } from '@/lib/db/queries';
+import { imageSrc } from '@/lib/cms/cloudinary';
+
+interface Props {
+  class?: string;
+  rowHead?: boolean;
+}
+
+const { class: className, rowHead = false } = Astro.props;
+const clients = await listClients(await getDb());
+---
+
+<section class={cn('bg-fog px-5 pt-16 pb-20 md:px-8 md:pt-20 md:pb-24 xl:px-10 xl:pt-24 xl:pb-[120px]', className)} data-cursor="Clients">
+  <div class="mx-auto flex max-w-[1600px] flex-col gap-10">
+    <div class:list={['flex justify-between', rowHead ? 'items-center' : 'flex-col items-start md:flex-row md:items-center']}>
+      <p class="tag">Trusted by teams who ship</p>
+      <p class="type-label text-muted">(2020—26©)</p>
+    </div>
+    <ul class="logo-wall grid grid-cols-2 gap-2 md:grid-cols-3 min-[1200px]:grid-cols-5" aria-label="Clients">
+      {
+        clients.map((c) => (
+          <li class="logo-wall__cell" title={c.name}>
+            <i aria-hidden="true" />
+            <i aria-hidden="true" />
+            <i aria-hidden="true" />
+            <i aria-hidden="true" />
+            <span
+              class="logo-wall__mark"
+              role="img"
+              aria-label={c.name}
+              style={`width:${c.displayWidth}px;height:${c.displayHeight}px;--mask:url(${imageSrc(c.logo, CLOUDINARY_CLOUD_NAME, c.displayWidth * 3)})`}
+            />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .logo-wall__cell {
+    position: relative;
+    height: 140px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-ink);
+    overflow: hidden;
+    transition: color 0.6s var(--ease-expo);
+  }
+  .logo-wall__mark {
+    display: block;
+    opacity: 0.6;
+    background: currentColor;
+    mask: var(--mask) center / contain no-repeat;
+    transition:
+      transform 0.7s var(--ease-expo),
+      opacity 0.5s ease;
+  }
+  .logo-wall__cell i {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border: 0 solid var(--color-cobalt);
+    opacity: 0;
+    transition:
+      opacity 0.45s ease,
+      transform 0.7s var(--ease-expo);
+  }
+  .logo-wall__cell i:nth-of-type(1) {
+    left: 12px;
+    top: 12px;
+    border-left-width: 1px;
+    border-top-width: 1px;
+    transform: translate(6px, 6px);
+  }
+  .logo-wall__cell i:nth-of-type(2) {
+    right: 12px;
+    top: 12px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    transform: translate(-6px, 6px);
+  }
+  .logo-wall__cell i:nth-of-type(3) {
+    left: 12px;
+    bottom: 12px;
+    border-left-width: 1px;
+    border-bottom-width: 1px;
+    transform: translate(6px, -6px);
+  }
+  .logo-wall__cell i:nth-of-type(4) {
+    right: 12px;
+    bottom: 12px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    transform: translate(-6px, -6px);
+  }
+  @media (hover: hover) {
+    .logo-wall__cell:hover {
+      color: var(--color-cobalt);
+    }
+    .logo-wall__cell:hover .logo-wall__mark {
+      transform: translateY(-3px) scale(1.04);
+      opacity: 1;
+    }
+    .logo-wall__cell:hover i {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @media (max-width: 809px) {
+    .logo-wall__cell {
+      height: 112px;
+    }
+    .logo-wall__mark {
+      transform: scale(0.8);
+    }
+  }
+</style>

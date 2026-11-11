@@ -1,0 +1,65 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/sections/shared/PageHero.astro';
+import NextStep from '@/components/sections/shared/NextStep.astro';
+import Clients from '@/components/sections/home/Clients.astro';
+import StatsRow from '@/components/ui/StatsRow.astro';
+import { about } from '@/data/pages';
+import studio from '@/assets/images/about-studio.jpg';
+---
+
+<BaseLayout title="Studio" description={about.hero.intro}>
+  <PageHero {...about.hero} />
+
+  <section class="bg-paper pb-24 md:pb-[120px] xl:pb-40" data-cursor="Our studio">
+    <div class="relative h-80 overflow-clip md:h-[520px] xl:h-[760px]" data-img-reveal>
+      <Image src={studio} alt="The Gandaria Studio space in Semarang" widths={[828, 1440, 2400]} sizes="100vw" class="absolute inset-0 size-full object-cover" />
+    </div>
+  </section>
+
+  <section class="bg-paper px-5 pb-24 md:px-8 md:pb-[120px] xl:px-10 xl:pb-40" data-cursor="Our story">
+    <div class="mx-auto flex max-w-[1600px] flex-col gap-6 md:flex-row md:gap-10">
+      <div class="flex flex-col gap-5 md:flex-1">
+        <p class="tag">Our story</p>
+        <h2 class="type-h3 max-w-[420px]" data-text-reveal="line" data-tr-blur="10" data-tr-y="28" data-tr-stagger="0.05">{about.story.title}</h2>
+      </div>
+      <div class="type-h4 flex flex-col gap-6 md:flex-1" data-reveal>
+        {about.story.paragraphs.map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-fog px-5 py-[88px] md:px-8 md:py-28 xl:px-10 xl:py-[140px]" data-cursor="What we believe">
+    <div class="mx-auto flex max-w-[1600px] flex-col gap-14">
+      <div class="flex flex-col gap-6 md:flex-row md:items-end md:gap-10">
+        <div class="flex flex-col gap-5 md:flex-1 lg:w-[900px] lg:flex-none">
+          <p class="tag">What we believe</p>
+          <h2 class="type-h1" data-text-reveal="line" data-tr-blur="10" data-tr-y="28" data-tr-stagger="0.05">Four rules we don’t break.</h2>
+        </div>
+        <p class="type-body text-muted md:max-w-[420px] md:flex-1 lg:ml-auto">They shape how we plan and price a project, and they’re a big part of why clients come back.</p>
+      </div>
+      <ul class="grid auto-rows-fr grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {
+          about.values.map((v, i) => (
+            <li class="flex flex-col gap-3.5 self-start line-t pt-6" data-reveal data-reveal-delay={i * 0.08}>
+              <p class="type-label text-cobalt">{String(i + 1).padStart(2, '0')}</p>
+              <h3 class="type-h3">{v.title}</h3>
+              <p class="type-body text-muted">{v.text}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="bg-paper px-5 py-[88px] md:px-8 md:py-28 xl:px-10 xl:py-[140px]" data-cursor="In numbers">
+    <div class="mx-auto flex max-w-[1600px] flex-col gap-12">
+      <p class="tag">In numbers</p>
+      <StatsRow />
+    </div>
+  </section>
+
+  <Clients rowHead class="px-5 pt-20 pb-[88px] md:px-8 md:pt-24 md:pb-28 xl:px-10 xl:pt-[120px] xl:pb-[140px]" />
+  <NextStep />
+</BaseLayout>

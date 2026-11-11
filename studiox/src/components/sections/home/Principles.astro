@@ -1,0 +1,41 @@
+---
+import { capabilities, principles } from '@/data/home';
+---
+
+<section class="bg-fog px-4 pt-12 pb-24 md:px-6 md:pt-14 md:pb-[120px] xl:px-10 xl:pt-[72px] xl:pb-40" data-cursor="Why Gandaria">
+  <div class="mx-auto flex max-w-[1600px] flex-col gap-[72px]">
+    <div class="flex flex-col gap-6 xl:flex-row xl:gap-10">
+      <p class="tag xl:flex-1">Why Gandaria</p>
+      <h2 class="type-h2 [text-wrap:balance] xl:flex-[2]">Senior people who tell you what they think, and work that gets noticed.</h2>
+    </div>
+
+    <ul class="flex flex-col gap-8 md:grid md:grid-cols-2 md:gap-x-6 md:gap-y-10 xl:flex xl:flex-row xl:gap-10">
+      {
+        principles.map((p, i) => (
+          <li class="flex flex-1 flex-col gap-3.5 line-t pt-5">
+            <span class="type-label flex size-[30px] items-center justify-center rounded-full border border-cobalt text-cobalt">
+              {String(i + 1).padStart(2, '0')}
+            </span>
+            <h3 class="type-h4">{p.title}</h3>
+            <p class="type-body text-muted">{p.text}</p>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="flex flex-col gap-5 xl:flex-row xl:gap-10">
+      <p class="tag pt-3 xl:flex-1">Capabilities</p>
+      <ul class="hover-list xl:flex-[2]">
+        {
+          capabilities.map(([name, desc, cat]) => (
+            <li class="hover-row flex cursor-default items-center gap-6 line-b py-3">
+              <p class="type-body flex-1">{name}</p>
+              <p class="type-body flex-[1.4] text-muted max-md:hidden">{desc}</p>
+              <p class="type-label w-20 text-right">{cat}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>

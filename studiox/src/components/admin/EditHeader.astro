@@ -1,0 +1,23 @@
+---
+import type { FieldErrors } from '@/lib/cms/validation';
+
+interface Props {
+  title: string;
+  back: { href: string; label: string };
+  viewHref?: string;
+  errors?: FieldErrors;
+}
+
+const { title, back, viewHref, errors = {} } = Astro.props;
+const count = Object.keys(errors).filter((k) => k !== '_form').length;
+---
+
+<div class="a-head">
+  <div>
+    <a href={back.href} class="a-hint hover:text-ink">← {back.label}</a>
+    <h1 class="a-title mt-1">{title}</h1>
+  </div>
+  {viewHref && <a class="a-btn a-btn--ghost" href={viewHref} target="_blank" rel="noopener">View on site ↗</a>}
+</div>
+{errors._form && <p class="admin-banner text-[#b42318]!" role="alert">{errors._form}</p>}
+{count > 0 && <p class="admin-banner text-[#b42318]!" role="alert">Please fix {count === 1 ? '1 field' : `${count} fields`} below, then save again.</p>}

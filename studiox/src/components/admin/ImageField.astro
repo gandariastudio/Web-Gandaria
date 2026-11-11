@@ -1,0 +1,66 @@
+---
+import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME } from 'astro:env/server';
+import type { CmsImage } from '@/lib/db/schema';
+import { imageSrc } from '@/lib/cms/cloudinary';
+
+interface Props {
+  name: string;
+  label: string;
+  value?: Partial<CmsImage> | null;
+  /** Cloudinary folder under gandaria/, e.g. "projects". */
+  folder: string;
+  errors?: Record<string, string>;
+  hint?: string;
+}
+
+const { name, label, value, folder, errors = {}, hint } = Astro.props;
+const ready = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
+const source = value && (value.publicId || value.url) ? { publicId: value.publicId ?? null, url: value.url ?? null, width: value.width, height: value.height } : null;
+const preview = source ? imageSrc({ ...source, width: source.width ?? 0, height: source.height ?? 0, alt: '' }, CLOUDINARY_CLOUD_NAME, 640) : '';
+const imageError = errors[`${name}.width`] ?? errors[`${name}.height`] ?? errors[name];
+const altError = errors[`${name}.alt`];
+const id = `f-${name.replace(/[^a-z0-9]+/gi, '-')}`;
+---
+
+<div class:list={['a-field', (imageError || altError) && 'has-error']} data-image-field data-folder={folder}>
+  <span class="a-label">{label}</span>
+  <div class="flex flex-wrap items-start gap-4">
+    <div class="image-preview" data-preview-box>
+      {preview ? <img src={preview} alt="" data-preview /> : <span class="a-hint" data-preview-empty>No image yet</span>}
+    </div>
+    <div class="flex min-w-[220px] flex-1 flex-col gap-2.5">
+      <input type="hidden" name={name} value={source ? JSON.stringify(source) : ''} data-image-value />
+      <div class="flex items-center gap-3">
+        <label class:list={['a-btn a-btn--ghost a-btn--sm', !ready && 'pointer-events-none opacity-50']}>
+          {source ? 'Replace image' : 'Upload image'}
+          <input type="file" accept="image/*" class="sr-only" data-image-file disabled={!ready} />
+        </label>
+        <span class="a-hint" data-image-status>{source?.width ? `${source.width} × ${source.height}` : ''}</span>
+      </div>
+      {!ready && <p class="a-hint">Upload is off until Cloudinary is configured.</p>}
+      {hint && <p class="a-hint">{hint}</p>}
+      {imageError && <p class="a-error">{imageError}</p>}
+      <label class="a-label mt-1" for={`${id}-alt`}>Alt text</label>
+      <input id={`${id}-alt`} name={`${name}_alt`} value={value?.alt ?? ''} class="a-input" placeholder="What the image shows" />
+      {altError && <p class="a-error">{altError}</p>}
+    </div>
+  </div>
+</div>
+
+<style>
+  .image-preview {
+    display: grid;
+    place-items: center;
+    width: 180px;
+    height: 120px;
+    overflow: hidden;
+    border-radius: 6px;
+    background: var(--color-fog);
+    box-shadow: inset 0 0 0 1px var(--color-line);
+  }
+  .image-preview :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+</style>

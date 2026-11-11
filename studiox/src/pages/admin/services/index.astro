@@ -1,0 +1,20 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import AdminList from '@/components/admin/AdminList.astro';
+import { getDb } from '@/lib/db';
+import { adminListServices } from '@/lib/db/admin';
+import { handleListPost, thumb } from '@/lib/cms/admin-page';
+
+const db = await getDb();
+const redirect = await handleListPost(Astro, db, 'services');
+if (redirect) return redirect;
+const rows = (await adminListServices(db)).map((s) => ({ id: s.id, title: s.title, meta: s.deliverables, thumb: thumb(s.image) }));
+---
+
+<AdminLayout title="Services">
+  <div class="a-head">
+    <h1 class="a-title">Services</h1>
+    <a class="a-btn" href="/admin/services/new">New service</a>
+  </div>
+  <AdminList rows={rows} base="/admin/services" noun="service" ordered />
+</AdminLayout>

@@ -1,0 +1,21 @@
+Studiox Astro Template: credits
+
+FONTS
+Geist (variable), by Vercel and Basement Studio. SIL Open Font License 1.1.
+
+JAVASCRIPT AND CSS
+Astro, MIT License
+Tailwind CSS, MIT License
+GSAP, including ScrollTrigger and SplitText, GreenSock Standard "No Charge" License
+Lenis, MIT License
+number-flow, MIT License
+clsx, MIT License
+tailwind-merge, MIT License
+sharp, Apache License 2.0
+TypeScript, Apache License 2.0
+
+IMAGES AND VIDEO
+Demo images are not included; they are replaced with placeholders.
+The hero video is also replaced with a placeholder.
+
+The logo mark and the vector artwork in the template are part of the item.

@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="render" content="width=1280 height=auto scale=1 format=jpg quality=80">
+<title>Studiox Documentation</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #f6f6f6;
+    --surface: #ffffff;
+    --ink: #252320;
+    --ink-soft: #6f6c67;
+    --line: #dcdbd7;
+    --bone: #e6e5dd;
+    --accent: #f15822;
+    --sky: #fde0cc;
+    --font-display: "Geist", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Geist", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, monospace;
+    --radius: 2px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+  .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); max-width: 1240px; margin: 0 auto; }
+  nav { position: sticky; top: 0; align-self: start; height: 100vh; overflow: auto; padding: 40px 24px; border-right: 1px solid var(--line); }
+  nav .brand { display: flex; align-items: center; gap: 9px; font: 500 22px/1.2 var(--font-display); letter-spacing: -0.03em; margin-bottom: 6px; }
+  nav .brand svg { width: 22px; height: 22px; fill: currentColor; }
+  nav .ver { font-size: 13px; color: var(--ink-soft); margin-bottom: 28px; }
+  nav a { display: block; padding: 5px 0; font-size: 14.5px; font-weight: 500; color: var(--ink-soft); text-decoration: none; }
+  nav a:hover { color: var(--accent); }
+  main { padding: 56px 64px 120px; min-width: 0; position: relative; overflow: hidden; }
+  .deco { position: absolute; right: -70px; top: -70px; width: 340px; height: 340px; fill: var(--bone); opacity: .8; pointer-events: none; }
+  section { position: relative; padding-top: 24px; margin-bottom: 48px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+  .eyebrow:before { content: ""; width: 7px; height: 7px; background: currentColor; }
+  h1 { font: 500 88px/.95 var(--font-display); letter-spacing: -0.055em; margin: 18px 0 18px; }
+  h1 span { color: var(--accent); display: block; }
+  h2 { font: 500 40px/1.05 var(--font-display); letter-spacing: -0.04em; margin: 0 0 16px; border-top: 1px solid var(--line); padding-top: 30px; }
+  h3 { font: 500 20px/1.3 var(--font-body); letter-spacing: -0.02em; margin: 28px 0 8px; }
+  p, li { color: var(--ink-soft); max-width: 72ch; }
+  ul { padding-left: 18px; }
+  li::marker { color: var(--accent); }
+  code { font: 13.5px var(--font-mono); background: var(--bone); padding: 2px 6px; border-radius: var(--radius); color: var(--ink); }
+  pre { font: 13.5px/1.65 var(--font-mono); background: var(--ink); color: var(--bone); padding: 18px 20px; border-radius: var(--radius); overflow: auto; }
+  pre code { background: none; padding: 0; color: inherit; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 500; font-size: 13px; }
+  td { color: var(--ink-soft); }
+  .swatch { display: inline-block; width: 16px; height: 16px; border: 1px solid var(--line); vertical-align: -3px; margin-right: 8px; }
+  .note { border-left: 3px solid var(--accent); background: var(--surface); padding: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0; color: var(--ink); }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } nav { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); } main { padding: 32px 20px 80px; } h1 { font-size: 60px; } }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <div class="brand"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h16v4H6zM2 6h4v4H2zm4 4h12v4H6zm12 4h4v4h-4zM2 18h16v4H2z"/></svg>Studiox</div>
+    <div class="ver">Version 1.0.0 · Astro 7</div>
+    <a href="#start">Getting started</a>
+    <a href="#structure">Folder structure</a>
+    <a href="#config">Site settings</a>
+    <a href="#content">Editing content</a>
+    <a href="#pages">Pages</a>
+    <a href="#design">Colours and fonts</a>
+    <a href="#images">Images</a>
+    <a href="#motion">Animations</a>
+    <a href="#forms">Contact form</a>
+    <a href="#deploy">Deploy</a>
+    <a href="#credits">Credits</a>
+    <a href="#support">Support</a>
+    <a href="#changelog">Changelog</a>
+  </nav>
+  <main>
+    <svg class="deco" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h16v4H6zM2 6h4v4H2zm4 4h12v4H6zm12 4h4v4h-4zM2 18h16v4H2z"/></svg>
+    <section>
+      <span class="eyebrow">Documentation</span>
+      <h1>Studiox<span>Astro template</span></h1>
+      <p>Studiox is a creative agency site built with Astro 7, Tailwind CSS 4, GSAP and Lenis. This page covers how to install it, where every piece of content lives, how to change colours, fonts and images, how the animations are set up, and how to deploy it.</p>
+    </section>
+
+    <section id="start">
+      <h2>Getting started</h2>
+      <h3>Requirements</h3>
+      <ul><li>Node.js 22.12 or newer</li><li>Bun (the project ships a <code>bun.lock</code>). npm also works.</li></ul>
+      <h3>Install and run</h3>
+      <pre><code>cd studiox
+bun install
+bun run dev</code></pre>
+      <p>The site runs at <code>http://localhost:4321</code>.</p>
+      <h3>Scripts</h3>
+      <table><tr><th>Command</th><th>What it does</th></tr>
+        <tr><td><code>bun run dev</code></td><td>Starts the dev server</td></tr>
+        <tr><td><code>bun run build</code></td><td>Builds the static site to <code>dist/</code></td></tr>
+        <tr><td><code>bun run preview</code></td><td>Serves the build locally</td></tr>
+        <tr><td><code>bun run check</code></td><td>Type-checks <code>.astro</code> and <code>.ts</code> files</td></tr>
+        <tr><td><code>bun run astro</code></td><td>Runs the Astro CLI</td></tr>
+      </table>
+    </section>
+
+    <section id="structure">
+      <h2>Folder structure</h2>
+      <pre><code>public/               favicons, og-image.jpg, videos/hero.mp4
+src/
+  assets/
+    fonts/            Geist-Variable.woff2
+    images/           every photo, optimised by astro:assets
+  components/
+    layout/           Header, Footer, Loader, Crosshair, Seo
+    sections/home/    the 13 home sections
+    sections/shared/  PageHero, NextStep
+    ui/               Button, ContactForm, ProjectCard, KineticWordmark...
+  data/
+    site.ts           email, navigation, footer and social links
+    home.ts           home page copy, plans, FAQs, testimonials
+    pages.ts          copy for the inner pages
+    blog/             journal articles (Markdown)
+    projects/         case studies (Markdown)
+    services/         services (Markdown)
+  layouts/            BaseLayout.astro
+  pages/              routes
+  scripts/            motion and interactions
+  styles/             variable.css, typography.css, common.css
+  utils/              cn(), seo.ts
+  content.config.ts   content collection schemas
+astro.config.mjs      site URL, fonts, sitemap</code></pre>
+    </section>
+
+    <section id="config">
+      <h2>Site settings</h2>
+      <p>Set your domain first: <code>site</code> in <code>astro.config.mjs</code> drives canonical URLs, Open Graph URLs, the sitemap and <code>robots.txt</code>.</p>
+      <pre><code>export default defineConfig({
+  site: 'https://studiox.studio',
+  integrations: [sitemap()],
+  ...
+});</code></pre>
+      <p>Email, navigation, footer and social links are in <code>src/data/site.ts</code>:</p>
+      <pre><code>export const EMAIL = 'hello@studiox.studio';
+
+export const NAV_LINKS = [
+  { label: 'Services', href: '/services' },
+  { label: 'Work', href: '/work' },
+  ...
+];
+
+export const SOCIAL_LINKS = [
+  { label: 'LinkedIn', href: 'https://www.linkedin.com' },
+  ...
+];</code></pre>
+      <p>The site name, default title, description and share image are in <code>src/utils/seo.ts</code>. The logo mark is drawn from <code>MARK_RECTS</code> in <code>site.ts</code>, and the favicons are in <code>public/</code>.</p>
+    </section>
+
+    <section id="content">
+      <h2>Editing content</h2>
+      <p>Home copy is in <code>src/data/home.ts</code>, and the copy for Studio, Services, Work, Journal and Privacy is in <code>src/data/pages.ts</code>. Projects, articles and services are Markdown files in content collections, with schemas in <code>src/content.config.ts</code>. If a field is missing or wrong, the build names the file.</p>
+      <h3>Add a project</h3>
+      <p>Copy a file in <code>src/data/projects/</code> and rename it. The file name becomes the URL: <code>acme.md</code> builds <code>/work/acme</code>.</p>
+      <table><tr><th>Collection</th><th>Folder</th><th>Fields</th><th>Builds</th></tr>
+        <tr><td>projects</td><td><code>src/data/projects</code></td><td>title, order, sector, year, summary, services, client, role, cover, coverAlt, challenge, approach, results (exactly 3), gallery (exactly 2)</td><td><code>/work/[slug]</code></td></tr>
+        <tr><td>blog</td><td><code>src/data/blog</code></td><td>title, category, date, readTime, excerpt, cover, coverAlt</td><td><code>/journal/[slug]</code></td></tr>
+        <tr><td>services</td><td><code>src/data/services</code></td><td>title, order, summary, deliverables, image, imageAlt</td><td>A row on Home and Services</td></tr>
+      </table>
+    </section>
+
+    <section id="pages">
+      <h2>Pages</h2>
+      <table><tr><th>Page</th><th>Route</th><th>Source</th></tr>
+        <tr><td>Home</td><td><code>/</code></td><td><code>src/pages/index.astro</code></td></tr>
+        <tr><td>Studio</td><td><code>/about</code></td><td><code>src/pages/about.astro</code></td></tr>
+        <tr><td>Services</td><td><code>/services</code></td><td><code>src/pages/services.astro</code></td></tr>
+        <tr><td>Work</td><td><code>/work</code></td><td><code>src/pages/work/index.astro</code></td></tr>
+        <tr><td>Project detail</td><td><code>/work/[slug]</code></td><td><code>src/pages/work/[slug].astro</code></td></tr>
+        <tr><td>Journal</td><td><code>/journal</code></td><td><code>src/pages/journal/index.astro</code></td></tr>
+        <tr><td>Article</td><td><code>/journal/[slug]</code></td><td><code>src/pages/journal/[slug].astro</code></td></tr>
+        <tr><td>Contact</td><td><code>/contact</code></td><td><code>src/pages/contact.astro</code></td></tr>
+        <tr><td>Privacy Policy</td><td><code>/privacy</code></td><td><code>src/pages/privacy.astro</code></td></tr>
+        <tr><td>404</td><td><code>/404</code></td><td><code>src/pages/404.astro</code></td></tr>
+      </table>
+    </section>
+
+    <section id="design">
+      <h2>Colours and fonts</h2>
+      <p>Colours and easings are tokens in <code>src/styles/variable.css</code>. Tailwind reads them, so <code>bg-cobalt</code> or <code>text-muted</code> follow any change. One script also sets colours directly: <code>INK</code>, <code>ACCENT</code> and <code>EMPTY</code> at the top of <code>src/scripts/pixel-stat.ts</code>.</p>
+      <table><tr><th>Token</th><th>Value</th><th>Used for</th></tr>
+        <tr><td><code>--color-ink</code></td><td><span class="swatch" style="background:#252320"></span>#252320</td><td>Text</td></tr>
+        <tr><td><code>--color-muted</code></td><td><span class="swatch" style="background:#6f6c67"></span>#6f6c67</td><td>Secondary text</td></tr>
+        <tr><td><code>--color-cobalt</code></td><td><span class="swatch" style="background:#f15822"></span>#f15822</td><td>The accent (orange; fills also use <code>--gradient-accent</code>, #f68a1e → #f15822)</td></tr>
+        <tr><td><code>--color-cobalt-deep</code></td><td><span class="swatch" style="background:#d9441a"></span>#d9441a</td><td>Accent hover and deep sections</td></tr>
+        <tr><td><code>--color-cobalt-line</code></td><td><span class="swatch" style="background:#f8a37a"></span>#f8a37a</td><td>Lines on the accent</td></tr>
+        <tr><td><code>--color-sky</code></td><td><span class="swatch" style="background:#fde0cc"></span>#fde0cc</td><td>Soft text on the accent</td></tr>
+        <tr><td><code>--color-line</code></td><td><span class="swatch" style="background:#dcdbd7"></span>#dcdbd7</td><td>Borders</td></tr>
+        <tr><td><code>--color-bone</code></td><td><span class="swatch" style="background:#e6e5dd"></span>#e6e5dd</td><td>Warm surface</td></tr>
+        <tr><td><code>--color-fog</code></td><td><span class="swatch" style="background:#f6f6f6"></span>#f6f6f6</td><td>Page surface</td></tr>
+        <tr><td><code>--color-paper</code></td><td><span class="swatch" style="background:#ffffff"></span>#ffffff</td><td>White surface</td></tr>
+      </table>
+      <h3>Type</h3>
+      <p>The type scale (<code>type-display</code>, <code>type-h1</code> to <code>type-h4</code>, <code>type-body</code> and so on) is in <code>src/styles/typography.css</code>. Breakpoints are 810 px, 1200 px and 1440 px.</p>
+      <h3>Fonts</h3>
+      <p>Geist loads through the Astro Fonts API from <code>src/assets/fonts/Geist-Variable.woff2</code>. To change it, add your file and edit the <code>fonts</code> entry in <code>astro.config.mjs</code>, then update <code>--font-geist</code> in <code>variable.css</code>. The kinetic wordmark animates the weight axis, so a variable font keeps that effect.</p>
+    </section>
+
+    <section id="images">
+      <h2>Images</h2>
+      <div class="note">The demo photos are not included in the download. Every image is a grey placeholder labelled with the size to upload for that slot, so you can see what fits the frame. Replace each one with your own image at the same path. The hero video is a placeholder too.</div>
+      <p>Photos live in <code>src/assets/images/</code> and go through <code>astro:assets</code>, which resizes them and writes WebP at build time. Markdown files point to them with a relative path. The hero video is <code>public/videos/hero.mp4</code>.</p>
+      <p>Frames crop with <code>object-cover</code> and change shape between phone and desktop, so keep the subject near the centre. The recommended size matches the main desktop frame at 2× for sharp screens.</p>
+      <table><tr><th>Slot</th><th>Files</th><th>Recommended size</th><th>Ratio</th></tr>
+        <tr><td>Project cover</td><td><code>work-*.jpg</code></td><td>2400×1350</td><td>16:9</td></tr>
+        <tr><td>Project gallery</td><td><code>work-*-gallery-*.jpg</code></td><td>1600×1280</td><td>5:4</td></tr>
+        <tr><td>Article cover</td><td><code>journal-*.jpg</code></td><td>2400×1350</td><td>16:9</td></tr>
+        <tr><td>Service image</td><td><code>service-*.jpg</code></td><td>1600×1200</td><td>4:3</td></tr>
+        <tr><td>Home zoom sequence</td><td><code>zoom-1…6.jpg</code></td><td>2400×1500</td><td>16:10</td></tr>
+        <tr><td>Studio photo (About)</td><td><code>about-studio.jpg</code></td><td>2400×1260</td><td>1.9:1</td></tr>
+        <tr><td>Social share image</td><td><code>public/og-image.jpg</code></td><td>1200×630</td><td>1.91:1</td></tr>
+        <tr><td>Client logos</td><td><code>client-*.png</code></td><td>3× the size listed in <code>home.ts</code></td><td>Per logo</td></tr>
+      </table>
+    </section>
+
+    <section id="motion">
+      <h2>Animations</h2>
+      <p>Everything starts in <code>src/scripts/main.ts</code>, one <code>init…</code> call per feature. To turn a feature off, remove its call.</p>
+      <table><tr><th>Feature</th><th>File</th></tr>
+        <tr><td>Smooth scroll (Lenis)</td><td><code>smooth-scroll.ts</code></td></tr>
+        <tr><td>Loader, page transition, adaptive header, back to top</td><td><code>site.ts</code></td></tr>
+        <tr><td>Menu</td><td><code>menu.ts</code></td></tr>
+        <tr><td>Liquid-chrome hero, expanding video</td><td><code>hero.ts</code></td></tr>
+        <tr><td>Kinetic wordmark</td><td><code>kinetic-wordmark.ts</code></td></tr>
+        <tr><td>Crosshair cursor (label from <code>data-cursor</code>)</td><td><code>crosshair.ts</code></td></tr>
+        <tr><td>Text, block and image reveals</td><td><code>reveals.ts</code></td></tr>
+        <tr><td>Image zoom</td><td><code>zoom-reveal.ts</code></td></tr>
+        <tr><td>Process lines, pixel edges</td><td><code>process.ts</code></td></tr>
+        <tr><td>Counters and pixel stats</td><td><code>number-flow.ts</code>, <code>pixel-stat.ts</code></td></tr>
+        <tr><td>Testimonial deck</td><td><code>quote-deck.ts</code></td></tr>
+        <tr><td>Service preview, card parallax</td><td><code>services-preview.ts</code>, <code>card-parallax.ts</code></td></tr>
+      </table>
+      <p>When a visitor has reduced motion turned on, <code>main.ts</code> skips the loader, smooth scroll, page transitions, reveals and cursor, and every section stays visible and readable.</p>
+    </section>
+
+    <section id="forms">
+      <h2>Contact form</h2>
+      <p>The form checks the fields, then opens the visitor's mail app with the enquiry filled in, addressed to <code>EMAIL</code>. No server is involved. To post to a form service instead, replace the <code>mailto:</code> step in <code>src/scripts/contact-form.ts</code>.</p>
+    </section>
+
+    <section id="deploy">
+      <h2>Deploy</h2>
+      <p>Set <code>site</code> in <code>astro.config.mjs</code>, then build. The output is a static folder.</p>
+      <pre><code>bun run build     # writes dist/</code></pre>
+      <table><tr><th>Host</th><th>Build command</th><th>Output folder</th></tr>
+        <tr><td>Cloudflare Pages</td><td><code>bun run build</code></td><td><code>dist</code></td></tr>
+        <tr><td>Netlify</td><td><code>bun run build</code></td><td><code>dist</code></td></tr>
+        <tr><td>Vercel</td><td><code>bun run build</code></td><td><code>dist</code></td></tr>
+      </table>
+      <p>Set the host's Node version to 22.12 or newer. The 404 page is <code>dist/404.html</code>.</p>
+    </section>
+
+    <section id="credits">
+      <h2>Credits</h2>
+      <table><tr><th>Asset</th><th>Source</th><th>Licence</th></tr>
+        <tr><td>Geist</td><td>Vercel and Basement Studio</td><td>SIL Open Font License 1.1</td></tr>
+        <tr><td>Astro</td><td>astro.build</td><td>MIT</td></tr>
+        <tr><td>Tailwind CSS</td><td>tailwindcss.com</td><td>MIT</td></tr>
+        <tr><td>GSAP</td><td>gsap.com</td><td>GreenSock Standard "No Charge" License</td></tr>
+        <tr><td>Lenis</td><td>darkroom.engineering</td><td>MIT</td></tr>
+        <tr><td>number-flow</td><td>number-flow.barvian.me</td><td>MIT</td></tr>
+        <tr><td>Demo images and video</td><td colspan="2">Not included; replaced with placeholders</td></tr>
+      </table>
+    </section>
+
+    <section id="support">
+      <h2>Support</h2>
+      <p>If you need help, reach the author through the support tab on the page where you bought the item. Include your Node version and any build output.</p>
+    </section>
+
+    <section id="changelog">
+      <h2>Changelog</h2>
+      <p><strong>1.0.0</strong> · 5 November 2026 · Initial release</p>
+    </section>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+---
+import { studioFacts } from '@/data/home';
+---
+
+<section class="bg-fog" data-cursor="About us">
+  <div class="container-x mx-auto max-w-[1680px] pt-4 pb-24 md:pt-6 md:pb-[120px] xl:pt-10 xl:pb-[180px]">
+    <h2 class="type-h2 max-w-[900px] [text-wrap:balance]" data-text-reveal="line" data-tr-blur="10" data-tr-y="28" data-tr-stagger="0.05">
+      Most brands look fine and say nothing. We help ambitious companies find what makes them different — and make it impossible to ignore.
+    </h2>
+
+    <div class="mt-10 flex flex-col gap-10 line-t pt-7 xl:flex-row">
+      <div class="flex flex-col gap-11 xl:flex-1">
+        <p class="tag">The studio</p>
+        <dl class="type-label w-full md:max-w-[340px]" data-reveal>
+          {
+            studioFacts.map(([term, value]) => (
+              <div class="flex justify-between gap-4 line-b py-2.5">
+                <dt>{term}</dt>
+                <dd class="text-right">{value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+      <div class="type-body flex max-w-[600px] flex-col gap-5 xl:max-w-none xl:flex-1" data-reveal>
+        <p>
+          Gandaria Studio started in Semarang in 2020. We kept the team small on purpose, so the person who runs your first workshop is the same
+          person who hands over the final files.
+        </p>
+        <p>
+          We partner with founders, family businesses and growing brands across Indonesia who care about detail. Our job is to turn what makes you
+          different into a brand and a website that people want to come back to.
+        </p>
+      </div>
+      <div class="hidden xl:block xl:flex-[0.4]" aria-hidden="true"></div>
+    </div>
+  </div>
+</section>

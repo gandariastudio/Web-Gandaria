@@ -1,0 +1,21 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { cn } from '@/utils/cn';
+
+type Props = HTMLAttributes<'a'> & {
+  label: string;
+  href?: string;
+  variant?: 'cobalt' | 'ink' | 'light' | 'secondary';
+  class?: string;
+};
+
+const { label, href = '#', variant = 'cobalt', class: className, ...rest } = Astro.props;
+---
+
+<a href={href} class={cn('btn', `btn-${variant}`, className)} {...rest}>
+  <span class="btn__mask">
+    <span class="invisible block" aria-hidden="true">{label}</span>
+    <span class="btn__label">{label}</span>
+    <span class="btn__label" aria-hidden="true">{label}</span>
+  </span>
+</a>

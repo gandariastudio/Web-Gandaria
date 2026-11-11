@@ -1,0 +1,32 @@
+---
+import { CLOUDINARY_CLOUD_NAME } from 'astro:env/server';
+import type { CmsImage } from '@/lib/db/schema';
+import { imageSrc, imageSrcset } from '@/lib/cms/cloudinary';
+
+interface Props {
+  image: CmsImage;
+  /** Candidate widths for srcset (Cloudinary images only). */
+  widths?: number[];
+  sizes?: string;
+  class?: string;
+  loading?: 'eager' | 'lazy';
+  alt?: string;
+}
+
+const { image, widths = [640, 1280, 1920], sizes = '100vw', class: className, loading = 'lazy', alt } = Astro.props;
+const src = imageSrc(image, CLOUDINARY_CLOUD_NAME, Math.min(Math.max(...widths), image.width));
+const srcset = imageSrcset(image, CLOUDINARY_CLOUD_NAME, widths);
+---
+
+<img
+  src={src}
+  srcset={srcset}
+  sizes={srcset ? sizes : undefined}
+  width={image.width}
+  height={image.height}
+  alt={alt ?? image.alt}
+  loading={loading}
+  fetchpriority={loading === 'eager' ? 'high' : undefined}
+  decoding="async"
+  class={className}
+/>

@@ -1,0 +1,132 @@
+@layer base {
+  body {
+    @apply bg-paper font-geist text-ink antialiased;
+    font-size: 16px;
+    line-height: 1.5;
+    font-feature-settings: 'blwf', 'cv03', 'cv04', 'cv09', 'cv11';
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-normal;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p {
+    overflow-wrap: break-word;
+  }
+}
+
+@utility type-display {
+  font-size: 64px;
+  line-height: 0.92;
+  letter-spacing: -0.06em;
+  @media (width >= 810px) {
+    font-size: 104px;
+  }
+  @media (width >= 1440px) {
+    font-size: 150px;
+  }
+}
+
+@utility type-h1 {
+  font-size: 36px;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  @media (width >= 810px) {
+    font-size: 48px;
+  }
+  @media (width >= 1200px) {
+    font-size: 64px;
+  }
+}
+
+@utility type-h2 {
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  @media (width >= 810px) {
+    font-size: 32px;
+  }
+  @media (width >= 1200px) {
+    font-size: 40px;
+  }
+}
+
+@utility type-h3 {
+  font-size: 22px;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  @media (width >= 810px) {
+    font-size: 24px;
+  }
+  @media (width >= 1200px) {
+    font-size: 28px;
+  }
+}
+
+@utility type-h4 {
+  font-size: 18px;
+  line-height: 1.4;
+  letter-spacing: -0.015em;
+  @media (width >= 810px) {
+    font-size: 19px;
+  }
+  @media (width >= 1200px) {
+    font-size: 20px;
+  }
+}
+
+@utility type-body {
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+}
+
+@utility type-small {
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+@utility type-label {
+  font-size: 13px;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+
+@utility type-caps {
+  font-size: 12px;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@utility type-button {
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+@utility type-price {
+  font-size: 56px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  @media (width >= 810px) {
+    font-size: 64px;
+  }
+  @media (width >= 1200px) {
+    font-size: 88px;
+  }
+}

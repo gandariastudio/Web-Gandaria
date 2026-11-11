@@ -1,0 +1,55 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import { getDb } from '@/lib/db';
+import { counts } from '@/lib/db/admin';
+import { getSettings } from '@/lib/db/queries';
+
+const db = await getDb();
+const [n, settings] = await Promise.all([counts(db), getSettings(db)]);
+const sections = [
+  { label: 'Projects', href: '/admin/projects', count: n.projects, note: 'Case studies on /work' },
+  { label: 'Journal', href: '/admin/journal', count: n.posts, note: 'Articles on /journal' },
+  { label: 'Services', href: '/admin/services', count: n.services, note: 'Home and /services' },
+  { label: 'Testimonials', href: '/admin/testimonials', count: n.testimonials, note: 'Quote deck on the home page' },
+  { label: 'Clients', href: '/admin/clients', count: n.clients, note: 'Logo wall on home and /about' },
+  { label: 'FAQ', href: '/admin/faqs', count: n.faqs, note: 'Home and /services' },
+];
+---
+
+<AdminLayout title="Dashboard">
+  <div class="a-head">
+    <div>
+      <h1 class="a-title">Dashboard</h1>
+      <p class="a-sub">Edit the content of gandariastudio.com. Saved changes reach the public site within about a minute.</p>
+    </div>
+    <div class="flex gap-2">
+      <a class="a-btn a-btn--ghost" href="/admin/journal/new">New article</a>
+      <a class="a-btn" href="/admin/projects/new">New project</a>
+    </div>
+  </div>
+
+  <div class="a-grid">
+    {
+      sections.map((s) => (
+        <a href={s.href} class="a-card gap-1.5! transition-colors hover:border-[var(--color-cobalt-line)]">
+          <span class="text-[13px] text-muted">{s.label}</span>
+          <span class="text-[34px] leading-none tracking-[-0.03em]">{s.count}</span>
+          <span class="a-hint">{s.note}</span>
+        </a>
+      ))
+    }
+  </div>
+
+  <section class="a-card">
+    <h2>Site settings</h2>
+    <dl class="grid grid-cols-[140px_1fr] gap-y-2 text-[14px]">
+      <dt class="text-muted">Email</dt>
+      <dd>{settings.email}</dd>
+      <dt class="text-muted">Booking from</dt>
+      <dd>{settings.bookingFrom}</dd>
+      <dt class="text-muted">Social links</dt>
+      <dd>{settings.socialLinks.map((l) => l.label).join(', ') || '—'}</dd>
+    </dl>
+    <a class="a-btn a-btn--ghost w-max" href="/admin/settings">Edit settings</a>
+  </section>
+</AdminLayout>

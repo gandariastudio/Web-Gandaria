@@ -1,0 +1,60 @@
+---
+import CmsImage from '@/components/ui/CmsImage.astro';
+import { getDb } from '@/lib/db';
+import { listServices } from '@/lib/db/queries';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PageHero from '@/components/sections/shared/PageHero.astro';
+import NextStep from '@/components/sections/shared/NextStep.astro';
+import Faq from '@/components/sections/home/Faq.astro';
+import SectionHead from '@/components/ui/SectionHead.astro';
+import { servicesPage } from '@/data/pages';
+
+const services = await listServices(await getDb());
+---
+
+<BaseLayout title="Services" description={servicesPage.hero.intro}>
+  <PageHero {...servicesPage.hero} />
+
+  <section class="bg-paper px-5 py-10 md:px-8 md:py-12 xl:px-10 xl:py-16" data-cursor="Our services">
+    <div class="mx-auto max-w-[1600px]">
+      {
+        services.map((s, i) => (
+          <article class="flex flex-col gap-6 line-t py-12 md:flex-row md:gap-14">
+            <div class="relative h-60 overflow-clip md:h-80 md:flex-[5] xl:h-[440px]" data-img-reveal>
+              <CmsImage image={s.image} widths={[600, 1200]} sizes="(min-width: 810px) 42vw, 100vw" class="absolute inset-0 size-full object-cover" />
+            </div>
+            <div class="flex flex-col gap-5 md:flex-[6]" data-reveal>
+              <p class="type-label text-cobalt">{String(i + 1).padStart(2, '0')}</p>
+              <h2 class="type-h1">{s.title}</h2>
+              <p class="type-h4 max-w-[560px] text-muted">{s.summary}</p>
+              <div class="flex flex-col gap-2 pt-5">
+                <p class="type-label text-muted">Deliverables</p>
+                <p class="type-body">{s.deliverables}</p>
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="bg-fog px-5 py-[88px] md:px-8 md:py-28 xl:px-10 xl:py-[140px]" data-cursor="How we work">
+    <div class="mx-auto flex max-w-[1600px] flex-col gap-14">
+      <SectionHead tag="How we work" title="From first call to launch." aside="Most projects run eight to ten weeks in four stages, with a review every week." />
+      <ol class="grid auto-rows-fr grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {
+          servicesPage.steps.map((step, i) => (
+            <li class="flex flex-col gap-3.5 self-start bg-paper px-7 pt-7 pb-8" data-reveal data-reveal-delay={i * 0.08}>
+              <p class="type-label text-cobalt">{step.label}</p>
+              <h3 class="type-h2">{step.title}</h3>
+              <p class="type-body text-muted">{step.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <Faq page class="bg-paper px-5 py-24 md:px-8 md:py-[120px] xl:px-10 xl:py-40" />
+  <NextStep />
+</BaseLayout>

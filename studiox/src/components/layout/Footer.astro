@@ -1,0 +1,89 @@
+---
+import CmsImage from '@/components/ui/CmsImage.astro';
+import LogoMark from '@/components/ui/LogoMark.astro';
+import KineticWordmark from '@/components/ui/KineticWordmark.astro';
+import LiveClock from '@/components/ui/LiveClock.astro';
+import { FOOTER_LINKS } from '@/data/site';
+import { getDb } from '@/lib/db';
+import { listProjects } from '@/lib/db/queries';
+
+const { email: EMAIL, socialLinks: SOCIAL_LINKS, bookingFrom } = Astro.locals.settings;
+// "Recently shipped": newest year first, then the order set in /admin. Skipped if the database is unavailable.
+const projects = await getDb().then(listProjects).catch(() => []);
+const shipped = [...projects].sort((a, b) => Number(b.year) - Number(a.year) || a.sortOrder - b.sortOrder)[0];
+---
+
+<footer class="bg-cobalt text-paper" data-cursor="Gandaria®">
+  <div class="flex flex-col gap-[72px] px-4 pt-8 pb-5 md:px-6 md:pt-9 md:pb-6 xl:px-10 xl:pt-10 xl:pb-7">
+    <div class="flex flex-col gap-8 md:flex-row md:gap-10">
+      <div class="flex flex-col gap-9 md:flex-1">
+        <LogoMark class="size-9" />
+        <ul class="type-small flex flex-col gap-1.5">
+          {
+            FOOTER_LINKS.map((link) => (
+              <li>
+                <a href={link.href} class="footer-link">
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="flex flex-col md:flex-[1.4]">
+        <p class="tag">Say hello</p>
+        <a href={`mailto:${EMAIL}`} class="text-link type-h2 mt-5 w-max">{EMAIL}</a>
+        <p class="type-small mt-5 max-w-[360px] text-sky">New projects from {bookingFrom} — tell us what you’re building.</p>
+      </div>
+
+      <div class="flex flex-col gap-11 md:w-80 xl:w-100">
+        <ul class="type-small flex flex-col gap-1.5 md:items-end">
+          {
+            SOCIAL_LINKS.map((link) => (
+              <li>
+                <a href={link.href} class="footer-link" target="_blank" rel="noopener">
+                  {link.label} ↗
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        {
+          shipped && (
+            <div class="flex flex-col gap-[14px]">
+              <p class="tag">Recently shipped</p>
+              <a href={`/work/${shipped.slug}`} class="relative block h-[220px] overflow-hidden" data-img-reveal>
+                <CmsImage image={shipped.cover} widths={[400, 800]} sizes="(min-width: 1440px) 400px, (min-width: 810px) 320px, 100vw" class="size-full object-cover" />
+                <span class="type-label absolute inset-x-3 bottom-3 flex justify-between">
+                  <span>{shipped.title}</span>
+                  <span>{shipped.year}</span>
+                </span>
+              </a>
+            </div>
+          )
+        }
+      </div>
+    </div>
+
+    <KineticWordmark text="Gandaria" color="#fff" peak={700} space={0.02} />
+
+    <div class="type-label flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between">
+      <p>©20—26 Gandaria Studio</p>
+      <LiveClock />
+      <p class="text-sky">Independent creative studio · Semarang</p>
+      <a href="#top" class="text-link w-max">Back to top ↑</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer-link {
+    transition: color 0.6s var(--ease-swift);
+  }
+  @media (hover: hover) {
+    .footer-link:hover {
+      color: var(--color-sky);
+    }
+  }
+</style>

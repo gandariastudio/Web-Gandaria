@@ -1,0 +1,17 @@
+---
+interface Props {
+  tag: string;
+  title: string;
+  aside?: string;
+}
+
+const { tag, title, aside } = Astro.props;
+---
+
+<div class="flex flex-col gap-6 md:flex-row md:items-end md:gap-10">
+  <div class="flex flex-col gap-5 md:flex-1 lg:w-[900px] lg:flex-none">
+    <p class="tag">{tag}</p>
+    <h2 class="type-h1" data-text-reveal="line" data-tr-blur="10" data-tr-y="28" data-tr-stagger="0.05">{title}</h2>
+  </div>
+  {aside && <p class="type-body text-muted md:max-w-[420px] md:flex-1 lg:ml-auto">{aside}</p>}
+</div>

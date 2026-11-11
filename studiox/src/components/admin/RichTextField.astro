@@ -1,0 +1,105 @@
+---
+interface Props {
+  name: string;
+  label: string;
+  value?: string;
+  error?: string;
+}
+
+const { name, label, value = '', error } = Astro.props;
+const tools = [
+  ['h2', 'H2'],
+  ['h3', 'H3'],
+  ['bold', 'Bold'],
+  ['italic', 'Italic'],
+  ['link', 'Link'],
+  ['bullet', '• List'],
+  ['ordered', '1. List'],
+  ['quote', 'Quote'],
+  ['undo', 'Undo'],
+  ['redo', 'Redo'],
+];
+---
+
+<div class:list={['a-field', error && 'has-error']} data-rich-text>
+  <span class="a-label">{label}</span>
+  <div class="rt">
+    <div class="rt-bar" role="toolbar" aria-label="Formatting">
+      {tools.map(([cmd, text]) => <button type="button" class="rt-btn" data-cmd={cmd}>{text}</button>)}
+    </div>
+    <div class="rt-editor article-body" data-editor></div>
+  </div>
+  <input type="hidden" name={name} value={value} data-rich-value />
+  <noscript><p class="a-hint">The editor needs JavaScript.</p></noscript>
+  {error && <p class="a-error">{error}</p>}
+</div>
+
+<style>
+  .rt {
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    background: var(--color-paper);
+  }
+  .has-error .rt {
+    border-color: #e5958b;
+  }
+  .rt-bar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    border-bottom: 1px solid var(--color-line);
+    border-radius: 8px 8px 0 0;
+    background: var(--color-paper);
+    padding: 8px;
+  }
+  .rt-btn {
+    border-radius: 5px;
+    padding: 4px 9px;
+    font-size: 13px;
+    color: var(--color-muted);
+    cursor: pointer;
+  }
+  .rt-btn:hover {
+    background: var(--color-fog);
+    color: var(--color-ink);
+  }
+  .rt-btn.is-active {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .rt-editor {
+    min-height: 280px;
+    padding: 18px 20px;
+    font-size: 16px !important;
+  }
+  .rt-editor :global(.ProseMirror) {
+    min-height: 260px;
+    outline: none;
+  }
+  .rt-editor :global(.ProseMirror > * + *) {
+    margin-top: 0.8em;
+  }
+  .rt-editor :global(ul) {
+    list-style: disc;
+    padding-left: 1.4em;
+  }
+  .rt-editor :global(ol) {
+    list-style: decimal;
+    padding-left: 1.4em;
+  }
+  .rt-editor :global(blockquote) {
+    border-left: 3px solid var(--color-cobalt);
+    padding-left: 1em;
+    color: var(--color-muted);
+  }
+  .rt-editor :global(a) {
+    color: var(--color-cobalt);
+    text-decoration: underline;
+  }
+  .rt-editor :global(h3) {
+    font-size: 22px;
+  }
+</style>

@@ -1,0 +1,38 @@
+---
+import BigTitle from '@/components/ui/BigTitle.astro';
+import { steps } from '@/data/home';
+
+const offsets = [
+  ['xl:w-[53%]', 'md:w-[34%]'],
+  ['xl:w-[22%]', 'md:w-[8%]'],
+  ['xl:w-[42%]', 'md:w-[24%]'],
+  ['xl:w-[22%]', 'md:w-[8%]'],
+];
+---
+
+<section
+  class="relative overflow-clip bg-cobalt-deep px-4 pt-24 pb-[190px] text-paper md:px-6 md:pt-[120px] md:pb-60 xl:px-10 xl:pt-40 xl:pb-[300px]"
+  data-cursor="How we work">
+  <div class="pixel-edge pointer-events-none absolute inset-x-0 bottom-0 z-0 h-32 md:h-40 xl:h-48" aria-hidden="true" data-pixel-edge></div>
+  <div class="relative mx-auto flex max-w-[1600px] flex-col gap-16 md:gap-12 xl:gap-[120px]">
+    <BigTitle lines={['From call', 'to launch.']} accent="text-sky" />
+    <div class="relative flex flex-col gap-14 md:gap-[110px] md:pt-10 xl:gap-[140px]" data-steps>
+      <div class="pointer-events-none absolute inset-0 z-0" aria-hidden="true" data-process-lines></div>
+      {
+        steps.map((step, i) => (
+          <div class="relative z-[1] flex w-full">
+            <div class:list={['h-px shrink-0', offsets[i][0], offsets[i][1]]} />
+            <div class="flex w-full gap-3.5 md:w-[400px] xl:w-[460px]" data-step-item data-reveal="40" data-reveal-delay="0.1" data-reveal-amount="0.3">
+              <span class="size-1.5 shrink-0 bg-paper/40" />
+              <div class="flex flex-1 flex-col gap-3">
+                <p class="type-label text-sky">{step.label}</p>
+                <h3 class="type-h2">{step.title}</h3>
+                <p class="type-body text-paper/72">{step.text}</p>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

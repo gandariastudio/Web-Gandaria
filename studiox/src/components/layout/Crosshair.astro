@@ -1,0 +1,42 @@
+
+
+<div class="crosshair pointer-events-none fixed inset-0 z-40 opacity-0" aria-hidden="true" data-crosshair>
+  <div class="kc-layer absolute inset-0 overflow-hidden">
+    <div class="crosshair__v absolute inset-y-0 left-0 w-px" data-ch-v></div>
+    <div class="crosshair__h absolute inset-x-0 top-0 h-px" data-ch-h></div>
+    <div class="crosshair__plus absolute top-0 left-0 hidden size-[15px]" data-ch-plus>
+      <i class="absolute top-0 left-[7px] h-[15px] w-px"></i>
+      <i class="absolute top-[7px] left-0 h-px w-[15px]"></i>
+    </div>
+  </div>
+</div>
+
+<style>
+  .crosshair {
+    --kc-line: rgba(37, 35, 32, 0.18);
+    --kc-text: var(--color-ink);
+    transition: opacity 0.5s var(--ease-swift);
+  }
+  .crosshair.is-dark {
+    --kc-line: rgba(255, 255, 255, 0.5);
+    --kc-text: #fff;
+  }
+  .crosshair__v,
+  .crosshair__h {
+    background: var(--kc-line);
+    transition: background-color 0.4s ease;
+    will-change: transform;
+  }
+  .crosshair__plus {
+    will-change: transform;
+  }
+  .crosshair__plus i {
+    background: var(--kc-text);
+    transition: background-color 0.4s ease;
+  }
+  @media (max-width: 809.98px) {
+    .crosshair__plus {
+      scale: 0.78;
+    }
+  }
+</style>

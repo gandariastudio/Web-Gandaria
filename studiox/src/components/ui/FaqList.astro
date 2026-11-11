@@ -1,0 +1,194 @@
+---
+interface Props {
+  items: { question: string; answer: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="fq-list" data-faq>
+  {
+    items.map((item, i) => (
+      <div class="fq-row">
+        <button type="button" class="fq-btn" aria-expanded="false" aria-controls={`fq-${i}`}>
+          <span class="fq-num">{String(i + 1).padStart(2, '0')}</span>
+          <span class="fq-q">{item.question}</span>
+          <span class="fq-icon" aria-hidden="true" />
+        </button>
+        <div class="fq-panel" id={`fq-${i}`} role="region">
+          <div>
+            <p class="fq-a">{item.answer}</p>
+          </div>
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .fq-list {
+    border-top: 1px solid var(--color-line);
+  }
+  .fq-row {
+    position: relative;
+    border-bottom: 1px solid var(--color-line);
+    transition: opacity 0.5s var(--ease-expo);
+  }
+  .fq-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+    background: var(--color-ink);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.9s var(--ease-expo);
+    pointer-events: none;
+  }
+  @media (hover: hover) {
+    .fq-list:hover .fq-row {
+      opacity: 0.4;
+    }
+    .fq-list:hover .fq-row:hover,
+    .fq-list .fq-row.is-open {
+      opacity: 1;
+    }
+    .fq-row:hover::before {
+      transform: scaleX(1);
+    }
+    .fq-row:hover .fq-q {
+      transform: translateX(8px);
+    }
+  }
+  .fq-btn {
+    all: unset;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 28px 0;
+    cursor: pointer;
+  }
+  .fq-btn:focus-visible {
+    outline: 2px solid var(--color-cobalt);
+    outline-offset: 4px;
+  }
+  .fq-num {
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+    transition: color 0.5s ease;
+  }
+  .fq-row.is-open .fq-num {
+    color: var(--color-cobalt);
+  }
+  .fq-q {
+    font-size: 26px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    transition: transform 0.7s var(--ease-expo);
+  }
+  .fq-icon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--color-line);
+    transition:
+      background-color 0.5s var(--ease-expo),
+      border-color 0.5s var(--ease-expo),
+      transform 0.7s var(--ease-expo);
+  }
+  .fq-icon::before,
+  .fq-icon::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 14px;
+    height: 1px;
+    background: var(--color-ink);
+    transform: translate(-50%, -50%);
+    transition: background-color 0.5s var(--ease-expo);
+  }
+  .fq-icon::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+  .fq-row:hover .fq-icon {
+    border-color: var(--color-ink);
+  }
+  .fq-row.is-open .fq-icon {
+    background: var(--color-cobalt);
+    border-color: var(--color-cobalt);
+    transform: rotate(135deg);
+  }
+  .fq-row.is-open .fq-icon::before,
+  .fq-row.is-open .fq-icon::after {
+    background: #fff;
+  }
+  .fq-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.8s var(--ease-expo);
+  }
+  .fq-row.is-open .fq-panel {
+    grid-template-rows: 1fr;
+  }
+  .fq-panel > div {
+    overflow: hidden;
+  }
+  .fq-a {
+    margin: 0;
+    padding: 0 56px 32px 72px;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--color-muted);
+    max-width: 720px;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition:
+      opacity 0.5s ease,
+      transform 0.8s var(--ease-expo);
+  }
+  .fq-row.is-open .fq-a {
+    opacity: 1;
+    transform: none;
+    transition-delay: 0.12s;
+  }
+  @media (max-width: 809px) {
+    .fq-btn {
+      grid-template-columns: 40px 1fr auto;
+      padding: 22px 0;
+    }
+    .fq-q {
+      font-size: 20px;
+    }
+    .fq-icon {
+      width: 34px;
+      height: 34px;
+    }
+    .fq-a {
+      padding: 0 0 24px 56px;
+    }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-faq]').forEach((list) => {
+    const rows = Array.from(list.querySelectorAll<HTMLElement>('.fq-row'));
+    rows.forEach((row) =>
+      row.querySelector('.fq-btn')?.addEventListener('click', () => {
+        const open = !row.classList.contains('is-open');
+        rows.forEach((r) => {
+          r.classList.toggle('is-open', r === row && open);
+          r.querySelector('.fq-btn')?.setAttribute('aria-expanded', String(r === row && open));
+        });
+      }),
+    );
+  });
+</script>

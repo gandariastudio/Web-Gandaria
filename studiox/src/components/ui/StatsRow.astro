@@ -1,0 +1,58 @@
+---
+import NumberFlow from '@/components/ui/NumberFlow.astro';
+import { stats } from '@/data/home';
+
+const COLUMNS = 20;
+const TOTAL = 100;
+---
+
+<div class="mx-auto flex w-full max-w-[1600px] flex-col md:flex-row">
+  {
+    stats.map((s) => (
+      <div class="flex min-h-[170px] flex-1 flex-col justify-between rounded-[4px] line-t pt-7 pb-11 md:min-h-[200px] md:line-l md:px-5 md:pt-1 md:pb-0 xl:min-h-[240px] xl:px-8">
+        <div class="pixel-stat flex w-full flex-col gap-7" data-delay={s.delay} data-pixel-stat>
+          <div class="type-label flex items-baseline justify-between gap-4 tracking-[0.01em]" data-ps-fade>
+            <span class="tabular-nums">({s.index})</span>
+            <span class="text-muted">{s.meta}</span>
+          </div>
+          <p class="pixel-stat__value flex items-start text-cobalt tabular-nums">
+            <NumberFlow value={s.value} duration={1.9} delay={s.delay + 0.12} />
+            <span class="ml-[0.06em] inline-block origin-bottom-left text-[0.5em] leading-[1.2] tracking-[-0.02em]" aria-hidden="true" data-ps-suffix>
+              {s.suffix}
+            </span>
+          </p>
+          <div class="grid w-full max-w-[220px] grid-cols-20 gap-[3px]" aria-hidden="true">
+            {Array.from({ length: TOTAL }, (_, k) => (
+              <span class="block aspect-square bg-line" data-ps-cell={k < s.filled ? '1' : '0'} data-col={k % COLUMNS} data-row={Math.floor(k / COLUMNS)} />
+            ))}
+          </div>
+          <p class="max-w-[300px] text-[15px] leading-[1.45] tracking-[0.01em] text-muted" data-ps-fade>{s.label}</p>
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<style>
+  .pixel-stat__value :global(number-flow) {
+    --number-flow-char-height: 1em;
+    line-height: 1;
+    margin-block: -0.25em;
+  }
+  .pixel-stat__value {
+    margin: -0.07em 0;
+    font-size: 104px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  @media (width >= 810px) {
+    .pixel-stat__value {
+      font-size: 80px;
+    }
+  }
+  @media (width >= 1440px) {
+    .pixel-stat__value {
+      font-size: 136px;
+    }
+  }
+</style>

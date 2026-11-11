@@ -1,0 +1,33 @@
+---
+import CmsImage from '@/components/ui/CmsImage.astro';
+import type { ProjectRow } from '@/lib/db/schema';
+
+interface Props {
+  project: ProjectRow;
+}
+
+const { project } = Astro.props;
+const p = project;
+---
+
+<a href={`/work/${project.slug}`} class="block w-full" data-project-card>
+  <div class="project-media relative h-[460px] w-full overflow-hidden rounded-[10px] bg-[#f3f3f5] md:h-[440px] xl:h-[740px]" data-cursor-zone-target data-img-reveal>
+    <div class="absolute inset-0" data-parallax-img>
+      <CmsImage image={p.cover} widths={[700, 1100, 1400]} sizes="(min-width: 810px) 50vw, 100vw" class="size-full object-cover" />
+    </div>
+    <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(#0000_40%,#000000ad_100%)]"></div>
+    <div
+      class="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-start gap-3 px-[18px] pb-[18px] text-paper md:px-5 md:pb-5 xl:flex-row xl:items-end xl:gap-8 xl:px-7 xl:pb-7">
+      <div class="flex flex-1 flex-col gap-2">
+        <h3 class="type-h3">{p.title}</h3>
+        <p class="type-small max-w-[420px] text-paper/78 [text-wrap:pretty]">{p.summary}</p>
+      </div>
+      <div class="type-label flex w-max shrink-0 flex-col items-start gap-1.5 xl:items-end">
+        <p class="flex items-center gap-1.5 text-paper/70">
+          <span>{p.sector}</span><span>·</span><span>{p.year}</span>
+        </p>
+        <p class="whitespace-nowrap">{p.services}</p>
+      </div>
+    </div>
+  </div>
+</a>
