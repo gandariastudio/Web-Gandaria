@@ -51,7 +51,16 @@ export default defineConfig({
   ],
 
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [
+      tailwindcss(),
+      // sanitize-html is CommonJS but requires the ESM-only htmlparser2. Vercel's runtime has no
+      // require(esm), so production builds bundle both and resolve that require at build time.
+      // Dev skips this: Vite's dev runner cannot run inlined CommonJS, and local Node handles it.
+      {
+        name: 'bundle-sanitize-html',
+        config: (_, { command }) => (command === 'build' ? { ssr: { noExternal: ['sanitize-html', 'htmlparser2'] } } : undefined),
+      },
+    ],
     // PGlite is the local-only fallback database. Keep it out of the server bundle.
     ssr: { external: ['@electric-sql/pglite'] },
     optimizeDeps: { exclude: ['@electric-sql/pglite'] },

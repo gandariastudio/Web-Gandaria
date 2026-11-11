@@ -20,6 +20,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   if (isAdminPath(pathname)) {
     // AUTH: /admin is intentionally open for now. Add the password check here, before next().
+    // Admin pages do not use the settings, but the 500 page does if an admin page fails.
+    context.locals.settings = DEFAULT_SETTINGS;
     const response = await next();
     setHeader(response, 'Cache-Control', 'no-store');
     setHeader(response, 'X-Robots-Tag', 'noindex, nofollow');
