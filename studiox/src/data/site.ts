@@ -7,6 +7,7 @@ export const MARK_RECTS = [
 ] as const;
 
 export const NAV_LINKS = [
+  { label: 'Home', href: '/' },
   { label: 'Services', href: '/services' },
   { label: 'Work', href: '/work' },
   { label: 'Studio', href: '/about' },

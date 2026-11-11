@@ -31,22 +31,22 @@ export const studioFacts = [
 
 export const steps = [
   {
-    label: '01 — Weeks 1–2',
+    label: '01',
     title: 'Discover',
     text: 'We start with workshops and an audit of what you already have, until we can say in one sentence what you want to be known for.',
   },
   {
-    label: '02 — Weeks 3–8',
+    label: '02',
     title: 'Design',
     text: 'Strategy turns into identity, language and interface, and you see it every week while it’s still easy to change.',
   },
   {
-    label: '03 — Weeks 9–10',
+    label: '03',
     title: 'Launch',
     text: 'Build, test and go live, with guidelines and training so your team can keep the brand sharp long after we leave.',
   },
   {
-    label: '04 — Ongoing',
+    label: '04',
     title: 'Evolve',
     text: 'We stay on after launch to check the numbers with your team and fix whatever isn’t pulling its weight.',
   },

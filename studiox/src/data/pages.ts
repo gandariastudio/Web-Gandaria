@@ -30,10 +30,10 @@ export const servicesPage = {
     intro: 'Four disciplines under one senior team, so the people who shape the idea also design the identity and build the website.',
   },
   steps: [
-    { label: '01 — Weeks 1–2', title: 'Discover', text: 'Workshops, research and audits to understand your audience and what you want to be known for.' },
-    { label: '02 — Weeks 3–8', title: 'Design', text: 'Strategy turns into identity, language and interface, and you see it every week while it’s still easy to change.' },
-    { label: '03 — Weeks 9–10', title: 'Launch', text: 'Build, test and go live, with guidelines and training so your team can run it.' },
-    { label: '04 — Ongoing', title: 'Evolve', text: 'We stay on after launch to check the numbers with you and fix what needs fixing.' },
+    { label: '01', title: 'Discover', text: 'Workshops, research and audits to understand your audience and what you want to be known for.' },
+    { label: '02', title: 'Design', text: 'Strategy turns into identity, language and interface, and you see it every week while it’s still easy to change.' },
+    { label: '03', title: 'Launch', text: 'Build, test and go live, with guidelines and training so your team can run it.' },
+    { label: '04', title: 'Evolve', text: 'We stay on after launch to check the numbers with you and fix what needs fixing.' },
   ],
 };
 
