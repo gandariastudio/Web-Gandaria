@@ -15,7 +15,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "db:seed": "tsx scripts/db-seed.ts",
-    "db:setup": "tsx scripts/setup-neon.ts"
+    "db:setup": "tsx scripts/setup-neon.ts",
+    "icons": "tsx scripts/make-icons.ts"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",

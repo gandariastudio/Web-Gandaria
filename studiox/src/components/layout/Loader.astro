@@ -36,33 +36,31 @@ import LogoMark from '@/components/ui/LogoMark.astro';
   :global(html.no-loader) .loader {
     display: none;
   }
-  .loader__mark :global(rect) {
-    animation-duration: 0.25s;
-    animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
-    animation-fill-mode: both;
+  /* Build the mark in three beats: ring, smile, dot (about 0.8s, read by runLoader). */
+  .loader__mark :global(.mark-ring),
+  .loader__mark :global(.mark-smile),
+  .loader__mark :global(.mark-dot) {
+    animation: 0.3s cubic-bezier(0.34, 1.4, 0.64, 1) both;
   }
-  .loader__mark :global(rect:nth-child(odd)) {
-    animation-name: mark-x;
+  .loader__mark :global(.mark-ring) {
+    animation-name: mark-pop;
   }
-  .loader__mark :global(rect:nth-child(even)) {
-    animation-name: mark-y;
+  .loader__mark :global(.mark-smile) {
+    animation-name: mark-stretch;
+    animation-delay: 0.22s;
   }
-  .loader__mark :global(rect:nth-child(2)),
-  .loader__mark :global(rect:nth-child(3)) {
-    animation-delay: 0.25s;
+  .loader__mark :global(.mark-dot) {
+    animation-name: mark-pop;
+    animation-delay: 0.45s;
   }
-  .loader__mark :global(rect:nth-child(4)),
-  .loader__mark :global(rect:nth-child(5)) {
-    animation-delay: 0.5s;
-  }
-  @keyframes mark-x {
+  @keyframes mark-pop {
     from {
-      transform: scaleX(0);
+      transform: scale(0);
     }
   }
-  @keyframes mark-y {
+  @keyframes mark-stretch {
     from {
-      transform: scaleY(0);
+      transform: scaleX(0);
     }
   }
 

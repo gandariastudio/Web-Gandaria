@@ -1,15 +1,10 @@
 import gsap from 'gsap';
-import { MARK_RECTS } from '@/data/site';
 import { ease } from './lib/ease';
 import { isDarkAt, prefersReducedMotion, visible } from './lib/dom';
 import { getLenis, lockScroll, scrollToTop } from './smooth-scroll';
 
 const PT_KEY = 'gandaria-pt';
 const LOADER_KEY = 'gandaria-loader';
-const ORIGIN: Record<string, string> = { right: '100% 50%', left: '0% 50%', top: '50% 0%' };
-
-const prepMark = (root: ParentNode) =>
-  root.querySelectorAll('rect').forEach((rect, i) => gsap.set(rect, { transformOrigin: ORIGIN[MARK_RECTS[i][4]] }));
 
 export function initAdaptiveHeader() {
   const html = document.documentElement;
@@ -49,23 +44,22 @@ export function initAdaptiveHeader() {
   setTimeout(queue, 2000);
 }
 
+/** Hovering the logo makes the dot hop and the smile stretch. */
 export function initMarkHover() {
   document.querySelectorAll<HTMLElement>('[data-logo]').forEach((link) => {
+    const dot = link.querySelector('[data-mark] .mark-dot');
+    const smile = link.querySelector('[data-mark] .mark-smile');
+    if (!dot || !smile) return;
     let busy = false;
-    prepMark(link);
     link.addEventListener('mouseenter', () => {
       if (busy) return;
       busy = true;
-      link.querySelectorAll('[data-mark] rect').forEach((rect, i) => {
-        const [, , , , , axis, step] = MARK_RECTS[i];
-        if (step === 0) return;
-        const prop = axis === 'scaleX' ? 'scaleX' : 'scaleY';
-        gsap
-          .timeline({ delay: ((2 - step) * 150) / 1000 })
-          .to(rect, { [prop]: 0, duration: 0.15, ease: ease.mark })
-          .to(rect, { [prop]: 1, duration: 0.15, ease: ease.mark }, `+=${((step - 1) * 150) / 1000}`);
-      });
-      gsap.delayedCall(0.7, () => (busy = false));
+      gsap
+        .timeline({ onComplete: () => (busy = false) })
+        .to(dot, { y: -150, duration: 0.22, ease: 'power2.out' })
+        .to(smile, { scaleX: 1.12, duration: 0.22, ease: 'power2.out' }, 0)
+        .to(dot, { y: 0, duration: 0.45, ease: 'bounce.out' })
+        .to(smile, { scaleX: 1, duration: 0.45, ease: 'elastic.out(1, 0.5)' }, '<');
     });
   });
 }
@@ -81,7 +75,7 @@ export function runLoader(): Promise<boolean> {
   sessionStorage.setItem(LOADER_KEY, '1');
   loader.style.animation = 'none';
   lockScroll(true);
-  const built = mark.querySelector('rect')?.getAnimations()[0]?.currentTime;
+  const built = mark.querySelector('.mark-ring')?.getAnimations()[0]?.currentTime;
   const elapsed = Math.min(0.9, typeof built === 'number' ? built / 1000 : 0);
   return new Promise((resolve) => {
     gsap

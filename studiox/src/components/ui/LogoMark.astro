@@ -1,6 +1,6 @@
 ---
 import { cn } from '@/utils/cn';
-import { MARK_RECTS } from '@/data/site';
+import { MARK_PATHS } from '@/data/site';
 
 interface Props {
   class?: string;
@@ -9,10 +9,17 @@ interface Props {
 const { class: className } = Astro.props;
 ---
 
-<svg class={cn('overflow-visible', className)} viewBox="0 0 24 24" aria-hidden="true" data-mark>
-  {
-    MARK_RECTS.map(([x, y, w, h, origin]) => (
-      <rect x={x} y={y} width={w} height={h} fill="currentColor" style={`transform-origin:${origin};transform-box:fill-box`} />
-    ))
-  }
+<!-- The Gandaria mark: ring, smile and dot. Fills follow currentColor; scripts/site.ts animates the parts. -->
+<svg class={cn('overflow-visible', className)} viewBox="0 0 829 1005" aria-hidden="true" data-mark>
+  <path class="mark-ring" d={MARK_PATHS.ring} fill="currentColor" fill-rule="evenodd" />
+  <path class="mark-smile" d={MARK_PATHS.smile} fill="currentColor" />
+  <circle class="mark-dot" cx={MARK_PATHS.dot.cx} cy={MARK_PATHS.dot.cy} r={MARK_PATHS.dot.r} fill="currentColor" />
 </svg>
+
+<style>
+  [data-mark] path,
+  [data-mark] circle {
+    transform-box: fill-box;
+    transform-origin: 50% 50%;
+  }
+</style>

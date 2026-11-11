@@ -42,7 +42,7 @@ npm run db:generate  # after editing src/lib/db/schema.ts, generate a new SQL mi
 - `src/lib/db/queries.ts` — public reads (published rows only, display order) that return the shapes components render. `src/lib/db/admin.ts` — admin lists, `findById`, `save*` (id `null` creates), `removeRow`, `move` (swaps `sort_order`). `seed.ts` + `seed-data.ts` hold the sample content.
 - Migrations live in `drizzle/`. Changing the schema means `npm run db:generate`, then `db:migrate` against each Neon branch.
 
-Code-only copy (hero lines, section titles, process steps, principles, stats, zoom images) stays in `src/data/home.ts` and `src/data/pages.ts`; `src/data/site.ts` keeps nav/footer links and `MARK_RECTS` (logo-mark geometry used by `LogoMark.astro` and `scripts/site.ts`).
+Code-only copy (hero lines, section titles, process steps, principles, stats, zoom images) stays in `src/data/home.ts` and `src/data/pages.ts`; `src/data/site.ts` keeps nav/footer links and `MARK_PATHS` (the Gandaria logo mark: ring, smile and dot, drawn by `LogoMark.astro`, animated in `Loader.astro` and `scripts/site.ts#initMarkHover`; the favicons are generated from it by `scripts/make-icons.ts`).
 
 ### Admin (`/admin`)
 
