@@ -1,55 +1,92 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro';
+import Icon, { type IconName } from '@/components/admin/Icon.astro';
 import { getDb } from '@/lib/db';
-import { counts } from '@/lib/db/admin';
+import { counts, recentlyEdited } from '@/lib/db/admin';
 import { getSettings } from '@/lib/db/queries';
+import { relativeTime, thumb } from '@/lib/cms/admin-page';
 
 const db = await getDb();
-const [n, settings] = await Promise.all([counts(db), getSettings(db)]);
-const sections = [
-  { label: 'Projects', href: '/admin/projects', count: n.projects, note: 'Case studies on /work' },
-  { label: 'Journal', href: '/admin/journal', count: n.posts, note: 'Articles on /journal' },
-  { label: 'Services', href: '/admin/services', count: n.services, note: 'Home and /services' },
-  { label: 'Testimonials', href: '/admin/testimonials', count: n.testimonials, note: 'Quote deck on the home page' },
-  { label: 'Clients', href: '/admin/clients', count: n.clients, note: 'Logo wall on home and /about' },
-  { label: 'FAQ', href: '/admin/faqs', count: n.faqs, note: 'Home and /services' },
+const [n, recent, settings] = await Promise.all([counts(db), recentlyEdited(db, 6), getSettings(db)]);
+const tiles: { label: string; href: string; count: number; icon: IconName }[] = [
+  { label: 'Projects', href: '/admin/projects', count: n.projects, icon: 'projects' },
+  { label: 'Articles', href: '/admin/journal', count: n.posts, icon: 'journal' },
+  { label: 'Services', href: '/admin/services', count: n.services, icon: 'services' },
+  { label: 'Testimonials', href: '/admin/testimonials', count: n.testimonials, icon: 'testimonials' },
+  { label: 'Clients', href: '/admin/clients', count: n.clients, icon: 'clients' },
+  { label: 'Questions', href: '/admin/faqs', count: n.faqs, icon: 'faq' },
 ];
+const kindIcon: Record<string, IconName> = { Project: 'projects', Article: 'journal', Service: 'services', Testimonial: 'testimonials', Client: 'clients', FAQ: 'faq' };
 ---
 
 <AdminLayout title="Dashboard">
-  <div class="a-head">
+  <header class="a-head">
     <div>
-      <h1 class="a-title">Dashboard</h1>
-      <p class="a-sub">Edit the content of gandariastudio.com. Saved changes reach the public site within about a minute.</p>
+      <h1 class="a-title">Welcome back</h1>
+      <p class="a-sub">Edit what visitors see on gandariastudio.com. Saved changes appear on the site within a minute.</p>
     </div>
-    <div class="flex gap-2">
-      <a class="a-btn a-btn--ghost" href="/admin/journal/new">New article</a>
-      <a class="a-btn" href="/admin/projects/new">New project</a>
+    <div class="a-actions">
+      <a class="a-btn a-btn--ghost" href="/admin/journal/new"><Icon name="plus" size={16} />New article</a>
+      <a class="a-btn" href="/admin/projects/new"><Icon name="plus" size={16} />New project</a>
     </div>
-  </div>
+  </header>
 
-  <div class="a-grid">
+  <div class="a-tiles">
     {
-      sections.map((s) => (
-        <a href={s.href} class="a-card gap-1.5! transition-colors hover:border-[var(--color-cobalt-line)]">
-          <span class="text-[13px] text-muted">{s.label}</span>
-          <span class="text-[34px] leading-none tracking-[-0.03em]">{s.count}</span>
-          <span class="a-hint">{s.note}</span>
+      tiles.map((t) => (
+        <a href={t.href} class="a-tile">
+          <span class="a-tile-icon">
+            <Icon name={t.icon} size={17} />
+          </span>
+          <span>
+            <span class="a-tile-count block">{t.count}</span>
+            <span class="a-tile-label block">{t.label}</span>
+          </span>
         </a>
       ))
     }
   </div>
 
+  <h2 class="a-section-title">Recently edited</h2>
+  <section class="a-card a-card--list">
+    {
+      recent.length === 0 ? (
+        <p class="a-hint">Nothing edited yet.</p>
+      ) : (
+        recent.map((r) => (
+          <a href={r.href} class="a-recent">
+            {r.image ? (
+              <span class="a-thumb">
+                <img src={thumb(r.image, 120)} alt="" loading="lazy" />
+              </span>
+            ) : (
+              <span class="a-thumb is-icon">
+                <Icon name={kindIcon[r.kind] ?? 'edit'} size={18} />
+              </span>
+            )}
+            <span class="a-row-main">
+              <span class="a-row-title-plain">{r.title}</span>
+              <span class="a-row-meta">
+                {r.kind} · {relativeTime(r.updatedAt)}
+              </span>
+            </span>
+            <Icon name="edit" size={16} class="a-faint" />
+          </a>
+        ))
+      )
+    }
+  </section>
+
+  <h2 class="a-section-title">Site details</h2>
   <section class="a-card">
-    <h2>Site settings</h2>
-    <dl class="grid grid-cols-[140px_1fr] gap-y-2 text-[14px]">
-      <dt class="text-muted">Email</dt>
+    <dl class="a-dl">
+      <dt>Contact email</dt>
       <dd>{settings.email}</dd>
-      <dt class="text-muted">Booking from</dt>
+      <dt>Booking from</dt>
       <dd>{settings.bookingFrom}</dd>
-      <dt class="text-muted">Social links</dt>
-      <dd>{settings.socialLinks.map((l) => l.label).join(', ') || '—'}</dd>
+      <dt>Social links</dt>
+      <dd>{settings.socialLinks.map((l) => l.label).join(', ') || 'None yet'}</dd>
     </dl>
-    <a class="a-btn a-btn--ghost w-max" href="/admin/settings">Edit settings</a>
+    <a class="a-btn a-btn--ghost a-btn--sm w-max" href="/admin/settings"><Icon name="settings" size={15} />Edit site details</a>
   </section>
 </AdminLayout>

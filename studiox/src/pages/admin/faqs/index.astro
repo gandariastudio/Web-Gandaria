@@ -1,20 +1,23 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro';
-import AdminList from '@/components/admin/AdminList.astro';
+import ListPage from '@/components/admin/ListPage.astro';
+import ItemRows from '@/components/admin/ItemRows.astro';
 import { getDb } from '@/lib/db';
 import { adminListFaqs } from '@/lib/db/admin';
-import { handleListPost, excerpt } from '@/lib/cms/admin-page';
+import { excerpt, handleListPost } from '@/lib/cms/admin-page';
 
 const db = await getDb();
-const redirect = await handleListPost(Astro, db, 'faqs');
-if (redirect) return redirect;
-const rows = (await adminListFaqs(db)).map((f) => ({ id: f.id, title: f.question, meta: excerpt(f.answer) }));
+const response = await handleListPost(Astro, db, 'faqs');
+if (response) return response;
+const items = (await adminListFaqs(db)).map((f) => ({
+  id: f.id,
+  title: f.question,
+  meta: excerpt(f.answer, 110),
+}));
 ---
 
 <AdminLayout title="FAQ">
-  <div class="a-head">
-    <h1 class="a-title">FAQ</h1>
-    <a class="a-btn" href="/admin/faqs/new">New question</a>
-  </div>
-  <AdminList rows={rows} base="/admin/faqs" noun="question" ordered />
+  <ListPage title="FAQ" description="Questions on the home page and /services, in this order." newHref="/admin/faqs/new" newLabel="New question" count={items.length} noun="question" sortable>
+    <ItemRows items={items} base="/admin/faqs" noun="question" sortable />
+  </ListPage>
 </AdminLayout>

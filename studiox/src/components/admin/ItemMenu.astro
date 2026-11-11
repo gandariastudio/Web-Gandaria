@@ -1,0 +1,58 @@
+---
+import Icon from './Icon.astro';
+import type { ListItem } from './types';
+
+interface Props {
+  item: ListItem;
+  base: string;
+  noun: string;
+  sortable: boolean;
+  first: boolean;
+  last: boolean;
+}
+
+const { item, base, noun, sortable, first, last } = Astro.props;
+---
+
+<details class="a-menu" data-menu>
+  <summary class="a-icon-btn" aria-label={`Actions for ${item.title}`}><Icon name="more" size={18} /></summary>
+  <div class="a-menu-pop">
+    <a class="a-menu-item" href={`${base}/${item.id}`}><Icon name="edit" size={16} />Edit {noun}</a>
+    {
+      item.viewHref && (
+        <a class="a-menu-item" href={item.viewHref} target="_blank" rel="noopener">
+          <Icon name="external" size={16} />
+          View on site
+        </a>
+      )
+    }
+    {
+      sortable && (
+        <form method="post">
+          <input type="hidden" name="id" value={item.id} />
+          {!first && (
+            <button class="a-menu-item" name="intent" value="up">
+              <Icon name="up" size={16} />
+              Move up
+            </button>
+          )}
+          {!last && (
+            <button class="a-menu-item" name="intent" value="down">
+              <Icon name="down" size={16} />
+              Move down
+            </button>
+          )}
+        </form>
+      )
+    }
+    <div class="a-menu-sep"></div>
+    <form method="post">
+      <input type="hidden" name="id" value={item.id} />
+      <input type="hidden" name="intent" value="delete" />
+      <button type="button" class="a-menu-item a-menu-item--danger" data-countdown-delete data-label={`Delete ${noun}`}>
+        <Icon name="trash" size={16} />
+        <span data-countdown-text>Delete {noun}</span>
+      </button>
+    </form>
+  </div>
+</details>

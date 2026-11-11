@@ -1,5 +1,6 @@
 ---
 import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME } from 'astro:env/server';
+import Icon from './Icon.astro';
 import type { CmsImage } from '@/lib/db/schema';
 import { imageSrc } from '@/lib/cms/cloudinary';
 
@@ -10,13 +11,17 @@ interface Props {
   /** Cloudinary folder under gandaria/, e.g. "projects". */
   folder: string;
   errors?: Record<string, string>;
+  /** e.g. "2400 × 1350" */
+  recommended?: string;
   hint?: string;
+  /** Show the image without cropping (logos). */
+  contain?: boolean;
 }
 
-const { name, label, value, folder, errors = {}, hint } = Astro.props;
+const { name, label, value, folder, errors = {}, recommended, hint, contain = false } = Astro.props;
 const ready = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
 const source = value && (value.publicId || value.url) ? { publicId: value.publicId ?? null, url: value.url ?? null, width: value.width, height: value.height } : null;
-const preview = source ? imageSrc({ ...source, width: source.width ?? 0, height: source.height ?? 0, alt: '' }, CLOUDINARY_CLOUD_NAME, 640) : '';
+const preview = source ? imageSrc({ ...source, width: source.width ?? 0, height: source.height ?? 0, alt: '' }, CLOUDINARY_CLOUD_NAME, 960) : '';
 const imageError = errors[`${name}.width`] ?? errors[`${name}.height`] ?? errors[name];
 const altError = errors[`${name}.alt`];
 const id = `f-${name.replace(/[^a-z0-9]+/gi, '-')}`;
@@ -24,43 +29,115 @@ const id = `f-${name.replace(/[^a-z0-9]+/gi, '-')}`;
 
 <div class:list={['a-field', (imageError || altError) && 'has-error']} data-image-field data-folder={folder}>
   <span class="a-label">{label}</span>
-  <div class="flex flex-wrap items-start gap-4">
-    <div class="image-preview" data-preview-box>
-      {preview ? <img src={preview} alt="" data-preview /> : <span class="a-hint" data-preview-empty>No image yet</span>}
-    </div>
-    <div class="flex min-w-[220px] flex-1 flex-col gap-2.5">
-      <input type="hidden" name={name} value={source ? JSON.stringify(source) : ''} data-image-value />
-      <div class="flex items-center gap-3">
-        <label class:list={['a-btn a-btn--ghost a-btn--sm', !ready && 'pointer-events-none opacity-50']}>
-          {source ? 'Replace image' : 'Upload image'}
-          <input type="file" accept="image/*" class="sr-only" data-image-file disabled={!ready} />
-        </label>
-        <span class="a-hint" data-image-status>{source?.width ? `${source.width} × ${source.height}` : ''}</span>
-      </div>
-      {!ready && <p class="a-hint">Upload is off until Cloudinary is configured.</p>}
-      {hint && <p class="a-hint">{hint}</p>}
-      {imageError && <p class="a-error">{imageError}</p>}
-      <label class="a-label mt-1" for={`${id}-alt`}>Alt text</label>
-      <input id={`${id}-alt`} name={`${name}_alt`} value={value?.alt ?? ''} class="a-input" placeholder="What the image shows" />
-      {altError && <p class="a-error">{altError}</p>}
-    </div>
-  </div>
+  <label class:list={['a-drop', !ready && 'is-off', preview && 'has-image', contain && 'is-contain']} data-drop>
+    <input type="file" accept="image/*" class="sr-only" data-image-file disabled={!ready} />
+    <span class="a-drop-preview" data-preview-box>{preview && <img src={preview} alt="" data-preview />}</span>
+    <span class="a-drop-cta">
+      <span class="a-drop-icon"><Icon name={preview ? 'image' : 'upload'} size={18} /></span>
+      <span class="a-drop-text" data-drop-text>
+        {ready ? (preview ? 'Drop a new image or click to replace' : 'Drop an image here or click to upload') : 'Upload is off until Cloudinary is connected'}
+      </span>
+      <span class="a-hint" data-image-status>
+        {source?.width ? `Current ${source.width} × ${source.height}` : ''}{recommended ? `${source?.width ? ' · ' : ''}Recommended ${recommended}` : ''}
+      </span>
+    </span>
+    <span class="a-drop-progress" aria-hidden="true"><span data-progress></span></span>
+  </label>
+  <input type="hidden" name={name} value={source ? JSON.stringify(source) : ''} data-image-value />
+  {hint && <p class="a-hint">{hint}</p>}
+  {imageError && <p class="a-error">{imageError}</p>}
+  <label class="a-label a-label--spaced" for={`${id}-alt`}>Describe the image <span class="a-req">*</span></label>
+  <input id={`${id}-alt`} name={`${name}_alt`} value={value?.alt ?? ''} class="a-input" placeholder="What does the image show? Read aloud by screen readers." />
+  {altError && <p class="a-error">{altError}</p>}
 </div>
 
 <style>
-  .image-preview {
-    display: grid;
-    place-items: center;
-    width: 180px;
-    height: 120px;
+  .a-drop {
+    position: relative;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
-    border-radius: 6px;
-    background: var(--color-fog);
-    box-shadow: inset 0 0 0 1px var(--color-line);
+    border: 1.5px dashed var(--a-line-strong);
+    border-radius: 16px;
+    background: var(--a-softer);
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease;
   }
-  .image-preview :global(img) {
+  .a-drop:hover,
+  .a-drop.is-over {
+    border-color: var(--a-text);
+    background: var(--a-soft);
+  }
+  .a-drop.is-off {
+    cursor: not-allowed;
+  }
+  .a-drop:has(input:focus-visible) {
+    outline: 2px solid var(--a-text);
+    outline-offset: 2px;
+  }
+  .a-drop-preview {
+    display: none;
+  }
+  .a-drop.has-image .a-drop-preview {
+    display: block;
+    height: 240px;
+    background: var(--a-soft);
+  }
+  .a-drop-preview :global(img) {
     width: 100%;
     height: 100%;
+    object-fit: cover;
+  }
+  .a-drop.is-contain .a-drop-preview :global(img) {
     object-fit: contain;
+    padding: 24px;
+  }
+  .a-drop-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 28px 20px;
+    text-align: center;
+  }
+  .a-drop.has-image .a-drop-cta {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 4px 10px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--a-line);
+    background: var(--a-bg);
+  }
+  .a-drop-icon {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--a-bg);
+    box-shadow: inset 0 0 0 1px var(--a-line);
+  }
+  .a-drop.has-image .a-drop-icon {
+    width: 28px;
+    height: 28px;
+  }
+  .a-drop-text {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .a-drop-progress {
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 3px;
+  }
+  .a-drop-progress span {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: var(--a-text);
+    transition: width 0.2s ease;
   }
 </style>

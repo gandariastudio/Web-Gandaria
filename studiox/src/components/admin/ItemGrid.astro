@@ -1,0 +1,45 @@
+---
+import Icon from './Icon.astro';
+import ItemMenu from './ItemMenu.astro';
+import { searchText, type ListItem } from './types';
+
+interface Props {
+  items: ListItem[];
+  /** e.g. /admin/projects */
+  base: string;
+  noun: string;
+  sortable?: boolean;
+  /** logos: show the whole image instead of cropping */
+  contain?: boolean;
+}
+
+const { items, base, noun, sortable = false, contain = false } = Astro.props;
+---
+
+<div class="a-grid" data-list data-sortable={sortable ? base : undefined}>
+  {
+    items.map((item, i) => (
+      <article class="a-item" data-item data-id={item.id} data-search={searchText(item)}>
+        {sortable && (
+          <button type="button" class="a-grip" data-grip aria-label={`Drag to reorder ${item.title}`} title="Drag to reorder">
+            <Icon name="grip" size={16} />
+          </button>
+        )}
+        <span class:list={['a-item-media', contain && 'is-logo']} aria-hidden="true">
+          {item.image ? <img src={item.image} alt="" loading="lazy" /> : null}
+        </span>
+        <div class="a-item-body">
+          {item.kicker && <span class="a-item-kicker">{item.kicker}</span>}
+          <a class="a-item-title" href={`${base}/${item.id}`}>
+            {item.title}
+          </a>
+          {item.meta && <span class="a-hint">{item.meta}</span>}
+        </div>
+        <div class="a-item-foot">
+          {item.published === undefined ? <span /> : <span class:list={['a-status', item.published && 'is-live']}>{item.published ? 'Published' : 'Draft'}</span>}
+          <ItemMenu item={item} base={base} noun={noun} sortable={sortable} first={i === 0} last={i === items.length - 1} />
+        </div>
+      </article>
+    ))
+  }
+</div>

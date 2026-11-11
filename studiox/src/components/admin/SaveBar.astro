@@ -1,0 +1,25 @@
+---
+import Toggle from './Toggle.astro';
+
+interface Props {
+  /** Show a Published switch bound to the form's `published` field. */
+  published?: boolean;
+  saveLabel: string;
+  isNew: boolean;
+  /** Where Discard goes (reloads the saved version). */
+  resetHref: string;
+}
+
+const { published, saveLabel, isNew, resetHref } = Astro.props;
+---
+
+<div class="a-savebar" data-savebar>
+  <div class="a-savebar-left">
+    {published !== undefined && <Toggle name="published" label="Published" checked={published} />}
+    <span class="a-dirty" data-dirty-label>{isNew ? 'Not saved yet' : 'All changes saved'}</span>
+  </div>
+  <div class="a-savebar-actions">
+    <a class="a-btn a-btn--ghost" href={resetHref} data-discard hidden>Discard</a>
+    <button type="submit" class="a-btn" data-save>{saveLabel}</button>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+---
+interface Props {
+  name: string;
+  label: string;
+  checked?: boolean;
+}
+
+const { name, label, checked = false } = Astro.props;
+---
+
+<label class="a-switch">
+  <input type="checkbox" name={name} checked={checked} role="switch" />
+  <span class="a-switch-track" aria-hidden="true"></span>
+  <span>{label}</span>
+</label>

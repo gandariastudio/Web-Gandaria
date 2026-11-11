@@ -1,0 +1,54 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  newHref: string;
+  newLabel: string;
+  count: number;
+  noun: string;
+  sortable?: boolean;
+}
+
+const { title, description, newHref, newLabel, count, noun, sortable = false } = Astro.props;
+const plural = count === 1 ? noun : `${noun}s`;
+---
+
+<header class="a-head">
+  <div>
+    <h1 class="a-title">{title}</h1>
+    <p class="a-sub">{description}</p>
+  </div>
+  <a class="a-btn" href={newHref}><Icon name="plus" size={16} />{newLabel}</a>
+</header>
+
+{
+  count === 0 ? (
+    <div class="a-empty">
+      <p>No {plural} yet.</p>
+      <a class="a-btn a-btn--ghost" href={newHref}>
+        <Icon name="plus" size={16} />
+        {newLabel}
+      </a>
+    </div>
+  ) : (
+    <>
+      <div class="a-toolbar">
+        <label class="a-search">
+          <Icon name="search" size={16} />
+          <span class="sr-only">Search {plural}</span>
+          <input type="search" placeholder={`Search ${plural}`} data-list-search />
+        </label>
+        <span class="a-count" data-list-count data-noun={noun}>
+          {count} {plural}
+          {sortable && ' · drag to reorder'}
+        </span>
+      </div>
+      <slot />
+      <p class="a-empty" hidden data-list-empty>
+        No {plural} match your search.
+      </p>
+    </>
+  )
+}

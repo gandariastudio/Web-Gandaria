@@ -1,14 +1,16 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import EditHeader from '@/components/admin/EditHeader.astro';
+import FormCard from '@/components/admin/FormCard.astro';
 import Field from '@/components/admin/Field.astro';
-import Checkbox from '@/components/admin/Checkbox.astro';
 import ImageField from '@/components/admin/ImageField.astro';
 import RichTextField from '@/components/admin/RichTextField.astro';
+import SaveBar from '@/components/admin/SaveBar.astro';
+import DangerZone from '@/components/admin/DangerZone.astro';
 import { getDb } from '@/lib/db';
 import { findById, savePost, slugTaken } from '@/lib/db/admin';
 import { postSchema, readers, validate, type FieldErrors } from '@/lib/cms/validation';
-import { parseId, saveErrorMessage, toDateInput } from '@/lib/cms/admin-page';
+import { parseId, relativeTime, saveErrorMessage, toDateInput } from '@/lib/cms/admin-page';
 import { readTime } from '@/lib/cms/read-time';
 
 const id = parseId(Astro.params.id);
@@ -25,7 +27,7 @@ if (Astro.request.method === 'POST') {
   values = readers.post(await Astro.request.formData());
   const result = validate(postSchema, values);
   if (!result.ok) errors = result.errors;
-  else if (await slugTaken(db, 'posts', result.data.slug, row?.id)) errors = { slug: 'Another article already uses this slug' };
+  else if (await slugTaken(db, 'posts', result.data.slug, row?.id)) errors = { slug: 'Another article already uses this address' };
   else {
     try {
       const savedId = await savePost(db, row?.id ?? null, result.data);
@@ -37,38 +39,42 @@ if (Astro.request.method === 'POST') {
   Astro.response.status = 422;
 }
 const title = row?.title ?? 'New article';
+const self = row ? `/admin/journal/${row.id}` : '/admin/journal/new';
 ---
 
-<AdminLayout title={title}>
-  <EditHeader title={title} back={{ href: '/admin/journal', label: 'Journal' }} viewHref={row?.published ? `/journal/${row.slug}` : undefined} errors={errors} />
+<AdminLayout title={title} width="narrow">
+  <EditHeader
+    title={title}
+    subtitle={row ? `${readTime(row.bodyHtml)} · last edited ${relativeTime(row.updatedAt)}` : 'Write the article, add a cover, then publish when it is ready.'}
+    back={{ href: '/admin/journal', label: 'Journal' }}
+    viewHref={row?.published ? `/journal/${row.slug}` : undefined}
+    errors={errors}
+  />
 
-  <form method="post" class="flex flex-col gap-5" data-edit-form>
-    <section class="a-card">
-      <h2>Basics</h2>
-      <div class="a-grid">
-        <Field name="title" label="Title" value={values.title} error={errors.title} required attrs={{ 'data-slug-source': true }} />
-        <Field name="slug" label="Slug" value={values.slug} error={errors.slug} required hint={row ? 'Changing it changes the page address.' : 'Page address: /journal/slug'} attrs={{ 'data-slug-target': true, 'data-autoslug': String(!row) }} />
+  <form method="post" class="a-form" data-edit-form data-start-dirty={String(Astro.request.method === 'POST')}>
+    <FormCard title="Basics" description="Shown on the article card and at the top of the article.">
+      <Field name="title" label="Title" value={values.title} error={errors.title} required attrs={{ 'data-slug-source': true }} />
+      <Field name="excerpt" type="textarea" rows={2} label="Short description" value={values.excerpt} error={errors.excerpt} required hint="One or two sentences shown under the title and on cards." />
+      <div class="a-fields">
         <Field name="category" label="Category" value={values.category} error={errors.category} required placeholder="Brand" />
         <Field name="publishedAt" type="date" label="Publish date" value={toDateInput(values.publishedAt)} error={errors.publishedAt} required />
       </div>
-      <Field name="excerpt" type="textarea" rows={2} label="Excerpt" value={values.excerpt} error={errors.excerpt} required hint="Shown on cards and under the title." />
-      <Checkbox name="published" label="Published" checked={values.published} hint="Drafts are hidden from the public site." />
-    </section>
+    </FormCard>
 
-    <section class="a-card">
-      <h2>Cover</h2>
-      <ImageField name="cover" label="Cover image" value={values.cover} folder="journal" errors={errors} hint="Recommended 2400 × 1350 (16:9)." />
-    </section>
+    <FormCard title="Cover image">
+      <ImageField name="cover" label="Cover" value={values.cover} folder="journal" errors={errors} recommended="2400 × 1350 (16:9)" />
+    </FormCard>
 
-    <section class="a-card">
-      <h2>Article</h2>
-      <RichTextField name="bodyHtml" label="Body" value={values.bodyHtml} error={errors.bodyHtml} />
-      {row && <p class="a-hint">{readTime(row.bodyHtml)}, worked out from the saved text.</p>}
-    </section>
+    <FormCard title="Article" description="Use Heading for section titles. The reading time is worked out for you.">
+      <RichTextField name="bodyHtml" label="Text" value={values.bodyHtml} error={errors.bodyHtml} />
+    </FormCard>
 
-    <div class="a-savebar">
-      <span class="a-hint">{row ? `Last saved ${row.updatedAt.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}` : 'Not saved yet'}</span>
-      <button type="submit" class="a-btn">{row ? 'Save changes' : 'Create article'}</button>
-    </div>
+    <FormCard title="Page address">
+      <Field name="slug" label="Address" value={values.slug} error={errors.slug} required hint={row ? `gandariastudio.com/journal/${row.slug}. Changing it breaks links that already point here.` : 'Filled in from the title: gandariastudio.com/journal/your-address'} attrs={{ 'data-slug-target': true, 'data-autoslug': String(!row) }} />
+    </FormCard>
+
+    <SaveBar published={values.published} saveLabel={row ? 'Save changes' : 'Create article'} isNew={!row} resetHref={self} />
   </form>
+
+  {row && <DangerZone action="/admin/journal" id={row.id} noun="article" />}
 </AdminLayout>

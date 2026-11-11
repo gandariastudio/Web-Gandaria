@@ -1,12 +1,15 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import EditHeader from '@/components/admin/EditHeader.astro';
+import FormCard from '@/components/admin/FormCard.astro';
 import Field from '@/components/admin/Field.astro';
 import ImageField from '@/components/admin/ImageField.astro';
+import SaveBar from '@/components/admin/SaveBar.astro';
+import DangerZone from '@/components/admin/DangerZone.astro';
 import { getDb } from '@/lib/db';
 import { findById, saveClient } from '@/lib/db/admin';
 import { clientSchema, readers, validate, type FieldErrors } from '@/lib/cms/validation';
-import { parseId, saveErrorMessage } from '@/lib/cms/admin-page';
+import { parseId, relativeTime, saveErrorMessage } from '@/lib/cms/admin-page';
 
 const id = parseId(Astro.params.id);
 if (id === null) return Astro.rewrite('/404');
@@ -32,24 +35,27 @@ if (Astro.request.method === 'POST') {
   Astro.response.status = 422;
 }
 const title = row?.name ?? 'New client';
+const self = row ? `/admin/clients/${row.id}` : '/admin/clients/new';
 ---
 
-<AdminLayout title={title}>
-  <EditHeader title={title} back={{ href: '/admin/clients', label: 'Clients' }} errors={errors} />
+<AdminLayout title={title} width="narrow">
+  <EditHeader title={title} subtitle={row ? `Last edited ${relativeTime(row.updatedAt)}` : 'Add a logo to the logo wall.'} back={{ href: '/admin/clients', label: 'Clients' }} errors={errors} />
 
-  <form method="post" class="flex flex-col gap-5" data-edit-form>
-    <section class="a-card">
-      <h2>Client</h2>
-      <Field name="name" label="Name" value={values.name} error={errors.name} required hint="Used as the logo's accessible label." />
-      <ImageField name="logo" label="Logo" value={values.logo} folder="clients" errors={errors} hint="PNG or SVG on a transparent background. The site shows it as a single-colour shape, so colours in the file are ignored." />
-      <div class="a-grid">
-        <Field name="displayWidth" type="number" label="Display width (px)" value={values.displayWidth} error={errors.displayWidth} required hint="Size on the logo wall, 16–400." />
-        <Field name="displayHeight" type="number" label="Display height (px)" value={values.displayHeight} error={errors.displayHeight} required hint="Keep the logo's own proportions." />
+  <form method="post" class="a-form" data-edit-form data-start-dirty={String(Astro.request.method === 'POST')}>
+    <FormCard title="Client">
+      <Field name="name" label="Client name" value={values.name} error={errors.name} required hint="Read aloud by screen readers in place of the logo." />
+      <ImageField name="logo" label="Logo" value={values.logo} folder="clients" errors={errors} contain recommended="3× the display size, PNG or SVG" hint="Use a logo on a transparent background. The site shows it as a single-colour shape, so colours in the file are ignored." />
+    </FormCard>
+
+    <FormCard title="Size on the logo wall" description="Keep the logo's own proportions.">
+      <div class="a-fields">
+        <Field name="displayWidth" type="number" label="Width (px)" value={values.displayWidth} error={errors.displayWidth} required hint="Between 16 and 400" />
+        <Field name="displayHeight" type="number" label="Height (px)" value={values.displayHeight} error={errors.displayHeight} required hint="Between 16 and 400" />
       </div>
-    </section>
-    <div class="a-savebar">
-      <span class="a-hint">{row ? `Last saved ${row.updatedAt.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}` : 'Not saved yet'}</span>
-      <button type="submit" class="a-btn">{row ? 'Save changes' : 'Create client'}</button>
-    </div>
+    </FormCard>
+
+    <SaveBar saveLabel={row ? 'Save changes' : 'Create client'} isNew={!row} resetHref={self} />
   </form>
+
+  {row && <DangerZone action="/admin/clients" id={row.id} noun="client" />}
 </AdminLayout>

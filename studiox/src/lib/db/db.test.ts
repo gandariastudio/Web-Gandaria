@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { createDb, migrateDb, type Db } from './client';
 import { isEmpty, seedIfEmpty } from './seed';
 import { getPost, getProject, getSettings, listClients, listFaqs, listPosts, listProjects, listServices, listTestimonials } from './queries';
-import { adminListFaqs, counts, move, removeRow, saveFaq, saveProject, saveSettings, slugTaken, findById } from './admin';
+import { adminListFaqs, adminListServices, counts, move, recentlyEdited, removeRow, reorder, saveFaq, saveProject, saveSettings, slugTaken, findById } from './admin';
 import { seedProjects } from './seed-data';
 
 let db: Db;
@@ -60,5 +60,24 @@ describe('admin writes', () => {
     await saveSettings(db, { email: 'studio@gandariastudio.com', bookingFrom: 'Q2 2027', socialLinks: [] });
     expect(await getSettings(db)).toEqual({ email: 'studio@gandariastudio.com', bookingFrom: 'Q2 2027', socialLinks: [] });
     expect((await counts(db)).faqs).toBe(6);
+  });
+});
+
+describe('drag-and-drop order and dashboard', () => {
+  it('reorder sets positions from the id list and ignores unknown ids', async () => {
+    const ids = (await adminListServices(db)).map((s) => s.id);
+    const reversed = [...ids].reverse();
+    await reorder(db, 'services', [...reversed, 9999]);
+    expect((await adminListServices(db)).map((s) => s.id)).toEqual(reversed);
+    await reorder(db, 'services', []);
+    expect((await adminListServices(db)).map((s) => s.id)).toEqual(reversed);
+    await reorder(db, 'services', ids);
+  });
+  it('recentlyEdited returns the newest edits across types', async () => {
+    await saveFaq(db, 1, { question: 'How quickly can we start?', answer: 'Soon.' });
+    const recent = await recentlyEdited(db, 3);
+    expect(recent).toHaveLength(3);
+    expect(recent[0]).toMatchObject({ kind: 'FAQ', href: '/admin/faqs/1' });
+    expect(recent[0].updatedAt.getTime()).toBeGreaterThanOrEqual(recent[1].updatedAt.getTime());
   });
 });

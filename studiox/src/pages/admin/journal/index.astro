@@ -1,20 +1,27 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro';
-import AdminList from '@/components/admin/AdminList.astro';
+import ListPage from '@/components/admin/ListPage.astro';
+import ItemGrid from '@/components/admin/ItemGrid.astro';
 import { getDb } from '@/lib/db';
 import { adminListPosts } from '@/lib/db/admin';
 import { handleListPost, thumb } from '@/lib/cms/admin-page';
 
 const db = await getDb();
-const redirect = await handleListPost(Astro, db, 'posts');
-if (redirect) return redirect;
-const rows = (await adminListPosts(db)).map((p) => ({ id: p.id, title: p.title, meta: `${p.category} · ${p.publishedAt.toLocaleDateString('en-GB', { dateStyle: 'medium', timeZone: 'UTC' })}`, status: p.published, thumb: thumb(p.cover), viewHref: p.published ? `/journal/${p.slug}` : undefined }));
+const response = await handleListPost(Astro, db, 'posts');
+if (response) return response;
+const date = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const items = (await adminListPosts(db)).map((p) => ({
+  id: p.id,
+  title: p.title,
+  kicker: `${p.category} · ${date(p.publishedAt)}`,
+  published: p.published,
+  image: thumb(p.cover),
+  viewHref: p.published ? `/journal/${p.slug}` : undefined,
+}));
 ---
 
 <AdminLayout title="Journal">
-  <div class="a-head">
-    <h1 class="a-title">Journal</h1>
-    <a class="a-btn" href="/admin/journal/new">New article</a>
-  </div>
-  <AdminList rows={rows} base="/admin/journal" noun="article" />
+  <ListPage title="Journal" description="Articles on /journal, newest first by publish date." newHref="/admin/journal/new" newLabel="New article" count={items.length} noun="article">
+    <ItemGrid items={items} base="/admin/journal" noun="article" />
+  </ListPage>
 </AdminLayout>

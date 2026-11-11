@@ -1,6 +1,6 @@
-import { and, asc, desc, eq, gt, lt, ne, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, lt, ne, sql } from 'drizzle-orm';
 import type { Db } from './client';
-import { clients, faqs, posts, projects, services, settings, testimonials } from './schema';
+import { clients, faqs, posts, projects, services, settings, testimonials, type CmsImage } from './schema';
 import type { ClientInput, FaqInput, PostInput, ProjectInput, ServiceInput, SettingsInput, TestimonialInput } from '../cms/validation';
 
 /** Content types the admin manages as lists. */
@@ -135,4 +135,46 @@ export async function move(db: Db, resource: OrderedResource, id: number, direct
   if (!neighbour) return;
   await db.update(t).set({ sortOrder: neighbour.sortOrder }).where(eq(t.id, current.id));
   await db.update(t).set({ sortOrder: current.sortOrder }).where(eq(t.id, neighbour.id));
+}
+
+/**
+ * Persist a drag-and-drop order: each id gets its 1-based position. One UPDATE with a CASE,
+ * so it costs a single round trip on Neon. Ids that are not in the table are ignored.
+ */
+export async function reorder(db: Db, resource: OrderedResource, ids: number[]) {
+  const unique = [...new Set(ids.filter((id) => Number.isInteger(id) && id > 0))];
+  if (!unique.length) return;
+  const t = ordered[resource];
+  const cases = sql.join(
+    unique.map((id, i) => sql`when ${t.id} = ${id} then ${i + 1}`),
+    sql` `,
+  );
+  await db.update(t).set({ sortOrder: sql`case ${cases} else ${t.sortOrder} end` }).where(inArray(t.id, unique));
+}
+
+export type RecentItem = { kind: string; title: string; href: string; updatedAt: Date; image: CmsImage | null };
+
+/** The most recently edited content across every type, newest first (dashboard). */
+export async function recentlyEdited(db: Db, limit = 6): Promise<RecentItem[]> {
+  const take = <T>(q: Promise<T[]>) => q;
+  const [p, po, s, t, c, f] = await Promise.all([
+    take(db.select({ id: projects.id, title: projects.title, updatedAt: projects.updatedAt, image: projects.cover }).from(projects).orderBy(desc(projects.updatedAt)).limit(limit)),
+    take(db.select({ id: posts.id, title: posts.title, updatedAt: posts.updatedAt, image: posts.cover }).from(posts).orderBy(desc(posts.updatedAt)).limit(limit)),
+    take(db.select({ id: services.id, title: services.title, updatedAt: services.updatedAt, image: services.image }).from(services).orderBy(desc(services.updatedAt)).limit(limit)),
+    take(db.select({ id: testimonials.id, title: testimonials.name, updatedAt: testimonials.updatedAt }).from(testimonials).orderBy(desc(testimonials.updatedAt)).limit(limit)),
+    take(db.select({ id: clients.id, title: clients.name, updatedAt: clients.updatedAt, image: clients.logo }).from(clients).orderBy(desc(clients.updatedAt)).limit(limit)),
+    take(db.select({ id: faqs.id, title: faqs.question, updatedAt: faqs.updatedAt }).from(faqs).orderBy(desc(faqs.updatedAt)).limit(limit)),
+  ]);
+  const tag = (kind: string, base: string, rows: { id: number; title: string; updatedAt: Date; image?: CmsImage }[]): RecentItem[] =>
+    rows.map((r) => ({ kind, title: r.title, href: `${base}/${r.id}`, updatedAt: r.updatedAt, image: r.image ?? null }));
+  return [
+    ...tag('Project', '/admin/projects', p),
+    ...tag('Article', '/admin/journal', po),
+    ...tag('Service', '/admin/services', s),
+    ...tag('Testimonial', '/admin/testimonials', t),
+    ...tag('Client', '/admin/clients', c),
+    ...tag('FAQ', '/admin/faqs', f),
+  ]
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+    .slice(0, limit);
 }

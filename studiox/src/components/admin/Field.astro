@@ -19,7 +19,7 @@ const describedBy = [hint && `${id}-hint`, error && `${id}-error`].filter(Boolea
 ---
 
 <div class:list={['a-field', error && 'has-error']}>
-  <label class="a-label" for={id}>{label}{required && <span class="text-muted"> *</span>}</label>
+  <label class="a-label" for={id}>{label}{required && <span class="a-req"> *</span>}</label>
   {
     type === 'textarea' ? (
       <textarea id={id} name={name} rows={rows} class="a-input" placeholder={placeholder} aria-invalid={error ? 'true' : undefined} aria-describedby={describedBy} {...attrs}>{value ?? ''}</textarea>

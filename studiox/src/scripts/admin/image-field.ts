@@ -1,5 +1,9 @@
+import { showToast } from './toast';
+
 type Signature = { cloudName: string; apiKey: string; timestamp: number; signature: string; folder: string };
 type UploadResult = { public_id: string; width: number; height: number; secure_url: string };
+
+const MAX_BYTES = 20 * 1024 * 1024;
 
 async function sign(folder: string): Promise<Signature> {
   const res = await fetch('/api/admin/cloudinary-signature', {
@@ -32,41 +36,68 @@ function upload(file: File, s: Signature, onProgress: (pct: number) => void): Pr
   });
 }
 
+/** Image fields: click or drop a file, upload straight to Cloudinary, preview it, store the result in the hidden input. */
 export function initImageFields() {
   document.querySelectorAll<HTMLElement>('[data-image-field]').forEach((field) => {
+    const drop = field.querySelector<HTMLElement>('[data-drop]')!;
     const fileInput = field.querySelector<HTMLInputElement>('[data-image-file]')!;
     const valueInput = field.querySelector<HTMLInputElement>('[data-image-value]')!;
     const status = field.querySelector<HTMLElement>('[data-image-status]')!;
+    const text = field.querySelector<HTMLElement>('[data-drop-text]')!;
     const box = field.querySelector<HTMLElement>('[data-preview-box]')!;
+    const bar = field.querySelector<HTMLElement>('[data-progress]')!;
     const form = field.closest('form');
-    const submit = form?.querySelector<HTMLButtonElement>('[type="submit"]');
+    const save = form?.querySelector<HTMLButtonElement>('[data-save]');
+    const enabled = !fileInput.disabled;
+    let busy = false;
 
-    fileInput.addEventListener('change', async () => {
-      const file = fileInput.files?.[0];
-      if (!file) return;
-      if (!file.type.startsWith('image/')) {
-        status.textContent = 'Choose an image file.';
-        return;
-      }
-      submit?.setAttribute('disabled', '');
-      status.textContent = 'Preparing…';
+    async function handle(file: File | undefined) {
+      if (!file || busy || !enabled) return;
+      if (!file.type.startsWith('image/')) return showToast('Choose an image file (JPG, PNG, WebP or SVG).', { error: true });
+      if (file.size > MAX_BYTES) return showToast('That image is larger than 20 MB. Export a smaller version first.', { error: true });
+      busy = true;
+      save?.setAttribute('disabled', '');
+      text.textContent = 'Uploading…';
+      bar.style.width = '4%';
       try {
         const signature = await sign(field.dataset.folder ?? 'misc');
-        const result = await upload(file, signature, (pct) => (status.textContent = `Uploading ${pct}%`));
+        const result = await upload(file, signature, (pct) => {
+          bar.style.width = `${pct}%`;
+          text.textContent = `Uploading ${pct}%`;
+        });
         valueInput.value = JSON.stringify({ publicId: result.public_id, url: null, width: result.width, height: result.height });
         box.innerHTML = '';
         const img = document.createElement('img');
         img.src = result.secure_url;
         img.alt = '';
         box.append(img);
-        status.textContent = `${result.width} × ${result.height}, uploaded. Save to apply.`;
+        drop.classList.add('has-image');
+        text.textContent = 'Drop a new image or click to replace';
+        status.textContent = `Uploaded ${result.width} × ${result.height}. Save to apply.`;
         form?.dispatchEvent(new Event('change'));
       } catch (error) {
-        status.textContent = error instanceof Error ? error.message : 'Upload failed';
+        text.textContent = 'Upload failed. Try again.';
+        showToast(error instanceof Error ? error.message : 'Upload failed', { error: true });
       } finally {
-        submit?.removeAttribute('disabled');
+        busy = false;
+        bar.style.width = '0';
+        save?.removeAttribute('disabled');
         fileInput.value = '';
       }
+    }
+
+    fileInput.addEventListener('change', () => handle(fileInput.files?.[0]));
+    ['dragenter', 'dragover'].forEach((type) =>
+      drop.addEventListener(type, (e) => {
+        if (!enabled) return;
+        e.preventDefault();
+        drop.classList.add('is-over');
+      }),
+    );
+    ['dragleave', 'drop'].forEach((type) => drop.addEventListener(type, () => drop.classList.remove('is-over')));
+    drop.addEventListener('drop', (e) => {
+      e.preventDefault();
+      handle((e as DragEvent).dataTransfer?.files?.[0]);
     });
   });
 }

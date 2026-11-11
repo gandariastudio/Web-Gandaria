@@ -1,13 +1,15 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro';
 import EditHeader from '@/components/admin/EditHeader.astro';
+import FormCard from '@/components/admin/FormCard.astro';
 import Field from '@/components/admin/Field.astro';
-import Checkbox from '@/components/admin/Checkbox.astro';
 import ImageField from '@/components/admin/ImageField.astro';
+import SaveBar from '@/components/admin/SaveBar.astro';
+import DangerZone from '@/components/admin/DangerZone.astro';
 import { getDb } from '@/lib/db';
 import { findById, saveProject, slugTaken } from '@/lib/db/admin';
 import { projectSchema, readers, validate, type FieldErrors } from '@/lib/cms/validation';
-import { parseId, saveErrorMessage } from '@/lib/cms/admin-page';
+import { parseId, relativeTime, saveErrorMessage } from '@/lib/cms/admin-page';
 
 const id = parseId(Astro.params.id);
 if (id === null) return Astro.rewrite('/404');
@@ -27,7 +29,7 @@ if (Astro.request.method === 'POST') {
   values = readers.project(await Astro.request.formData());
   const result = validate(projectSchema, values);
   if (!result.ok) errors = result.errors;
-  else if (await slugTaken(db, 'projects', result.data.slug, row?.id)) errors = { slug: 'Another project already uses this slug' };
+  else if (await slugTaken(db, 'projects', result.data.slug, row?.id)) errors = { slug: 'Another project already uses this address' };
   else {
     try {
       const savedId = await saveProject(db, row?.id ?? null, result.data);
@@ -39,55 +41,60 @@ if (Astro.request.method === 'POST') {
   Astro.response.status = 422;
 }
 const title = row?.title ?? 'New project';
+const self = row ? `/admin/projects/${row.id}` : '/admin/projects/new';
 ---
 
-<AdminLayout title={title}>
-  <EditHeader title={title} back={{ href: '/admin/projects', label: 'Projects' }} viewHref={row?.published ? `/work/${row.slug}` : undefined} errors={errors} />
+<AdminLayout title={title} width="narrow">
+  <EditHeader
+    title={title}
+    subtitle={row ? `Last edited ${relativeTime(row.updatedAt)}` : 'Fill in the case study, add images, then save.'}
+    back={{ href: '/admin/projects', label: 'Projects' }}
+    viewHref={row?.published ? `/work/${row.slug}` : undefined}
+    errors={errors}
+  />
 
-  <form method="post" class="flex flex-col gap-5" data-edit-form>
-    <section class="a-card">
-      <h2>Basics</h2>
-      <div class="a-grid">
-        <Field name="title" label="Title" value={values.title} error={errors.title} required attrs={{ 'data-slug-source': true }} />
-        <Field name="slug" label="Slug" value={values.slug} error={errors.slug} required hint={row ? 'Changing it changes the page address.' : 'Page address: /work/slug'} attrs={{ 'data-slug-target': true, 'data-autoslug': String(!row) }} />
+  <form method="post" class="a-form" data-edit-form data-start-dirty={String(Astro.request.method === 'POST')}>
+    <FormCard title="Basics" description="Shown on the project card and at the top of the case study.">
+      <Field name="title" label="Project name" value={values.title} error={errors.title} required attrs={{ 'data-slug-source': true }} />
+      <Field name="summary" type="textarea" rows={2} label="Summary" value={values.summary} error={errors.summary} required hint="One or two sentences about what you made." />
+      <div class="a-fields">
         <Field name="client" label="Client" value={values.client} error={errors.client} required />
         <Field name="role" label="Our role" value={values.role} error={errors.role} required placeholder="Brand strategy, identity, website" />
         <Field name="sector" label="Sector" value={values.sector} error={errors.sector} required placeholder="Hospitality" />
         <Field name="year" label="Year" value={values.year} error={errors.year} required />
       </div>
-      <Field name="summary" type="textarea" rows={2} label="Summary" value={values.summary} error={errors.summary} required hint="One or two sentences, shown on the project card and at the top of the case study." />
       <Field name="services" label="Services tag" value={values.services} error={errors.services} required hint="Shown on the card, for example: Brand identity · Website" />
-      <Checkbox name="published" label="Published" checked={values.published} hint="Drafts are hidden from the public site." />
-    </section>
+    </FormCard>
 
-    <section class="a-card">
-      <h2>Case study</h2>
+    <FormCard title="Images" description="Keep the subject near the centre: frames crop differently on phones and desktops.">
+      <ImageField name="cover" label="Cover image" value={values.cover} folder="projects" errors={errors} recommended="2400 × 1350 (16:9)" />
+      <div class="a-fields">
+        {[0, 1].map((i) => <ImageField name={`gallery.${i}`} label={`Gallery image ${i + 1}`} value={values.gallery?.[i]} folder="projects" errors={errors} recommended="1600 × 1280 (5:4)" />)}
+      </div>
+    </FormCard>
+
+    <FormCard title="Case study" description="The two paragraphs under the cover image.">
       <Field name="challenge" type="textarea" rows={4} label="The challenge" value={values.challenge} error={errors.challenge} required />
       <Field name="approach" type="textarea" rows={4} label="Our approach" value={values.approach} error={errors.approach} required />
-    </section>
+    </FormCard>
 
-    <section class="a-card">
-      <h2>Results</h2>
-      <p class="a-hint -mt-2">Exactly three, shown as large numbers on the case study.</p>
+    <FormCard title="Results" description="Exactly three, shown as large numbers on the case study.">
       {
         [0, 1, 2].map((i) => (
-          <div class="grid gap-3 md:grid-cols-[200px_1fr]">
+          <div class="a-fields">
             <Field name={`results.${i}.value`} label={`Result ${i + 1}`} value={values.results?.[i]?.value} error={errors[`results.${i}.value`]} placeholder="+52%" />
-            <Field name={`results.${i}.label`} label="Label" value={values.results?.[i]?.label} error={errors[`results.${i}.label`]} placeholder="online bookings" />
+            <Field name={`results.${i}.label`} label="Description" value={values.results?.[i]?.label} error={errors[`results.${i}.label`]} placeholder="online bookings" />
           </div>
         ))
       }
-    </section>
+    </FormCard>
 
-    <section class="a-card">
-      <h2>Images</h2>
-      <ImageField name="cover" label="Cover" value={values.cover} folder="projects" errors={errors} hint="Recommended 2400 × 1350 (16:9). Keep the subject near the centre." />
-      {[0, 1].map((i) => <ImageField name={`gallery.${i}`} label={`Gallery image ${i + 1}`} value={values.gallery?.[i]} folder="projects" errors={errors} hint="Recommended 1600 × 1280 (5:4)." />)}
-    </section>
+    <FormCard title="Page address" description="The link to this case study.">
+      <Field name="slug" label="Address" value={values.slug} error={errors.slug} required hint={row ? `gandariastudio.com/work/${row.slug}. Changing it breaks links that already point here.` : 'Filled in from the project name: gandariastudio.com/work/your-address'} attrs={{ 'data-slug-target': true, 'data-autoslug': String(!row) }} />
+    </FormCard>
 
-    <div class="a-savebar">
-      <span class="a-hint">{row ? `Last saved ${row.updatedAt.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}` : 'Not saved yet'}</span>
-      <button type="submit" class="a-btn">{row ? 'Save changes' : 'Create project'}</button>
-    </div>
+    <SaveBar published={values.published} saveLabel={row ? 'Save changes' : 'Create project'} isNew={!row} resetHref={self} />
   </form>
+
+  {row && <DangerZone action="/admin/projects" id={row.id} noun="project" />}
 </AdminLayout>

@@ -1,23 +1,32 @@
 ---
+import Icon from './Icon.astro';
 import type { FieldErrors } from '@/lib/cms/validation';
 
 interface Props {
   title: string;
+  subtitle?: string;
   back: { href: string; label: string };
   viewHref?: string;
   errors?: FieldErrors;
 }
 
-const { title, back, viewHref, errors = {} } = Astro.props;
+const { title, subtitle, back, viewHref, errors = {} } = Astro.props;
 const count = Object.keys(errors).filter((k) => k !== '_form').length;
 ---
 
-<div class="a-head">
+<header class="a-head">
   <div>
-    <a href={back.href} class="a-hint hover:text-ink">← {back.label}</a>
-    <h1 class="a-title mt-1">{title}</h1>
+    <a href={back.href} class="a-back"><Icon name="back" size={15} />{back.label}</a>
+    <h1 class="a-title">{title}</h1>
+    {subtitle && <p class="a-sub">{subtitle}</p>}
   </div>
-  {viewHref && <a class="a-btn a-btn--ghost" href={viewHref} target="_blank" rel="noopener">View on site ↗</a>}
-</div>
-{errors._form && <p class="admin-banner text-[#b42318]!" role="alert">{errors._form}</p>}
-{count > 0 && <p class="admin-banner text-[#b42318]!" role="alert">Please fix {count === 1 ? '1 field' : `${count} fields`} below, then save again.</p>}
+  {
+    viewHref && (
+      <a class="a-btn a-btn--ghost a-btn--sm" href={viewHref} target="_blank" rel="noopener">
+        View on site <Icon name="external" size={15} />
+      </a>
+    )
+  }
+</header>
+{errors._form && <p class="a-alert" role="alert">{errors._form}</p>}
+{count > 0 && <p class="a-alert" role="alert">Please fix {count === 1 ? 'the highlighted field' : `the ${count} highlighted fields`}, then save again.</p>}

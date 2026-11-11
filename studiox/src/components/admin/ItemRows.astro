@@ -1,0 +1,36 @@
+---
+import Icon from './Icon.astro';
+import ItemMenu from './ItemMenu.astro';
+import { searchText, type ListItem } from './types';
+
+interface Props {
+  items: ListItem[];
+  base: string;
+  noun: string;
+  sortable?: boolean;
+}
+
+const { items, base, noun, sortable = false } = Astro.props;
+---
+
+<div class="a-rows" data-list data-sortable={sortable ? base : undefined}>
+  {
+    items.map((item, i) => (
+      <article class="a-row" data-item data-id={item.id} data-search={searchText(item)}>
+        {sortable && (
+          <button type="button" class="a-grip" data-grip aria-label={`Drag to reorder ${item.title}`} title="Drag to reorder">
+            <Icon name="grip" size={16} />
+          </button>
+        )}
+        <div class="a-row-main">
+          <a class="a-row-title" href={`${base}/${item.id}`}>
+            {item.title}
+          </a>
+          {item.meta && <span class="a-row-meta">{item.meta}</span>}
+        </div>
+        {item.published !== undefined && <span class:list={['a-status', item.published && 'is-live']}>{item.published ? 'Published' : 'Draft'}</span>}
+        <ItemMenu item={item} base={base} noun={noun} sortable={sortable} first={i === 0} last={i === items.length - 1} />
+      </article>
+    ))
+  }
+</div>

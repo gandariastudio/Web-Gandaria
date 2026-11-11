@@ -1,20 +1,24 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro';
-import AdminList from '@/components/admin/AdminList.astro';
+import ListPage from '@/components/admin/ListPage.astro';
+import ItemRows from '@/components/admin/ItemRows.astro';
 import { getDb } from '@/lib/db';
 import { adminListTestimonials } from '@/lib/db/admin';
-import { handleListPost, excerpt } from '@/lib/cms/admin-page';
+import { excerpt, handleListPost } from '@/lib/cms/admin-page';
 
 const db = await getDb();
-const redirect = await handleListPost(Astro, db, 'testimonials');
-if (redirect) return redirect;
-const rows = (await adminListTestimonials(db)).map((t) => ({ id: t.id, title: `${t.name}, ${t.role}`, meta: excerpt(t.quote), status: t.published }));
+const response = await handleListPost(Astro, db, 'testimonials');
+if (response) return response;
+const items = (await adminListTestimonials(db)).map((t) => ({
+  id: t.id,
+  title: t.name,
+  meta: `${t.role} · “${excerpt(t.quote, 90)}”`,
+  published: t.published,
+}));
 ---
 
 <AdminLayout title="Testimonials">
-  <div class="a-head">
-    <h1 class="a-title">Testimonials</h1>
-    <a class="a-btn" href="/admin/testimonials/new">New testimonial</a>
-  </div>
-  <AdminList rows={rows} base="/admin/testimonials" noun="testimonial" ordered />
+  <ListPage title="Testimonials" description="Quotes in the card deck on the home page, in this order." newHref="/admin/testimonials/new" newLabel="New testimonial" count={items.length} noun="testimonial" sortable>
+    <ItemRows items={items} base="/admin/testimonials" noun="testimonial" sortable />
+  </ListPage>
 </AdminLayout>

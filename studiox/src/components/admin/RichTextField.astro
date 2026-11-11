@@ -8,16 +8,16 @@ interface Props {
 
 const { name, label, value = '', error } = Astro.props;
 const tools = [
-  ['h2', 'H2'],
-  ['h3', 'H3'],
-  ['bold', 'Bold'],
-  ['italic', 'Italic'],
-  ['link', 'Link'],
-  ['bullet', '• List'],
-  ['ordered', '1. List'],
-  ['quote', 'Quote'],
-  ['undo', 'Undo'],
-  ['redo', 'Redo'],
+  ['h2', 'Heading', 'H2'],
+  ['h3', 'Subheading', 'H3'],
+  ['bold', 'Bold', 'B'],
+  ['italic', 'Italic', 'I'],
+  ['link', 'Link', 'Link'],
+  ['bullet', 'Bulleted list', '• List'],
+  ['ordered', 'Numbered list', '1. List'],
+  ['quote', 'Quote', '“ Quote'],
+  ['undo', 'Undo', '↶'],
+  ['redo', 'Redo', '↷'],
 ];
 ---
 
@@ -25,7 +25,7 @@ const tools = [
   <span class="a-label">{label}</span>
   <div class="rt">
     <div class="rt-bar" role="toolbar" aria-label="Formatting">
-      {tools.map(([cmd, text]) => <button type="button" class="rt-btn" data-cmd={cmd}>{text}</button>)}
+      {tools.map(([cmd, title, text]) => <button type="button" class="rt-btn" data-cmd={cmd} title={title} aria-label={title}>{text}</button>)}
     </div>
     <div class="rt-editor article-body" data-editor></div>
   </div>
@@ -36,12 +36,16 @@ const tools = [
 
 <style>
   .rt {
-    border: 1px solid var(--color-line);
-    border-radius: 8px;
-    background: var(--color-paper);
+    border: 1px solid var(--a-line-strong);
+    border-radius: 16px;
+    background: var(--a-bg);
+  }
+  .rt:focus-within {
+    border-color: var(--a-text);
+    box-shadow: 0 0 0 3px rgb(0 0 0 / 0.06);
   }
   .has-error .rt {
-    border-color: #e5958b;
+    border-color: var(--a-danger);
   }
   .rt-bar {
     position: sticky;
@@ -50,33 +54,34 @@ const tools = [
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    border-bottom: 1px solid var(--color-line);
-    border-radius: 8px 8px 0 0;
-    background: var(--color-paper);
+    border-bottom: 1px solid var(--a-line);
+    border-radius: 16px 16px 0 0;
+    background: var(--a-bg);
     padding: 8px;
   }
   .rt-btn {
-    border-radius: 5px;
-    padding: 4px 9px;
+    height: 30px;
+    border-radius: 999px;
+    padding: 0 11px;
     font-size: 13px;
-    color: var(--color-muted);
+    color: var(--a-muted);
     cursor: pointer;
   }
   .rt-btn:hover {
-    background: var(--color-fog);
-    color: var(--color-ink);
+    background: var(--a-soft);
+    color: var(--a-text);
   }
   .rt-btn.is-active {
-    background: var(--color-ink);
-    color: var(--color-paper);
+    background: var(--a-text);
+    color: #fff;
   }
   .rt-editor {
-    min-height: 280px;
-    padding: 18px 20px;
+    min-height: 320px;
+    padding: 20px 22px;
     font-size: 16px !important;
   }
   .rt-editor :global(.ProseMirror) {
-    min-height: 260px;
+    min-height: 300px;
     outline: none;
   }
   .rt-editor :global(.ProseMirror > * + *) {
@@ -91,12 +96,11 @@ const tools = [
     padding-left: 1.4em;
   }
   .rt-editor :global(blockquote) {
-    border-left: 3px solid var(--color-cobalt);
+    border-left: 3px solid var(--a-line-strong);
     padding-left: 1em;
-    color: var(--color-muted);
+    color: var(--a-muted);
   }
   .rt-editor :global(a) {
-    color: var(--color-cobalt);
     text-decoration: underline;
   }
   .rt-editor :global(h3) {
