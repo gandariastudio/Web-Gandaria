@@ -1,5 +1,5 @@
 // @ts-check
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { defineConfig, envField, fontProviders } from 'astro/config';
 import vercel from '@astrojs/vercel';
@@ -15,6 +15,21 @@ const localOnlyFiles = (() => {
   } catch {
     return [];
   }
+})();
+
+// sanitize-html is CommonJS but requires the ESM-only htmlparser2, and Vercel's runtime has no
+// require(esm). Production builds therefore bundle sanitize-html with its whole dependency tree:
+// bundling only part of it hides the rest from Vercel's file tracing and they are never deployed.
+const sanitizeHtmlTree = (() => {
+  const seen = new Set();
+  const walk = (/** @type {string} */ name) => {
+    if (seen.has(name)) return;
+    seen.add(name);
+    const pkg = JSON.parse(readFileSync(`node_modules/${name}/package.json`, 'utf8'));
+    Object.keys(pkg.dependencies ?? {}).forEach(walk);
+  };
+  walk('sanitize-html');
+  return [...seen];
 })();
 
 export default defineConfig({
@@ -53,12 +68,11 @@ export default defineConfig({
   vite: {
     plugins: [
       tailwindcss(),
-      // sanitize-html is CommonJS but requires the ESM-only htmlparser2. Vercel's runtime has no
-      // require(esm), so production builds bundle both and resolve that require at build time.
-      // Dev skips this: Vite's dev runner cannot run inlined CommonJS, and local Node handles it.
+      // See sanitizeHtmlTree. Dev skips this: Vite's dev runner cannot run inlined CommonJS,
+      // and local Node supports require(esm).
       {
         name: 'bundle-sanitize-html',
-        config: (_, { command }) => (command === 'build' ? { ssr: { noExternal: ['sanitize-html', 'htmlparser2'] } } : undefined),
+        config: (_, { command }) => (command === 'build' ? { ssr: { noExternal: sanitizeHtmlTree } } : undefined),
       },
     ],
     // PGlite is the local-only fallback database. Keep it out of the server bundle.
