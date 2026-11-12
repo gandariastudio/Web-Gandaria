@@ -50,10 +50,10 @@ function ico(images: { size: number; data: Buffer }[]) {
   return Buffer.concat([header, ...images.map((i) => i.data)]);
 }
 
-// Browser tab icons: rounded tile, mark large enough to read at 16px.
-writeFileSync(`${PUBLIC}favicon.svg`, iconSvg(64, 0.7, 14));
-writeFileSync(`${PUBLIC}favicon-96x96.png`, await png(iconSvg(96, 0.7, 21)));
-const icoImages = await Promise.all([16, 32, 48].map(async (size) => ({ size, data: await png(iconSvg(size, 0.7, size * 0.22)) })));
+// Browser tab icons: square tile with sharp corners, mark large enough to read at 16px.
+writeFileSync(`${PUBLIC}favicon.svg`, iconSvg(64, 0.7));
+writeFileSync(`${PUBLIC}favicon-96x96.png`, await png(iconSvg(96, 0.7)));
+const icoImages = await Promise.all([16, 32, 48].map(async (size) => ({ size, data: await png(iconSvg(size, 0.7)) })));
 writeFileSync(`${PUBLIC}favicon.ico`, ico(icoImages));
 // Home screen icons: square (the OS rounds them); the mark stays inside the maskable safe zone.
 writeFileSync(`${PUBLIC}apple-touch-icon.png`, await png(iconSvg(180, 0.56)));
