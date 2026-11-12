@@ -45,4 +45,66 @@ const { email: EMAIL, socialLinks: elsewhere } = Astro.locals.settings;
       </div>
     </div>
   </section>
+
+  <!-- White, unlike the grey email and form section above, so it reads as its own section. -->
+  <section id="book" class="bg-paper px-5 py-24 md:px-8 md:py-[120px] xl:px-10 xl:py-40" data-cursor="Book a call">
+    <div class="mx-auto flex max-w-[1600px] flex-col gap-10 md:gap-12">
+      <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-10">
+        <div class="flex flex-col gap-5">
+          <p class="tag">Book a call</p>
+          <h2 class="type-h2 max-w-[640px]">Prefer to talk it through?</h2>
+        </div>
+        <p class="type-body max-w-[460px] text-muted">
+          Pick a time for a 30-minute video call with the team. Times are shown in your own timezone, and you get a calendar invite straight away.
+        </p>
+      </div>
+      <!-- Cal.com booking calendar, loaded when it scrolls near the viewport (see the script below). -->
+      <div class="cal-embed w-full" id="cal-inline-30min">
+        <p class="type-small text-muted">
+          Loading the calendar… If it does not appear, <a class="text-link" href="https://cal.com/gandaria-studio-sm79hj/30min" target="_blank" rel="noopener">book on Cal.com ↗</a>
+        </p>
+      </div>
+    </div>
+  </section>
 </BaseLayout>
+
+<style>
+  .cal-embed {
+    min-height: 560px;
+  }
+</style>
+
+<script is:inline>
+  // Cal.com inline embed (from the Cal.com dashboard), started only when the calendar is near the
+  // viewport so visitors who never scroll this far do not download it.
+  (function () {
+    var el = document.getElementById('cal-inline-30min');
+    if (!el) return;
+    var started = false;
+    function start() {
+      if (started) return;
+      started = true;
+      (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+      Cal('init', '30min', { origin: 'https://app.cal.com' });
+      Cal.config = Cal.config || {};
+      Cal.config.forwardQueryParams = true;
+      el.innerHTML = '';
+      Cal.ns['30min']('inline', {
+        elementOrSelector: '#cal-inline-30min',
+        config: { layout: 'month_view', useSlotsViewOnSmallScreen: 'true', theme: 'light' },
+        calLink: 'gandaria-studio-sm79hj/30min',
+      });
+      Cal.ns['30min']('ui', {
+        hideEventTypeDetails: false,
+        layout: 'month_view',
+        theme: 'light',
+        cssVarsPerTheme: { light: { 'cal-brand': '#f15822' } },
+      });
+    }
+    if (!('IntersectionObserver' in window) || location.hash === '#book') return start();
+    var io = new IntersectionObserver(function (entries) {
+      if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); start(); }
+    }, { rootMargin: '600px 0px' });
+    io.observe(el);
+  })();
+</script>
