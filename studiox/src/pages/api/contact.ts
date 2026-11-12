@@ -20,12 +20,13 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
   if (!parsed.success) return json({ ok: false, errors: fieldErrors(parsed.error) }, 422);
   const enquiry = parsed.data;
 
+  let id: number;
   try {
     const db = await getDb();
     if ((await recentFromEmail(db, enquiry.email, RATE_LIMIT.minutes)) >= RATE_LIMIT.count) {
       return json({ ok: false, error: 'You have sent several messages already. We will be in touch soon.' }, 429);
     }
-    await saveEnquiry(db, enquiry);
+    id = await saveEnquiry(db, enquiry);
   } catch (error) {
     console.error('[contact] could not save enquiry', error);
     return json({ ok: false, error: `Could not send right now. Please email ${locals.settings.email} instead.` }, 500);
@@ -35,7 +36,9 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
     apiKey: RESEND_API_KEY,
     from: CONTACT_FROM_EMAIL,
     to: locals.settings.email,
-    inboxUrl: new URL('/admin/inbox', url).href,
+    messageUrl: new URL(`/admin/inbox/${id}`, url).href,
+    logoUrl: new URL('/email-logo.png', url).href,
+    sentAt: new Date(),
   });
   return json({ ok: true });
 };

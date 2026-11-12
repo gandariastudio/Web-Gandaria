@@ -1,7 +1,7 @@
 import type { EnquiryInput } from './enquiry';
-import { enquiryEmailText } from './enquiry';
+import { enquiryEmailHtml, enquiryEmailText, enquirySubject, type EnquiryEmailContext } from './enquiry-email';
 
-export type MailConfig = { apiKey?: string; from?: string; to: string; inboxUrl: string };
+export type MailConfig = { apiKey?: string; from?: string; to: string } & EnquiryEmailContext;
 
 /**
  * Email the studio about a new enquiry through Resend (https://resend.com). Does nothing without
@@ -17,8 +17,9 @@ export async function sendEnquiryEmail(e: EnquiryInput, config: MailConfig): Pro
         from: config.from || 'Gandaria Website <onboarding@resend.dev>',
         to: [config.to],
         reply_to: `${e.name.replace(/[<>"]/g, '')} <${e.email}>`,
-        subject: `New enquiry from ${e.name}${e.company ? ` (${e.company})` : ''}`,
-        text: enquiryEmailText(e, config.inboxUrl),
+        subject: enquirySubject(e),
+        html: enquiryEmailHtml(e, config),
+        text: enquiryEmailText(e, config),
       }),
     });
     if (!res.ok) console.error('[contact] email failed', res.status, await res.text().catch(() => ''));

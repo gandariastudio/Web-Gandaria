@@ -27,17 +27,3 @@ export function looksLikeSpam(body: { website?: unknown; elapsed?: unknown }): b
   const elapsed = Number(body.elapsed);
   return !Number.isFinite(elapsed) || elapsed < MIN_FILL_MS;
 }
-
-/** Plain-text email sent to the studio for a new enquiry. */
-export function enquiryEmailText(e: EnquiryInput, inboxUrl: string): string {
-  const rows: [string, string][] = [
-    ['Name', e.name],
-    ['Email', e.email],
-    ['Company', e.company],
-    ['Needs', e.services],
-    ['Budget', e.budget],
-    ['Sent from', e.page],
-  ];
-  const lines = rows.filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`);
-  return `${lines.join('\n')}\n\n${e.message || '(no message)'}\n\n—\nReply to this email to answer ${e.name}. All messages: ${inboxUrl}\n`;
-}

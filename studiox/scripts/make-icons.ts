@@ -59,4 +59,13 @@ writeFileSync(`${PUBLIC}favicon.ico`, ico(icoImages));
 writeFileSync(`${PUBLIC}apple-touch-icon.png`, await png(iconSvg(180, 0.56)));
 writeFileSync(`${PUBLIC}web-app-manifest-192x192.png`, await png(iconSvg(192, 0.5)));
 writeFileSync(`${PUBLIC}web-app-manifest-512x512.png`, await png(iconSvg(512, 0.5)));
+// Email logo: the ink mark on transparent, like the website header (email clients do not show SVG).
+// 96px tall, shown at 24px, so it stays sharp on high-density screens.
+{
+  const h = 96;
+  const w = Math.round((MARK_W / MARK_H) * h);
+  const { ring, smile, dot } = MARK_PATHS;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${MARK_W} ${MARK_H}" width="${w}" height="${h}"><g fill="#252320"><path fill-rule="evenodd" d="${ring}"/><path d="${smile}"/><circle cx="${dot.cx}" cy="${dot.cy}" r="${dot.r}"/></g></svg>`;
+  writeFileSync(`${PUBLIC}email-logo.png`, await png(svg));
+}
 console.log('Icons written to public/');
