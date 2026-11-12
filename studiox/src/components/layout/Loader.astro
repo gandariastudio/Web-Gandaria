@@ -2,10 +2,27 @@
 import LogoMark from '@/components/ui/LogoMark.astro';
 ---
 
-<div class="loader fixed inset-0 z-[2147483000] bg-cobalt" aria-hidden="true" data-loader>
-  <span class="loader__mark fixed top-1/2 left-1/2 size-6 text-paper" data-loader-mark>
-    <LogoMark class="size-6" />
-  </span>
+<div class="loader fixed inset-0 z-[2147483000] text-paper" aria-hidden="true" data-loader>
+  <div class="loader__panel loader__panel--under bg-cobalt-deep" data-loader-panel></div>
+  <div class="loader__panel bg-cobalt" data-loader-panel></div>
+  <!-- Same proportions as the header logo (mark 24px, gap 10px, word 20px) so it can fly into it. -->
+  <div class="loader__lockup fixed top-1/2 left-1/2 flex items-center" data-loader-lockup>
+    <span class="loader__mark block" data-loader-mark><LogoMark class="size-full" /></span>
+    <span class="loader__word flex font-medium" data-loader-word>
+      {
+        'Gandaria'.split('').map((ch, i) => (
+          <span class="loader__clip">
+            <span class="loader__ch" style={`--i:${i}`}>{ch}</span>
+          </span>
+        ))
+      }
+    </span>
+  </div>
+  <div class="loader__foot type-label fixed inset-x-0 bottom-0 flex items-end justify-between gap-6 px-4 pb-5 md:px-6 xl:px-10 xl:pb-8" data-loader-foot>
+    <span class="loader__bar" aria-hidden="true"><span></span></span>
+    <span class="opacity-80">Independent creative studio</span>
+    <span class="loader__count tabular-nums"></span>
+  </div>
 </div>
 
 <div class="curtain fixed inset-0 z-[2147483000] flex items-center justify-center bg-cobalt text-paper" aria-hidden="true" data-curtain>
@@ -24,35 +41,107 @@ import LogoMark from '@/components/ui/LogoMark.astro';
 </script>
 
 <style>
+  /*
+   * Intro runs in CSS so it starts on first paint, before the JS bundle loads. runLoader() reads
+   * how far the ring animation got and times the exit from there (exit starts at about 1.25s).
+   */
   .loader {
-    clip-path: inset(0 0 0% 0);
     pointer-events: all;
     animation: kfx-failsafe 0.4s ease 4s forwards;
-  }
-  .loader__mark {
-    transform: translate(-50%, -50%) scale(2);
-    will-change: transform;
   }
   :global(html.no-loader) .loader {
     display: none;
   }
-  /* Build the mark in three beats: ring, smile, dot (about 0.8s, read by runLoader). */
-  .loader__mark :global(.mark-ring),
-  .loader__mark :global(.mark-smile),
-  .loader__mark :global(.mark-dot) {
-    animation: 0.3s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  .loader__panel {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 0 0% 0);
   }
+  .loader__lockup {
+    --m: 48px;
+    gap: calc(var(--m) * 10 / 24);
+    transform: translate(-50%, -50%);
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+  @media (min-width: 810px) {
+    .loader__lockup {
+      --m: 64px;
+    }
+  }
+  .loader__mark {
+    width: var(--m);
+    height: var(--m);
+    flex: none;
+  }
+  .loader__word {
+    font-size: calc(var(--m) * 20 / 24);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .loader__clip {
+    display: block;
+    overflow: clip;
+    padding-bottom: 0.08em;
+    margin-bottom: -0.08em;
+  }
+  .loader__ch {
+    display: block;
+    animation: loader-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(0.32s + var(--i) * 0.045s);
+  }
+
+  /* The mark builds in three beats: ring, smile, then the dot drops in. */
   .loader__mark :global(.mark-ring) {
-    animation-name: mark-pop;
+    animation: mark-pop 0.42s cubic-bezier(0.34, 1.4, 0.64, 1) both;
   }
   .loader__mark :global(.mark-smile) {
-    animation-name: mark-stretch;
-    animation-delay: 0.22s;
+    animation: mark-stretch 0.4s cubic-bezier(0.34, 1.4, 0.64, 1) 0.2s both;
   }
   .loader__mark :global(.mark-dot) {
-    animation-name: mark-pop;
-    animation-delay: 0.45s;
+    animation: mark-drop 0.6s linear 0.42s both;
   }
+
+  .loader__bar {
+    position: absolute;
+    inset: 0 16px auto;
+    height: 1px;
+    background: rgb(255 255 255 / 0.25);
+  }
+  .loader__bar > span {
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    transform-origin: 0 50%;
+    animation: loader-bar 1.2s cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  @media (min-width: 810px) {
+    .loader__bar {
+      inset: 0 24px auto;
+    }
+  }
+  @media (min-width: 1440px) {
+    .loader__bar {
+      inset: 0 40px auto;
+    }
+  }
+  .loader__foot {
+    padding-top: 14px;
+    animation: loader-fade 0.4s ease 0.15s both;
+  }
+  .loader__count {
+    counter-reset: loader var(--loader-n);
+    animation: loader-count 1.2s cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  .loader__count::after {
+    content: counter(loader) '%';
+  }
+  @property --loader-n {
+    syntax: '<integer>';
+    initial-value: 0;
+    inherits: false;
+  }
+
   @keyframes mark-pop {
     from {
       transform: scale(0);
@@ -61,6 +150,48 @@ import LogoMark from '@/components/ui/LogoMark.astro';
   @keyframes mark-stretch {
     from {
       transform: scaleX(0);
+    }
+  }
+  /* Falls from above, lands, and settles with one small bounce. */
+  @keyframes mark-drop {
+    0% {
+      transform: translateY(-260%);
+      opacity: 0;
+      animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+    }
+    10% {
+      opacity: 1;
+    }
+    55% {
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0, 0.55, 0.45, 1);
+    }
+    75% {
+      transform: translateY(-30%);
+      animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+  @keyframes loader-rise {
+    from {
+      transform: translateY(105%);
+    }
+  }
+  @keyframes loader-bar {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes loader-count {
+    to {
+      --loader-n: 100;
+    }
+  }
+  @keyframes loader-fade {
+    from {
+      opacity: 0;
     }
   }
 
