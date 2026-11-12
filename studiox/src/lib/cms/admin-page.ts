@@ -19,7 +19,7 @@ export async function handleListPost(Astro: AstroGlobal, db: Db, resource: Resou
   const form = await Astro.request.formData();
   const intent = String(form.get('intent') ?? '');
   const id = Number(form.get('id'));
-  const ordered = resource !== 'posts';
+  const ordered = resource !== 'posts' && resource !== 'enquiries';
   try {
     if (intent === 'reorder' && ordered) {
       const ids = String(form.get('ids') ?? '').split(',').map(Number);

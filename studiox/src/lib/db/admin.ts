@@ -1,11 +1,11 @@
 import { and, asc, desc, eq, gt, inArray, lt, ne, sql } from 'drizzle-orm';
 import type { Db } from './client';
-import { clients, faqs, posts, projects, services, settings, testimonials, type CmsImage, type SiteImages } from './schema';
+import { clients, enquiries, faqs, posts, projects, services, settings, testimonials, type CmsImage, type SiteImages } from './schema';
 import { DEFAULT_SETTINGS } from './queries';
 import type { ClientInput, FaqInput, PostInput, ProjectInput, ServiceInput, SettingsInput, TestimonialInput } from '../cms/validation';
 
 /** Content types the admin manages as lists. */
-export const tables = { projects, posts, services, testimonials, clients, faqs };
+export const tables = { projects, posts, services, testimonials, clients, faqs, enquiries };
 export type Resource = keyof typeof tables;
 const ordered = { projects, services, testimonials, clients, faqs } as const;
 export type OrderedResource = keyof typeof ordered;

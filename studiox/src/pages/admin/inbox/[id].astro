@@ -1,0 +1,81 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import EditHeader from '@/components/admin/EditHeader.astro';
+import FormCard from '@/components/admin/FormCard.astro';
+import DangerZone from '@/components/admin/DangerZone.astro';
+import Icon from '@/components/admin/Icon.astro';
+import { getDb } from '@/lib/db';
+import { findEnquiry, setEnquiryRead } from '@/lib/db/enquiries';
+import { parseId } from '@/lib/cms/admin-page';
+
+const id = parseId(Astro.params.id);
+if (typeof id !== 'number') return Astro.rewrite('/404');
+const db = await getDb();
+
+// "Mark as unread" posts here; opening the message marks it read.
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  if (form.get('intent') === 'unread') {
+    await setEnquiryRead(db, id, false);
+    return Astro.redirect('/admin/inbox', 303);
+  }
+}
+
+const m = await findEnquiry(db, id);
+if (!m) return Astro.rewrite('/404');
+if (!m.read) await setEnquiryRead(db, id, true);
+
+const sent = m.createdAt.toLocaleString('en-GB', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Jakarta' });
+const reply = `mailto:${m.email}?subject=${encodeURIComponent('Re: Your enquiry to Gandaria Studio')}&body=${encodeURIComponent(`Hi ${m.name.split(' ')[0]},\n\n`)}`;
+const details: [string, string][] = [
+  ['Email', m.email],
+  ['Company', m.company],
+  ['Needs', m.services],
+  ['Budget', m.budget],
+  ['Sent from', m.page],
+];
+---
+
+<AdminLayout title={`Message from ${m.name}`} width="narrow">
+  <EditHeader title={m.name} subtitle={`Sent ${sent} (WIB)`} back={{ href: '/admin/inbox', label: 'Inbox' }} />
+
+  <div class="a-form">
+    <FormCard title="Message">
+      <p class="a-msg-body">{m.message || 'No message, only the details below.'}</p>
+      <dl class="a-dl">
+        {
+          details
+            .filter(([, v]) => v)
+            .map(([k, v]) => (
+              <>
+                <dt>{k}</dt>
+                <dd>{k === 'Email' ? <a href={`mailto:${v}`}>{v}</a> : v}</dd>
+              </>
+            ))
+        }
+      </dl>
+      <div class="a-actions">
+        <a class="a-btn" href={reply}><Icon name="mail" size={16} />Reply by email</a>
+        <form method="post">
+          <input type="hidden" name="intent" value="unread" />
+          <button type="submit" class="a-btn a-btn--ghost">Mark as unread</button>
+        </form>
+      </div>
+    </FormCard>
+
+    <DangerZone action="/admin/inbox" id={m.id} noun="message" message="It is removed from the inbox for everyone. This cannot be undone." />
+  </div>
+</AdminLayout>
+
+<style>
+  .a-dl dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .a-msg-body {
+    margin: 0;
+    white-space: pre-wrap;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+</style>

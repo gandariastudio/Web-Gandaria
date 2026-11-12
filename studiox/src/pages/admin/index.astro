@@ -4,10 +4,11 @@ import Icon, { type IconName } from '@/components/admin/Icon.astro';
 import { getDb } from '@/lib/db';
 import { counts, recentlyEdited } from '@/lib/db/admin';
 import { getSettings } from '@/lib/db/queries';
+import { unreadEnquiries } from '@/lib/db/enquiries';
 import { relativeTime, thumb } from '@/lib/cms/admin-page';
 
 const db = await getDb();
-const [n, recent, settings] = await Promise.all([counts(db), recentlyEdited(db, 6), getSettings(db)]);
+const [n, recent, settings, unread] = await Promise.all([counts(db), recentlyEdited(db, 6), getSettings(db), unreadEnquiries(db)]);
 const tiles: { label: string; href: string; count: number; icon: IconName }[] = [
   { label: 'Projects', href: '/admin/projects', count: n.projects, icon: 'projects' },
   { label: 'Articles', href: '/admin/journal', count: n.posts, icon: 'journal' },
@@ -30,6 +31,18 @@ const kindIcon: Record<string, IconName> = { Project: 'projects', Article: 'jour
       <a class="a-btn" href="/admin/projects/new"><Icon name="plus" size={16} />New project</a>
     </div>
   </header>
+
+  {
+    unread > 0 && (
+      <a class="a-inbox-note" href="/admin/inbox">
+        <Icon name="inbox" size={18} />
+        <span>
+          You have <strong>{unread} new {unread === 1 ? 'message' : 'messages'}</strong> from the contact form.
+        </span>
+        <span class="a-inbox-open">Open inbox →</span>
+      </a>
+    )
+  }
 
   <div class="a-tiles">
     {
@@ -90,3 +103,22 @@ const kindIcon: Record<string, IconName> = { Project: 'projects', Article: 'jour
     <a class="a-btn a-btn--ghost a-btn--sm w-max" href="/admin/settings"><Icon name="settings" size={15} />Edit site details</a>
   </section>
 </AdminLayout>
+
+<style>
+  .a-inbox-note {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    border-radius: 16px;
+    background: #fff3ec;
+    color: #9a3412;
+    font-size: 14px;
+  }
+  .a-inbox-open {
+    margin-left: auto;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+</style>

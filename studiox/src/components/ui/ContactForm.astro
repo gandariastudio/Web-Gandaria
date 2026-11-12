@@ -10,7 +10,12 @@ const inputs: { name: string; label: string; required: boolean; type: 'text' | '
 ];
 ---
 
-<form class="cf relative w-full" novalidate data-contact-form data-email={EMAIL}>
+<form class="cf relative w-full" action="/api/contact" method="post" novalidate data-contact-form data-email={EMAIL}>
+  <!-- Spam trap: hidden from people, filled in by bots. -->
+  <label class="cf-hp" aria-hidden="true">
+    Website
+    <input name="website" type="text" tabindex="-1" autocomplete="off" />
+  </label>
   <div class="cf-grid">
     {
       inputs.map((f) => (
@@ -44,10 +49,11 @@ const inputs: { name: string; label: string; required: boolean; type: 'text' | '
       <textarea name="message" class="cf-input" rows="1" placeholder="Goals, timing, anything we should know"></textarea>
       <span class="cf-line" aria-hidden="true"></span>
     </label>
+    <p class="cf-error cf-full" role="alert" hidden data-cf-error></p>
     <div class="cf-foot cf-full">
       <span class="max-w-[300px] text-[13px] leading-[1.4] text-muted">Your details stay with us. No newsletters, ever.</span>
-      <button type="submit" class="cf-submit">
-        <span class="cf-roll"><span>Send enquiry</span><span aria-hidden="true">Send enquiry</span></span>
+      <button type="submit" class="cf-submit" data-cf-submit>
+        <span class="cf-roll"><span data-cf-label>Send enquiry</span><span aria-hidden="true">Send enquiry</span></span>
         <span class="cf-arrow" aria-hidden="true">→</span>
       </button>
     </div>
@@ -188,6 +194,24 @@ const inputs: { name: string; label: string; required: boolean; type: 'text' | '
   .cf-submit:focus-visible {
     outline: 2px solid var(--color-cobalt);
     outline-offset: 3px;
+  }
+  .cf-hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .cf-error {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.4;
+    color: var(--color-cobalt-deep);
+  }
+  .cf-submit[aria-busy='true'] {
+    cursor: progress;
+    opacity: 0.7;
+    transform: none;
   }
   .cf-foot {
     display: flex;

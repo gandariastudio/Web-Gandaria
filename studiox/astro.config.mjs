@@ -48,6 +48,10 @@ export default defineConfig({
       CLOUDINARY_API_SECRET: envField.string({ context: 'server', access: 'secret', optional: true }),
       // Google Search Console "HTML tag" verification: only the content value, not the whole tag.
       GOOGLE_SITE_VERIFICATION: envField.string({ context: 'server', access: 'public', optional: true }),
+      // Contact form email notifications through Resend. Without a key, messages still land in the admin Inbox.
+      RESEND_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
+      // Sender for those emails, e.g. "Gandaria Website <website@gandariastudio.com>" (domain verified in Resend).
+      CONTACT_FROM_EMAIL: envField.string({ context: 'server', access: 'public', optional: true }),
     },
   },
 

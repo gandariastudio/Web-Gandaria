@@ -36,7 +36,7 @@ npm run db:generate  # after editing src/lib/db/schema.ts, generate a new SQL mi
 
 ### Content: Neon Postgres via Drizzle
 
-- `src/lib/db/schema.ts` — tables `projects`, `posts`, `services`, `testimonials`, `clients`, `faqs`, and single-row `settings` (email, social links, "booking from", and `site_images`: optional uploads for the home zoom sequence, the Numbers background and the About photo, edited on `/admin/site-images`; an empty slot falls back to the built-in image listed in `src/data/site-images.ts` and rendered by `components/ui/SiteImage.astro`). Images are JSON `CmsImage` (`{ publicId?, url?, width, height, alt }`): uploaded images have a Cloudinary `publicId`; seeded sample content uses `url` pointing at `public/placeholders/`.
+- `src/lib/db/schema.ts` — tables `projects`, `posts`, `services`, `testimonials`, `clients`, `faqs`, `enquiries` (contact form messages), and single-row `settings` (email, social links, "booking from", and `site_images`: optional uploads for the home zoom sequence, the Numbers background and the About photo, edited on `/admin/site-images`; an empty slot falls back to the built-in image listed in `src/data/site-images.ts` and rendered by `components/ui/SiteImage.astro`). Images are JSON `CmsImage` (`{ publicId?, url?, width, height, alt }`): uploaded images have a Cloudinary `publicId`; seeded sample content uses `url` pointing at `public/placeholders/`.
 - `src/lib/db/client.ts` — `createDb(url, { allowLocal })`: Neon HTTP driver when `DATABASE_URL` is set; otherwise, in dev/tests only, embedded **PGlite** in `.data/pglite` (gitignored). PGlite is single-process: stop `npm run dev` before running `db:*` scripts against it. Neon HTTP has no interactive transactions, so writes are single statements.
 - `src/lib/db/index.ts` — `getDb()` for app code (reads `astro:env`); local PGlite auto-migrates and seeds itself on first use. Scripts and tests import `client.ts` directly because they cannot resolve `astro:*`.
 - `src/lib/db/queries.ts` — public reads (published rows only, display order) that return the shapes components render. `src/lib/db/admin.ts` — admin lists, `findById`, `save*` (id `null` creates), `removeRow`, `move` (swaps `sort_order`). `seed.ts` + `seed-data.ts` hold the sample content.
@@ -60,7 +60,7 @@ Article bodies are HTML from a vanilla TipTap editor, sanitised on save by `lib/
 
 The browser asks `POST /api/admin/cloudinary-signature` (folder must be one of projects, journal, services, clients, site) and uploads straight to Cloudinary, which avoids Vercel's 4.5 MB request limit. Public pages render CMS images with `components/ui/CmsImage.astro` (`f_auto,q_auto,c_limit,w_…` srcset; cropping is done by CSS `object-cover`). Without Cloudinary env vars, upload is disabled and placeholders keep working. Design images that are not CMS content (zoom sequence, about photo) still go through `astro:assets` from `src/assets/images/`.
 
-Env vars (validated by `env.schema` in `astro.config.mjs`, all optional so the site builds without them): `DATABASE_URL`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, and `GOOGLE_SITE_VERIFICATION` (Search Console HTML-tag value, printed by `Seo.astro`). See `.env.example`. In production a missing `DATABASE_URL` throws.
+Env vars (validated by `env.schema` in `astro.config.mjs`, all optional so the site builds without them): `DATABASE_URL`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `GOOGLE_SITE_VERIFICATION` (Search Console HTML-tag value, printed by `Seo.astro`), and `RESEND_API_KEY` + `CONTACT_FROM_EMAIL` (contact form email notifications). See `.env.example`. In production a missing `DATABASE_URL` throws.
 
 PGlite's files are excluded from the Vercel function in `astro.config.mjs` (`localOnlyFiles`), so production must never import it.
 
@@ -96,7 +96,7 @@ Shared helpers: `scripts/lib/ease.ts` (named `CustomEase` curves matching the CS
 
 ### Contact form
 
-`ContactForm.astro` + `scripts/contact-form.ts` validate client-side and then open a `mailto:` to the settings email. There is no server-side form handling.
+`ContactForm.astro` + `scripts/contact-form.ts` validate client-side, then POST JSON to `pages/api/contact.ts`, which validates with `lib/cms/enquiry.ts#enquirySchema`, drops spam silently (hidden `website` honeypot, or the form open under 3 s via the `elapsed` the browser sends), rate-limits to 5 messages per email per 10 minutes, saves to the `enquiries` table (`lib/db/enquiries.ts`) and then emails the settings address through Resend (`lib/cms/notify.ts`) when `RESEND_API_KEY` is set. Saving comes first and the email never fails the request. Messages are read in the admin Inbox (`/admin/inbox`, unread badge on the rail and a dashboard notice); opening one marks it read.
 
 ## Conventions
 

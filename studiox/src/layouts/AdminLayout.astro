@@ -5,6 +5,7 @@ import '@/styles/global.css';
 import LogoMark from '@/components/ui/LogoMark.astro';
 import Icon, { type IconName } from '@/components/admin/Icon.astro';
 import { getDbHandle } from '@/lib/db';
+import { unreadEnquiries } from '@/lib/db/enquiries';
 
 interface Props {
   title: string;
@@ -14,8 +15,9 @@ interface Props {
 
 const { title, width = 'wide' } = Astro.props;
 const path = Astro.url.pathname;
-const nav: { label: string; href: string; icon: IconName }[] = [
+const nav: { label: string; href: string; icon: IconName; badge?: boolean }[] = [
   { label: 'Dashboard', href: '/admin', icon: 'dashboard' },
+  { label: 'Inbox', href: '/admin/inbox', icon: 'inbox', badge: true },
   { label: 'Projects', href: '/admin/projects', icon: 'projects' },
   { label: 'Journal', href: '/admin/journal', icon: 'journal' },
   { label: 'Services', href: '/admin/services', icon: 'services' },
@@ -36,7 +38,9 @@ const flash = params.has('saved')
       ? 'Order saved'
       : '';
 
-const { kind } = await getDbHandle();
+const { kind, db } = await getDbHandle();
+// Unread contact-form messages, shown as a badge on the Inbox icon.
+const unread = await unreadEnquiries(db).catch(() => 0);
 const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
 ---
 
@@ -60,6 +64,12 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
               <a href={item.href} class:list={['a-rail-link', active(item.href) && 'is-active']} aria-current={active(item.href) ? 'page' : undefined} data-tip={item.label}>
                 <Icon name={item.icon} size={20} />
                 <span class="sr-only">{item.label}</span>
+                {item.badge && unread > 0 && (
+                  <span class="a-badge">
+                    {unread > 99 ? '99+' : unread}
+                    <span class="sr-only"> unread</span>
+                  </span>
+                )}
               </a>
             </li>
           ))
@@ -188,6 +198,22 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     transition:
       background-color 0.2s ease,
       color 0.2s ease;
+  }
+  .a-badge {
+    position: absolute;
+    top: 2px;
+    right: 1px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #f15822;
+    color: #fff;
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 17px;
+    text-align: center;
+    box-shadow: 0 0 0 2px var(--a-bg, #fff);
   }
   .a-rail-link:hover,
   .a-rail-link:focus-visible {
@@ -1024,8 +1050,8 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
       display: contents;
     }
     .a-rail-link {
-      width: 38px;
-      height: 38px;
+      width: 34px;
+      height: 40px;
     }
     .a-savebar-actions {
       flex: 1;

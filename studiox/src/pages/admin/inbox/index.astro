@@ -1,0 +1,92 @@
+---
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import Icon from '@/components/admin/Icon.astro';
+import { getDb } from '@/lib/db';
+import { listEnquiries } from '@/lib/db/enquiries';
+import { excerpt, handleListPost, relativeTime } from '@/lib/cms/admin-page';
+
+const db = await getDb();
+const response = await handleListPost(Astro, db, 'enquiries');
+if (response) return response;
+const messages = await listEnquiries(db);
+const unread = messages.filter((m) => !m.read).length;
+const plural = (n: number) => (n === 1 ? 'message' : 'messages');
+---
+
+<AdminLayout title="Inbox">
+  <header class="a-head">
+    <div>
+      <h1 class="a-title">Inbox</h1>
+      <p class="a-sub">Messages sent through the contact form on the website, newest first.</p>
+    </div>
+  </header>
+
+  {
+    messages.length === 0 ? (
+      <div class="a-empty">
+        <p>No messages yet. When someone sends the contact form, it shows up here.</p>
+      </div>
+    ) : (
+      <>
+        <div class="a-toolbar">
+          <label class="a-search">
+            <Icon name="search" size={16} />
+            <span class="sr-only">Search messages</span>
+            <input type="search" placeholder="Search messages" data-list-search />
+          </label>
+          <span class="a-count" data-list-count data-noun="message">
+            {messages.length} {plural(messages.length)}
+            {unread > 0 && ` · ${unread} new`}
+          </span>
+        </div>
+        <div class="a-rows" data-list>
+          {messages.map((m) => (
+            <article
+              class:list={['a-row', 'a-msg', !m.read && 'is-unread']}
+              data-item
+              data-id={m.id}
+              data-search={[m.name, m.email, m.company, m.services, m.budget, m.message].join(' ').toLowerCase()}>
+              <span class="a-msg-dot" aria-hidden="true" />
+              <div class="a-row-main">
+                <a class="a-row-title" href={`/admin/inbox/${m.id}`}>
+                  {m.name}
+                  {m.company && <span class="a-faint"> · {m.company}</span>}
+                  {!m.read && <span class="sr-only"> (new)</span>}
+                </a>
+                <span class="a-row-meta">{excerpt(m.message || [m.services, m.budget].filter(Boolean).join(' · ') || m.email, 120)}</span>
+              </div>
+              <time class="a-msg-time" datetime={m.createdAt.toISOString()} title={m.createdAt.toLocaleString('en-GB', { timeZone: 'Asia/Jakarta' })}>
+                {relativeTime(m.createdAt)}
+              </time>
+            </article>
+          ))}
+        </div>
+        <p class="a-empty" hidden data-list-empty>
+          No messages match your search.
+        </p>
+      </>
+    )
+  }
+</AdminLayout>
+
+<style>
+  .a-msg-dot {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    border-radius: 999px;
+    background: transparent;
+  }
+  .a-msg.is-unread .a-msg-dot {
+    background: #f15822;
+  }
+  .a-msg.is-unread .a-row-title {
+    font-weight: 600;
+  }
+  .a-msg-time {
+    flex: none;
+    font-size: 13px;
+    color: var(--a-muted);
+    white-space: nowrap;
+  }
+</style>

@@ -6,15 +6,17 @@ interface Props {
   action: string;
   id: number;
   noun: string;
+  /** What deleting means; defaults to the wording for website content. */
+  message?: string;
 }
 
-const { action, id, noun } = Astro.props;
+const { action, id, noun, message = 'It disappears from the website right away. This cannot be undone.' } = Astro.props;
 ---
 
 <section class="a-danger">
   <div>
     <h2>Delete this {noun}</h2>
-    <p>It disappears from the website right away. This cannot be undone.</p>
+    <p>{message}</p>
   </div>
   <form method="post" action={action} class="a-danger-actions">
     <input type="hidden" name="id" value={id} />

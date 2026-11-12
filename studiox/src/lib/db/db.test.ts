@@ -4,6 +4,7 @@ import { isEmpty, seedIfEmpty } from './seed';
 import { getPost, getProject, getSettings, listClients, listFaqs, listPosts, listProjects, listServices, listTestimonials } from './queries';
 import { adminListFaqs, adminListServices, counts, move, recentlyEdited, removeRow, reorder, saveFaq, saveProject, saveSettings, saveSiteImages, slugTaken, findById } from './admin';
 import { seedProjects } from './seed-data';
+import { findEnquiry, listEnquiries, recentFromEmail, saveEnquiry, setEnquiryRead, unreadEnquiries } from './enquiries';
 
 let db: Db;
 
@@ -89,5 +90,20 @@ describe('drag-and-drop order and dashboard', () => {
     expect(recent).toHaveLength(3);
     expect(recent[0]).toMatchObject({ kind: 'FAQ', href: '/admin/faqs/1' });
     expect(recent[0].updatedAt.getTime()).toBeGreaterThanOrEqual(recent[1].updatedAt.getTime());
+  });
+});
+
+describe('enquiries', () => {
+  it('saves messages unread, newest first, and counts recent ones per email', async () => {
+    const base = { company: '', services: 'Brand', budget: '', message: 'Hi', page: '/contact' };
+    const first = await saveEnquiry(db, { ...base, name: 'Rina', email: 'rina@example.com' });
+    const second = await saveEnquiry(db, { ...base, name: 'Adi', email: 'adi@example.com' });
+    expect((await listEnquiries(db)).map((e) => e.id).slice(0, 2)).toEqual([second, first]);
+    expect(await unreadEnquiries(db)).toBe(2);
+    await setEnquiryRead(db, first, true);
+    expect((await findEnquiry(db, first))?.read).toBe(true);
+    expect(await unreadEnquiries(db)).toBe(1);
+    expect(await recentFromEmail(db, 'RINA@example.com', 10)).toBe(1);
+    expect(await recentFromEmail(db, 'rina@example.com', 10, new Date(Date.now() + 11 * 60_000))).toBe(0);
   });
 });

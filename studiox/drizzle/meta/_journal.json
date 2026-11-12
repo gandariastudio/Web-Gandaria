@@ -15,6 +15,13 @@
       "when": 1794467187084,
       "tag": "0001_dapper_obadiah_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794472554058,
+      "tag": "0002_shallow_madrox",
+      "breakpoints": true
     }
   ]
 }

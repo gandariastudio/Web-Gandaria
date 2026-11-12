@@ -92,6 +92,21 @@ export const faqs = pgTable('faqs', {
   ...timestamps,
 });
 
+/** Messages sent through the website's contact form (read in the admin Inbox). */
+export const enquiries = pgTable('enquiries', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  company: text('company').notNull().default(''),
+  services: text('services').notNull().default(''),
+  budget: text('budget').notNull().default(''),
+  message: text('message').notNull().default(''),
+  /** The page the form was sent from, e.g. "/contact". */
+  page: text('page').notNull().default(''),
+  read: boolean('read').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 /** Single-row table (id is always 1). */
 export const settings = pgTable('settings', {
   id: integer('id').primaryKey().default(1),
@@ -111,6 +126,7 @@ export type SiteImages = {
 };
 
 export type ProjectRow = typeof projects.$inferSelect;
+export type EnquiryRow = typeof enquiries.$inferSelect;
 export type PostRow = typeof posts.$inferSelect;
 export type ServiceRow = typeof services.$inferSelect;
 export type TestimonialRow = typeof testimonials.$inferSelect;
