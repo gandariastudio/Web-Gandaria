@@ -98,8 +98,17 @@ export const settings = pgTable('settings', {
   email: text('email').notNull(),
   socialLinks: jsonb('social_links').$type<SocialLink[]>().notNull(),
   bookingFrom: text('booking_from').notNull(),
+  /** Optional replacements for the built-in design images; an empty slot keeps the built-in one. */
+  siteImages: jsonb('site_images').$type<SiteImages>().notNull().default({}),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+/** Image slots on the home and About pages that the admin can replace (see src/data/site-images.ts). */
+export type SiteImages = {
+  zoom?: (CmsImage | null)[];
+  numbers?: CmsImage | null;
+  about?: CmsImage | null;
+};
 
 export type ProjectRow = typeof projects.$inferSelect;
 export type PostRow = typeof posts.$inferSelect;

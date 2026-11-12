@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { createDb, migrateDb, type Db } from './client';
 import { isEmpty, seedIfEmpty } from './seed';
 import { getPost, getProject, getSettings, listClients, listFaqs, listPosts, listProjects, listServices, listTestimonials } from './queries';
-import { adminListFaqs, adminListServices, counts, move, recentlyEdited, removeRow, reorder, saveFaq, saveProject, saveSettings, slugTaken, findById } from './admin';
+import { adminListFaqs, adminListServices, counts, move, recentlyEdited, removeRow, reorder, saveFaq, saveProject, saveSettings, saveSiteImages, slugTaken, findById } from './admin';
 import { seedProjects } from './seed-data';
 
 let db: Db;
@@ -58,8 +58,18 @@ describe('admin writes', () => {
     const id = await saveFaq(db, null, { question: 'New?', answer: 'Yes.' });
     expect((await adminListFaqs(db)).at(-1)?.id).toBe(id);
     await saveSettings(db, { email: 'studio@gandariastudio.com', bookingFrom: 'Q2 2027', socialLinks: [] });
-    expect(await getSettings(db)).toEqual({ email: 'studio@gandariastudio.com', bookingFrom: 'Q2 2027', socialLinks: [] });
+    expect(await getSettings(db)).toEqual({ email: 'studio@gandariastudio.com', bookingFrom: 'Q2 2027', socialLinks: [], siteImages: {} });
     expect((await counts(db)).faqs).toBe(6);
+  });
+  it('saves site images without touching the other settings', async () => {
+    const photo = { publicId: 'gandaria/site/about', width: 2400, height: 1260, alt: 'The studio' };
+    await saveSiteImages(db, { zoom: [null, null, null, null, null, null], numbers: null, about: photo });
+    const settings = await getSettings(db);
+    expect(settings.siteImages.about).toEqual(photo);
+    expect(settings.siteImages.zoom).toHaveLength(6);
+    expect(settings.email).toBe('studio@gandariastudio.com');
+    await saveSettings(db, { email: 'studio@gandariastudio.com', bookingFrom: 'Q3 2027', socialLinks: [] });
+    expect((await getSettings(db)).siteImages.about).toEqual(photo);
   });
 });
 

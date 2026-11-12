@@ -1,9 +1,9 @@
 import { asc, desc, eq, and } from 'drizzle-orm';
 import type { Db } from './client';
-import { clients, faqs, posts, projects, services, settings, testimonials, type PostRow, type SocialLink } from './schema';
+import { clients, faqs, posts, projects, services, settings, testimonials, type PostRow, type SiteImages, type SocialLink } from './schema';
 import { readTime } from '../cms/read-time';
 
-export type SiteSettings = { email: string; socialLinks: SocialLink[]; bookingFrom: string };
+export type SiteSettings = { email: string; socialLinks: SocialLink[]; bookingFrom: string; siteImages: SiteImages };
 
 /** Used when the settings row is missing (fresh database) or the database is unreachable. */
 export const DEFAULT_SETTINGS: SiteSettings = {
@@ -13,11 +13,12 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     { label: 'Instagram', href: 'https://www.instagram.com' },
   ],
   bookingFrom: 'Q1 2027',
+  siteImages: {},
 };
 
 export async function getSettings(db: Db): Promise<SiteSettings> {
   const [row] = await db.select().from(settings).where(eq(settings.id, 1)).limit(1);
-  return row ? { email: row.email, socialLinks: row.socialLinks, bookingFrom: row.bookingFrom } : DEFAULT_SETTINGS;
+  return row ? { email: row.email, socialLinks: row.socialLinks, bookingFrom: row.bookingFrom, siteImages: row.siteImages ?? {} } : DEFAULT_SETTINGS;
 }
 
 export const listProjects = (db: Db) =>

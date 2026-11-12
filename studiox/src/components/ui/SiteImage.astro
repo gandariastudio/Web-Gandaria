@@ -1,0 +1,29 @@
+---
+import { Image } from 'astro:assets';
+import CmsImage from './CmsImage.astro';
+import type { CmsImage as CmsImageData } from '@/lib/db/schema';
+import type { BuiltInImage } from '@/data/site-images';
+import { hasImage } from '@/lib/cms/cloudinary';
+
+/** A replaceable design image: the upload from Site images in the admin, or the built-in one. */
+interface Props {
+  image?: CmsImageData | null;
+  builtIn: BuiltInImage;
+  widths: number[];
+  sizes: string;
+  class?: string;
+  loading?: 'eager' | 'lazy';
+  alt?: string;
+  [attr: `data-${string}`]: string | boolean | undefined;
+}
+
+const { image, builtIn, widths, sizes, class: className, loading = 'lazy', alt, ...data } = Astro.props;
+---
+
+{
+  hasImage(image) ? (
+    <CmsImage image={image} widths={widths} sizes={sizes} class={className} loading={loading} alt={alt} {...data} />
+  ) : (
+    <Image src={builtIn.src} alt={alt ?? builtIn.alt} widths={widths} sizes={sizes} class={className} loading={loading} {...data} />
+  )
+}

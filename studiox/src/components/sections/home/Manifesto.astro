@@ -1,6 +1,9 @@
 ---
-import { Image } from 'astro:assets';
-import { zoomImages } from '@/data/home';
+import SiteImage from '@/components/ui/SiteImage.astro';
+import { SITE_IMAGE_SLOTS } from '@/data/site-images';
+
+const zoomImages = SITE_IMAGE_SLOTS.zoom.builtIn;
+const uploads = Astro.locals.settings.siteImages.zoom ?? [];
 
 const START = 300;
 ---
@@ -11,9 +14,9 @@ const START = 300;
       <div class="absolute inset-0 origin-center scale-[1.35]" data-zoom-scale>
         {
           zoomImages.map((img, i) => (
-            <Image
-              src={img.src}
-              alt={img.alt}
+            <SiteImage
+              image={uploads[i]}
+              builtIn={img}
               widths={[828, 1440, 2400]}
               sizes="100vw"
               loading={i === 0 ? 'eager' : 'lazy'}

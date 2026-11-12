@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clientSchema, postSchema, projectSchema, readers, settingsSchema, validate } from './validation';
+import { clientSchema, postSchema, projectSchema, readers, settingsSchema, siteImagesSchema, validate } from './validation';
 
 const fd = (entries: Record<string, string>) => {
   const f = new FormData();
@@ -63,5 +63,16 @@ describe('client and settings forms', () => {
     expect(!r.ok && r.errors['socialLinks.1.href']).toMatch(/full URL/);
     const ok = validate(settingsSchema, readers.settings(fd({ email: 'hello@gandariastudio.com', bookingFrom: 'Q1 2027', 'social.0.label': 'Instagram', 'social.0.href': 'https://instagram.com/x' })));
     expect(ok.ok && ok.data.socialLinks).toEqual([{ label: 'Instagram', href: 'https://instagram.com/x' }]);
+  });
+});
+
+describe('site images', () => {
+  it('treats empty slots as "keep the built-in image" and requires alt text for uploads', () => {
+    const empty = validate(siteImagesSchema, readers.siteImages(fd({})));
+    expect(empty.ok && empty.data).toEqual({ zoom: [null, null, null, null, null, null], numbers: null, about: null });
+    const missingAlt = validate(siteImagesSchema, readers.siteImages(fd({ 'zoom.2': img })));
+    expect(!missingAlt.ok && missingAlt.errors['zoom.2.alt']).toMatch(/Describe/);
+    const ok = validate(siteImagesSchema, readers.siteImages(fd({ about: img, about_alt: 'The studio' })));
+    expect(ok.ok && ok.data.about).toMatchObject({ width: 1200, height: 800, alt: 'The studio' });
   });
 });

@@ -82,6 +82,18 @@ export const settingsSchema = z.object({
   socialLinks: z.array(z.object({ label: required('Label'), href: z.url('Enter a full URL starting with https://') })),
 });
 
+/** A replaceable image: empty means "keep the built-in image", so it becomes null. */
+const optionalImage = z.preprocess(
+  (v) => (v && typeof v === 'object' && ((v as Partial<CmsImage>).publicId || (v as Partial<CmsImage>).url) ? v : null),
+  image('an image').nullable(),
+);
+
+export const siteImagesSchema = z.object({
+  zoom: z.array(optionalImage).length(6),
+  numbers: optionalImage,
+  about: optionalImage,
+});
+
 export type ProjectInput = z.infer<typeof projectSchema>;
 export type PostInput = z.infer<typeof postSchema>;
 export type ServiceInput = z.infer<typeof serviceSchema>;
@@ -89,6 +101,7 @@ export type TestimonialInput = z.infer<typeof testimonialSchema>;
 export type ClientInput = z.infer<typeof clientSchema>;
 export type FaqInput = z.infer<typeof faqSchema>;
 export type SettingsInput = z.infer<typeof settingsSchema>;
+export type SiteImagesInput = z.infer<typeof siteImagesSchema>;
 
 /* ---------- FormData -> plain objects ---------- */
 
@@ -149,6 +162,11 @@ export const readers = {
     displayHeight: str(f, 'displayHeight'),
   }),
   faq: (f: FormData) => ({ question: str(f, 'question'), answer: str(f, 'answer') }),
+  siteImages: (f: FormData) => ({
+    zoom: [0, 1, 2, 3, 4, 5].map((i) => readImage(f, `zoom.${i}`)),
+    numbers: readImage(f, 'numbers'),
+    about: readImage(f, 'about'),
+  }),
   settings: (f: FormData) => ({
     email: str(f, 'email'),
     bookingFrom: str(f, 'bookingFrom'),

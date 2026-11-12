@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, gt, inArray, lt, ne, sql } from 'drizzle-orm';
 import type { Db } from './client';
-import { clients, faqs, posts, projects, services, settings, testimonials, type CmsImage } from './schema';
+import { clients, faqs, posts, projects, services, settings, testimonials, type CmsImage, type SiteImages } from './schema';
+import { DEFAULT_SETTINGS } from './queries';
 import type { ClientInput, FaqInput, PostInput, ProjectInput, ServiceInput, SettingsInput, TestimonialInput } from '../cms/validation';
 
 /** Content types the admin manages as lists. */
@@ -114,6 +115,15 @@ export async function saveSettings(db: Db, input: SettingsInput) {
     .insert(settings)
     .values({ id: 1, ...input })
     .onConflictDoUpdate({ target: settings.id, set: { ...input, updatedAt: now() } });
+}
+
+/** Replace the site images. Creates the settings row with defaults if the database has none yet. */
+export async function saveSiteImages(db: Db, siteImages: SiteImages) {
+  const { email, socialLinks, bookingFrom } = DEFAULT_SETTINGS;
+  await db
+    .insert(settings)
+    .values({ id: 1, email, socialLinks, bookingFrom, siteImages })
+    .onConflictDoUpdate({ target: settings.id, set: { siteImages, updatedAt: now() } });
 }
 
 export async function removeRow(db: Db, resource: Resource, id: number) {

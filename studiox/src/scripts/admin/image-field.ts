@@ -48,8 +48,29 @@ export function initImageFields() {
     const bar = field.querySelector<HTMLElement>('[data-progress]')!;
     const form = field.closest('form');
     const save = form?.querySelector<HTMLButtonElement>('[data-save]');
+    const reset = field.querySelector<HTMLButtonElement>('[data-image-reset]');
+    const alt = field.querySelector<HTMLInputElement>('[data-image-alt]');
     const enabled = !fileInput.disabled;
     let busy = false;
+
+    const showPreview = (src: string) => {
+      box.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = '';
+      box.append(img);
+      drop.classList.add('has-image');
+    };
+
+    // Optional slots (site images): go back to the built-in image by clearing the upload.
+    reset?.addEventListener('click', () => {
+      valueInput.value = '';
+      if (alt) alt.value = '';
+      if (field.dataset.fallback) showPreview(field.dataset.fallback);
+      status.textContent = 'Using the built-in image. Save to apply.';
+      reset.hidden = true;
+      form?.dispatchEvent(new Event('change'));
+    });
 
     async function handle(file: File | undefined) {
       if (!file || busy || !enabled) return;
@@ -66,12 +87,8 @@ export function initImageFields() {
           text.textContent = `Uploading ${pct}%`;
         });
         valueInput.value = JSON.stringify({ publicId: result.public_id, url: null, width: result.width, height: result.height });
-        box.innerHTML = '';
-        const img = document.createElement('img');
-        img.src = result.secure_url;
-        img.alt = '';
-        box.append(img);
-        drop.classList.add('has-image');
+        showPreview(result.secure_url);
+        if (reset) reset.hidden = false;
         text.textContent = 'Drop a new image or click to replace';
         status.textContent = `Uploaded ${result.width} × ${result.height}. Save to apply.`;
         form?.dispatchEvent(new Event('change'));

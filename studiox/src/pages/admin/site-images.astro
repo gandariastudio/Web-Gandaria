@@ -1,0 +1,93 @@
+---
+import { getImage } from 'astro:assets';
+import AdminLayout from '@/layouts/AdminLayout.astro';
+import EditHeader from '@/components/admin/EditHeader.astro';
+import FormCard from '@/components/admin/FormCard.astro';
+import ImageField from '@/components/admin/ImageField.astro';
+import SaveBar from '@/components/admin/SaveBar.astro';
+import { getDb } from '@/lib/db';
+import { saveSiteImages } from '@/lib/db/admin';
+import { getSettings } from '@/lib/db/queries';
+import { readers, siteImagesSchema, validate, type FieldErrors } from '@/lib/cms/validation';
+import { saveErrorMessage } from '@/lib/cms/admin-page';
+import { SITE_IMAGE_SLOTS, type BuiltInImage } from '@/data/site-images';
+
+const db = await getDb();
+let values: any = (await getSettings(db)).siteImages;
+let errors: FieldErrors = {};
+
+if (Astro.request.method === 'POST') {
+  values = readers.siteImages(await Astro.request.formData());
+  const result = validate(siteImagesSchema, values);
+  if (!result.ok) errors = result.errors;
+  else {
+    try {
+      await saveSiteImages(db, result.data);
+      return Astro.redirect('/admin/site-images?saved=1', 303);
+    } catch (error) {
+      errors = { _form: saveErrorMessage(error) };
+    }
+  }
+  Astro.response.status = 422;
+}
+
+/** Small preview of a built-in image for the empty-slot state. */
+const preview = async (img: BuiltInImage) => (await getImage({ src: img.src, width: 960 })).src;
+const zoomPreviews = await Promise.all(SITE_IMAGE_SLOTS.zoom.builtIn.map(preview));
+const numbersPreview = await preview(SITE_IMAGE_SLOTS.numbers.builtIn);
+const aboutPreview = await preview(SITE_IMAGE_SLOTS.about.builtIn);
+---
+
+<AdminLayout title="Site images" width="narrow">
+  <EditHeader
+    title="Site images"
+    subtitle="Photos on the home and About pages that are not part of a project or article. Empty slots use the built-in image."
+    back={{ href: '/admin', label: 'Dashboard' }}
+    errors={errors}
+  />
+
+  <form method="post" class="a-form" data-edit-form data-start-dirty={String(Astro.request.method === 'POST')}>
+    <FormCard title="Home: scrolling zoom" description="The six photos that change as visitors scroll through the “Strategy … Craft” section, in this order.">
+      {
+        zoomPreviews.map((fallback, i) => (
+          <ImageField
+            name={`zoom.${i}`}
+            label={`Photo ${i + 1}`}
+            value={values.zoom?.[i]}
+            folder="site"
+            errors={errors}
+            recommended={SITE_IMAGE_SLOTS.zoom.recommended}
+            fallback={fallback}
+          />
+        ))
+      }
+    </FormCard>
+
+    <FormCard title="Home: numbers background" description="The full-width photo behind the studio numbers.">
+      <ImageField
+        name="numbers"
+        label="Background photo"
+        value={values.numbers}
+        folder="site"
+        errors={errors}
+        recommended={SITE_IMAGE_SLOTS.numbers.recommended}
+        hint="Shown in black and white, so any colour photo works."
+        fallback={numbersPreview}
+      />
+    </FormCard>
+
+    <FormCard title="About: studio photo" description="The wide photo near the top of the About page.">
+      <ImageField
+        name="about"
+        label="Studio photo"
+        value={values.about}
+        folder="site"
+        errors={errors}
+        recommended={SITE_IMAGE_SLOTS.about.recommended}
+        fallback={aboutPreview}
+      />
+    </FormCard>
+
+    <SaveBar saveLabel="Save images" isNew={false} resetHref="/admin/site-images" />
+  </form>
+</AdminLayout>

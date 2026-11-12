@@ -3,7 +3,7 @@ import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME } from
 import { signUploadParams } from '@/lib/cms/cloudinary';
 
 /** Folders the admin may upload into (always under gandaria/). */
-const FOLDERS = new Set(['projects', 'journal', 'services', 'clients']);
+const FOLDERS = new Set(['projects', 'journal', 'services', 'clients', 'site']);
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 

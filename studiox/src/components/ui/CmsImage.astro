@@ -11,9 +11,11 @@ interface Props {
   class?: string;
   loading?: 'eager' | 'lazy';
   alt?: string;
+  /** data-* attributes are passed through to the <img>. */
+  [attr: `data-${string}`]: string | boolean | undefined;
 }
 
-const { image, widths = [640, 1280, 1920], sizes = '100vw', class: className, loading = 'lazy', alt } = Astro.props;
+const { image, widths = [640, 1280, 1920], sizes = '100vw', class: className, loading = 'lazy', alt, ...data } = Astro.props;
 const src = imageSrc(image, CLOUDINARY_CLOUD_NAME, Math.min(Math.max(...widths), image.width));
 const srcset = imageSrcset(image, CLOUDINARY_CLOUD_NAME, widths);
 ---
@@ -29,4 +31,5 @@ const srcset = imageSrcset(image, CLOUDINARY_CLOUD_NAME, widths);
   fetchpriority={loading === 'eager' ? 'high' : undefined}
   decoding="async"
   class={className}
+  {...data}
 />

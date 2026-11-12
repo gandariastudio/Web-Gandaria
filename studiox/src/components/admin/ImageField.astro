@@ -16,18 +16,25 @@ interface Props {
   hint?: string;
   /** Show the image without cropping (logos). */
   contain?: boolean;
+  /**
+   * Preview URL of a built-in image used while this slot is empty. Makes the field optional and
+   * adds a "Use built-in image" button that clears the upload.
+   */
+  fallback?: string;
 }
 
-const { name, label, value, folder, errors = {}, recommended, hint, contain = false } = Astro.props;
+const { name, label, value, folder, errors = {}, recommended, hint, contain = false, fallback } = Astro.props;
 const ready = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
 const source = value && (value.publicId || value.url) ? { publicId: value.publicId ?? null, url: value.url ?? null, width: value.width, height: value.height } : null;
-const preview = source ? imageSrc({ ...source, width: source.width ?? 0, height: source.height ?? 0, alt: '' }, CLOUDINARY_CLOUD_NAME, 960) : '';
+const uploaded = source ? imageSrc({ ...source, width: source.width ?? 0, height: source.height ?? 0, alt: '' }, CLOUDINARY_CLOUD_NAME, 960) : '';
+const preview = uploaded || fallback || '';
+const usingBuiltIn = !uploaded && !!fallback;
 const imageError = errors[`${name}.width`] ?? errors[`${name}.height`] ?? errors[name];
 const altError = errors[`${name}.alt`];
 const id = `f-${name.replace(/[^a-z0-9]+/gi, '-')}`;
 ---
 
-<div class:list={['a-field', (imageError || altError) && 'has-error']} data-image-field data-folder={folder}>
+<div class:list={['a-field', (imageError || altError) && 'has-error']} data-image-field data-folder={folder} data-fallback={fallback}>
   <span class="a-label">{label}</span>
   <label class:list={['a-drop', !ready && 'is-off', preview && 'has-image', contain && 'is-contain']} data-drop>
     <input type="file" accept="image/*" class="sr-only" data-image-file disabled={!ready} />
@@ -38,20 +45,31 @@ const id = `f-${name.replace(/[^a-z0-9]+/gi, '-')}`;
         {ready ? (preview ? 'Drop a new image or click to replace' : 'Drop an image here or click to upload') : 'Upload is off until Cloudinary is connected'}
       </span>
       <span class="a-hint" data-image-status>
-        {source?.width ? `Current ${source.width} × ${source.height}` : ''}{recommended ? `${source?.width ? ' · ' : ''}Recommended ${recommended}` : ''}
+        {usingBuiltIn ? 'Built-in image · ' : ''}{source?.width ? `Current ${source.width} × ${source.height}` : ''}{recommended ? `${source?.width ? ' · ' : ''}Recommended ${recommended}` : ''}
       </span>
     </span>
     <span class="a-drop-progress" aria-hidden="true"><span data-progress></span></span>
   </label>
   <input type="hidden" name={name} value={source ? JSON.stringify(source) : ''} data-image-value />
+  {
+    fallback && (
+      <button type="button" class="a-btn a-btn--ghost a-btn--sm a-reset" data-image-reset hidden={usingBuiltIn}>
+        Use built-in image
+      </button>
+    )
+  }
   {hint && <p class="a-hint">{hint}</p>}
   {imageError && <p class="a-error">{imageError}</p>}
-  <label class="a-label a-label--spaced" for={`${id}-alt`}>Describe the image <span class="a-req">*</span></label>
-  <input id={`${id}-alt`} name={`${name}_alt`} value={value?.alt ?? ''} class="a-input" placeholder="What does the image show? Read aloud by screen readers." />
+  <label class="a-label a-label--spaced" for={`${id}-alt`}>Describe the image {!fallback && <span class="a-req">*</span>}</label>
+  <input id={`${id}-alt`} name={`${name}_alt`} value={value?.alt ?? ''} class="a-input" placeholder={fallback ? 'Needed when you upload an image. Read aloud by screen readers.' : 'What does the image show? Read aloud by screen readers.'} data-image-alt />
   {altError && <p class="a-error">{altError}</p>}
 </div>
 
 <style>
+  .a-reset {
+    align-self: flex-start;
+    margin-top: 8px;
+  }
   .a-drop {
     position: relative;
     display: flex;
