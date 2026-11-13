@@ -4,6 +4,7 @@ import { sanitizeArticle } from './sanitize';
 import { countWords } from './read-time';
 import { SLUG_PATTERN } from './slugify';
 import { MAX_ZOOM } from './crop';
+import { videoEmbed } from './blocks';
 
 const required = (label: string) => z.string().trim().min(1, `${label} is required`);
 const slug = z.string().trim().min(1, 'Slug is required').max(80).regex(SLUG_PATTERN, 'Use lowercase letters, numbers and hyphens only');
@@ -22,6 +23,55 @@ const image = (label: string) =>
     })
     .refine((i) => !!(i.publicId || i.url), { message: `Upload ${label}`, path: ['width'] });
 
+const result = z.object({ value: required('Value'), label: required('Label') });
+
+/** One case-study block; see ProjectBlock in db/schema.ts. */
+const blockSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('text'),
+    label: z.string().trim().max(80).default(''),
+    text: required('Text'),
+    size: z.enum(['statement', 'paragraph']).default('statement'),
+  }),
+  z.object({
+    type: z.literal('image'),
+    image: image('an image'),
+    width: z.enum(['contained', 'full']).default('contained'),
+    caption: z.string().trim().max(200).default(''),
+  }),
+  z.object({
+    type: z.literal('gallery'),
+    images: z.array(image('an image')).min(2, 'Add at least two images').max(3, 'Use at most three images'),
+  }),
+  z
+    .object({
+      type: z.literal('video'),
+      source: z.enum(['upload', 'embed']),
+      video: z
+        .object({ publicId: z.string().min(1), width: z.coerce.number().int().positive(), height: z.coerce.number().int().positive() })
+        .nullish()
+        .transform((v) => v ?? null),
+      url: z.string().trim().default(''),
+      width: z.enum(['contained', 'full']).default('contained'),
+      caption: z.string().trim().max(200).default(''),
+    })
+    .superRefine((b, ctx) => {
+      if (b.source === 'upload' && !b.video) ctx.addIssue({ code: 'custom', path: ['video'], message: 'Upload a video' });
+      if (b.source === 'embed' && !videoEmbed(b.url)) ctx.addIssue({ code: 'custom', path: ['url'], message: 'Paste a YouTube or Vimeo link' });
+    }),
+  z.object({
+    type: z.literal('results'),
+    label: z.string().trim().max(80).default(''),
+    items: z.array(result).min(1, 'Add at least one result').max(4, 'Use at most four results'),
+  }),
+  z.object({
+    type: z.literal('quote'),
+    quote: required('Quote'),
+    name: required('Name'),
+    role: z.string().trim().max(120).default(''),
+  }),
+]);
+
 export const projectSchema = z.object({
   slug,
   title: required('Title'),
@@ -31,11 +81,8 @@ export const projectSchema = z.object({
   services: required('Services'),
   client: required('Client'),
   role: required('Role'),
-  challenge: required('Challenge'),
-  approach: required('Approach'),
   cover: image('a cover image'),
-  results: z.array(z.object({ value: required('Value'), label: required('Label') })).length(3),
-  gallery: z.array(image('a gallery image')).length(2),
+  blocks: z.array(blockSchema).max(40, 'Use at most 40 blocks'),
   published: z.boolean(),
 });
 
@@ -124,6 +171,56 @@ export function readImage(form: FormData, name: string): Partial<CmsImage> {
   return { ...base, alt: str(form, `${name}_alt`) };
 }
 
+const hasUpload = (img: Partial<CmsImage>) => !!(img.publicId || img.url);
+
+/**
+ * Blocks post as `blocks.<i>.<field>`, numbered 0, 1, 2… in page order (the admin script renumbers
+ * them before submitting). Empty image slots and empty result rows are dropped.
+ */
+export function readBlocks(f: FormData) {
+  const blocks: Record<string, unknown>[] = [];
+  for (let i = 0; i < 100; i++) {
+    const at = (field: string) => `blocks.${i}.${field}`;
+    const type = str(f, at('type'));
+    if (!type) break;
+    switch (type) {
+      case 'text':
+        blocks.push({ type, label: str(f, at('label')), text: str(f, at('text')), size: str(f, at('size')) || 'statement' });
+        break;
+      case 'image':
+        blocks.push({ type, image: readImage(f, at('image')), width: str(f, at('width')) || 'contained', caption: str(f, at('caption')) });
+        break;
+      case 'gallery':
+        blocks.push({ type, images: [0, 1, 2].map((j) => readImage(f, at(`images.${j}`))).filter(hasUpload) });
+        break;
+      case 'video': {
+        let video: unknown = null;
+        try {
+          const raw = str(f, at('video'));
+          if (raw) video = JSON.parse(raw);
+        } catch {
+          video = null;
+        }
+        blocks.push({ type, source: str(f, at('source')) || 'upload', video, url: str(f, at('url')), width: str(f, at('width')) || 'contained', caption: str(f, at('caption')) });
+        break;
+      }
+      case 'results':
+        blocks.push({
+          type,
+          label: str(f, at('label')),
+          items: [0, 1, 2, 3].map((j) => ({ value: str(f, at(`items.${j}.value`)), label: str(f, at(`items.${j}.label`)) })).filter((r) => r.value || r.label),
+        });
+        break;
+      case 'quote':
+        blocks.push({ type, quote: str(f, at('quote')), name: str(f, at('name')), role: str(f, at('role')) });
+        break;
+      default:
+        blocks.push({ type });
+    }
+  }
+  return blocks;
+}
+
 export const readers = {
   project: (f: FormData) => ({
     slug: str(f, 'slug'),
@@ -134,11 +231,8 @@ export const readers = {
     services: str(f, 'services'),
     client: str(f, 'client'),
     role: str(f, 'role'),
-    challenge: str(f, 'challenge'),
-    approach: str(f, 'approach'),
     cover: readImage(f, 'cover'),
-    results: [0, 1, 2].map((i) => ({ value: str(f, `results.${i}.value`), label: str(f, `results.${i}.label`) })),
-    gallery: [0, 1].map((i) => readImage(f, `gallery.${i}`)),
+    blocks: readBlocks(f),
     published: bool(f, 'published'),
   }),
   post: (f: FormData) => ({

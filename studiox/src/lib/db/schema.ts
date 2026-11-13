@@ -18,6 +18,26 @@ export type CmsImage = {
 export type ImageCrop = { x: number; y: number; zoom: number };
 
 export type ProjectResult = { value: string; label: string };
+
+/** A video uploaded to Cloudinary (resource type "video"). */
+export type CmsVideo = { publicId: string; width: number; height: number };
+
+/** Contained = inside the page margins; full = edge to edge. */
+export type BlockWidth = 'contained' | 'full';
+
+/**
+ * The case study below the cover is a list of blocks, arranged in the admin like Dribbble's shot
+ * editor. Rendered by components/sections/project/ProjectBlocks.astro.
+ */
+export type ProjectBlock =
+  | { type: 'text'; label: string; text: string; size: 'statement' | 'paragraph' }
+  | { type: 'image'; image: CmsImage; width: BlockWidth; caption: string }
+  | { type: 'gallery'; images: CmsImage[] }
+  | { type: 'video'; source: 'upload' | 'embed'; video: CmsVideo | null; url: string; width: BlockWidth; caption: string }
+  | { type: 'results'; label: string; items: ProjectResult[] }
+  | { type: 'quote'; quote: string; name: string; role: string };
+
+export type ProjectBlockType = ProjectBlock['type'];
 export type SocialLink = { label: string; href: string };
 
 const timestamps = {
@@ -37,10 +57,14 @@ export const projects = pgTable('projects', {
   client: text('client').notNull(),
   role: text('role').notNull(),
   cover: jsonb('cover').$type<CmsImage>().notNull(),
-  challenge: text('challenge').notNull(),
-  approach: text('approach').notNull(),
-  results: jsonb('results').$type<ProjectResult[]>().notNull(),
-  gallery: jsonb('gallery').$type<CmsImage[]>().notNull(),
+  /** The case study below the cover. */
+  blocks: jsonb('blocks').$type<ProjectBlock[]>().notNull().default([]),
+  // Before blocks, the case study had these fixed fields. Migration 0003 copied them into
+  // `blocks`; they are kept (no longer edited) so older deployments keep working.
+  challenge: text('challenge').notNull().default(''),
+  approach: text('approach').notNull().default(''),
+  results: jsonb('results').$type<ProjectResult[]>().notNull().default([]),
+  gallery: jsonb('gallery').$type<CmsImage[]>().notNull().default([]),
   published: boolean('published').notNull().default(true),
   ...timestamps,
 });

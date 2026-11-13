@@ -1,0 +1,55 @@
+---
+import { CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, CLOUDINARY_CLOUD_NAME } from 'astro:env/server';
+import Icon from './Icon.astro';
+import type { CmsVideo } from '@/lib/db/schema';
+import { cloudinaryVideo } from '@/lib/cms/blocks';
+
+/** Upload a short clip to Cloudinary; it plays muted and on a loop on the website. */
+interface Props {
+  name: string;
+  label: string;
+  value?: Partial<CmsVideo> | null;
+  folder: string;
+  error?: string;
+}
+
+const { name, label, value, folder, error } = Astro.props;
+const ready = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
+const source = value?.publicId && value.width && value.height ? { publicId: value.publicId, width: value.width, height: value.height } : null;
+const preview = source && CLOUDINARY_CLOUD_NAME ? cloudinaryVideo(CLOUDINARY_CLOUD_NAME, source, 960).src : '';
+---
+
+<div class:list={['a-field', error && 'has-error']} data-video-field data-folder={folder}>
+  <span class="a-label">{label}</span>
+  <label class:list={['a-drop', !ready && 'is-off', preview && 'has-image']} data-drop>
+    <input type="file" accept="video/mp4,video/webm,video/quicktime" class="sr-only" data-video-file disabled={!ready} />
+    <span class="a-drop-preview a-video-preview" data-preview-box>{preview && <video src={preview} muted loop autoplay playsinline />}</span>
+    <span class="a-drop-tools">
+      {
+        ready && (
+          <span class="a-drop-tool" aria-hidden="true">
+            <Icon name="upload" size={14} />
+            Replace
+          </span>
+        )
+      }
+    </span>
+    <span class="a-drop-cta">
+      <span class="a-drop-icon"><Icon name="upload" size={18} /></span>
+      <span class="a-drop-text" data-drop-text>{ready ? 'Add a video' : 'Upload is off until Cloudinary is connected'}</span>
+      <span class="a-hint" data-video-status>MP4 or WebM, up to 100 MB. Plays muted, on a loop.</span>
+    </span>
+    <span class="a-drop-progress" aria-hidden="true"><span data-progress></span></span>
+  </label>
+  <input type="hidden" name={name} value={source ? JSON.stringify(source) : ''} data-video-value />
+  {error && <p class="a-error">{error}</p>}
+</div>
+
+<style>
+  .a-video-preview :global(video) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>

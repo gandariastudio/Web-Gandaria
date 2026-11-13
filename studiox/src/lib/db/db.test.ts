@@ -4,6 +4,7 @@ import { isEmpty, seedIfEmpty } from './seed';
 import { getPost, getProject, getSettings, listClients, listFaqs, listPosts, listProjects, listServices, listTestimonials } from './queries';
 import { adminListFaqs, adminListServices, counts, move, recentlyEdited, removeRow, reorder, saveFaq, saveProject, saveSettings, saveSiteImages, slugTaken, findById } from './admin';
 import { seedProjects } from './seed-data';
+import { legacyBlocks } from '../cms/blocks';
 import { findEnquiry, listEnquiries, recentFromEmail, saveEnquiry, setEnquiryRead, unreadEnquiries } from './enquiries';
 
 let db: Db;
@@ -40,7 +41,7 @@ describe('public queries on seeded data', () => {
 
 describe('admin writes', () => {
   it('hides drafts from the public site', async () => {
-    const id = await saveProject(db, null, { ...seedProjects[0], slug: 'draft-one', title: 'Draft', published: false });
+    const id = await saveProject(db, null, { ...seedProjects[0], blocks: legacyBlocks(seedProjects[0]), slug: 'draft-one', title: 'Draft', published: false });
     expect(await slugTaken(db, 'projects', 'draft-one')).toBe(true);
     expect(await slugTaken(db, 'projects', 'draft-one', id)).toBe(false);
     expect((await listProjects(db)).some((p) => p.slug === 'draft-one')).toBe(false);
@@ -105,5 +106,13 @@ describe('enquiries', () => {
     expect(await unreadEnquiries(db)).toBe(1);
     expect(await recentFromEmail(db, 'RINA@example.com', 10)).toBe(1);
     expect(await recentFromEmail(db, 'rina@example.com', 10, new Date(Date.now() + 11 * 60_000))).toBe(0);
+  });
+});
+
+describe('project blocks', () => {
+  it('seeds the old case-study fields as blocks', async () => {
+    const p = await getProject(db, seedProjects[0].slug);
+    expect(p?.blocks.map((b) => b.type)).toEqual(['text', 'text', 'results', 'gallery']);
+    expect(p?.blocks[0]).toMatchObject({ label: 'The challenge', text: seedProjects[0].challenge });
   });
 });

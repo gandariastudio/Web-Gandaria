@@ -1,0 +1,175 @@
+---
+/*
+ * One case-study block, drawn as its content (document style, like Dribbble and Contra): text you
+ * type straight into, images shown large, numbers in place. A small toolbar appears on hover or
+ * focus with move, duplicate, delete and the block's options. Field names are
+ * `blocks.<index>.<field>`; scripts/admin/blocks.ts renumbers them whenever blocks move.
+ */
+import Icon, { type IconName } from '../Icon.astro';
+import ImageField from '../ImageField.astro';
+import VideoField from '../VideoField.astro';
+import { BLOCK_TYPES, videoEmbed } from '@/lib/cms/blocks';
+
+interface Props {
+  /** The block's values (may be partial when re-rendering a form with errors). */
+  block: Record<string, any>;
+  /** Position, or "__i__" inside the insert templates. */
+  index: number | string;
+  errors?: Record<string, string>;
+}
+
+const { block: b, index, errors = {} } = Astro.props;
+const at = (field: string) => `blocks.${index}.${field}`;
+const id = (field: string) => `f-${at(field).replace(/[^a-z0-9]+/gi, '-')}`;
+const err = (field: string) => errors[at(field)];
+const meta = BLOCK_TYPES.find((t) => t.type === b.type) ?? BLOCK_TYPES[0];
+const width = b.width === 'full' ? 'full' : 'contained';
+const source = b.source === 'embed' ? 'embed' : 'upload';
+const items: { value?: string; label?: string }[] = Array.from({ length: 4 }, (_, j) => b.items?.[j] ?? {});
+const images: unknown[] = Array.from({ length: 3 }, (_, j) => b.images?.[j] ?? null);
+const embed = b.type === 'video' && b.url ? videoEmbed(b.url) : null;
+---
+
+<article class="a-doc-block" data-block data-type={b.type}>
+  <div class="a-doc-tools" role="toolbar" aria-label={`${meta.label} block`}>
+    <span class="a-doc-kind"><Icon name={meta.icon as IconName} size={14} />{meta.label}</span>
+    {
+      b.type === 'text' && (
+        <span class="a-doc-opts" role="radiogroup" aria-label="Text size">
+          <label class="a-doc-opt" title="Large statement">
+            <input type="radio" name={at('size')} value="statement" checked={b.size !== 'paragraph'} />
+            <span>Large</span>
+          </label>
+          <label class="a-doc-opt" title="Paragraph">
+            <input type="radio" name={at('size')} value="paragraph" checked={b.size === 'paragraph'} />
+            <span>Paragraph</span>
+          </label>
+        </span>
+      )
+    }
+    {
+      (b.type === 'image' || b.type === 'video') && (
+        <span class="a-doc-opts" role="radiogroup" aria-label="Layout">
+          <label class="a-doc-opt" title="In the column">
+            <input type="radio" name={at('width')} value="contained" checked={width === 'contained'} />
+            <span>Column</span>
+          </label>
+          <label class="a-doc-opt" title="Full width">
+            <input type="radio" name={at('width')} value="full" checked={width === 'full'} />
+            <span>Full width</span>
+          </label>
+        </span>
+      )
+    }
+    {
+      b.type === 'video' && (
+        <span class="a-doc-opts" role="radiogroup" aria-label="Video source">
+          <label class="a-doc-opt" title="Upload a clip">
+            <input type="radio" name={at('source')} value="upload" checked={source === 'upload'} data-video-source />
+            <span>Upload</span>
+          </label>
+          <label class="a-doc-opt" title="YouTube or Vimeo link">
+            <input type="radio" name={at('source')} value="embed" checked={source === 'embed'} data-video-source />
+            <span>Link</span>
+          </label>
+        </span>
+      )
+    }
+    <span class="a-doc-sep" aria-hidden="true"></span>
+    <button type="button" class="a-doc-tool" data-block-up title="Move up" aria-label="Move block up"><Icon name="up" size={15} /></button>
+    <button type="button" class="a-doc-tool" data-block-down title="Move down" aria-label="Move block down"><Icon name="down" size={15} /></button>
+    <button type="button" class="a-doc-tool" data-block-copy title="Duplicate" aria-label="Duplicate block"><Icon name="copy" size={15} /></button>
+    <button type="button" class="a-doc-tool is-danger" data-block-delete title="Delete" aria-label="Delete block"><Icon name="trash" size={15} /></button>
+  </div>
+  <input type="hidden" name={at('type')} value={b.type} />
+
+  <div class="a-doc-content">
+    {
+      b.type === 'text' && (
+        <div class="a-doc-text-block">
+          <input id={id('label')} name={at('label')} value={b.label ?? ''} class="a-doc-input a-doc-tag" placeholder="Label (optional)" aria-label="Label" />
+          <div class="a-doc-text-wrap">
+            <textarea id={id('text')} name={at('text')} rows="2" class="a-doc-input a-doc-text" placeholder="Write something…" aria-label="Text" data-autogrow>{b.text ?? ''}</textarea>
+            {err('text') && <p class="a-error">{err('text')}</p>}
+          </div>
+        </div>
+      )
+    }
+
+    {
+      b.type === 'image' && (
+        <div class="a-doc-media">
+          <ImageField name={at('image')} label="Image" value={b.image} folder="projects" errors={errors} recommended="2400 px wide, any height" noAdjust />
+          <input id={id('caption')} name={at('caption')} value={b.caption ?? ''} class="a-doc-input a-doc-caption" placeholder="Add a caption (optional)" aria-label="Caption" />
+        </div>
+      )
+    }
+
+    {
+      b.type === 'gallery' && (
+        <div class="a-doc-media">
+          <div class="a-doc-gallery">
+            {images.map((img, j) => (
+              <ImageField name={at(`images.${j}`)} label={j === 2 ? 'Image 3 (optional)' : `Image ${j + 1}`} value={img as any} folder="projects" errors={errors} recommended="1600 × 1280 (5:4)" />
+            ))}
+          </div>
+          {err('images') && <p class="a-error">{err('images')}</p>}
+        </div>
+      )
+    }
+
+    {
+      b.type === 'video' && (
+        <div class="a-doc-media">
+          <div data-when-source="upload" hidden={source !== 'upload'}>
+            <VideoField name={at('video')} label="Video" value={b.video} folder="projects" error={err('video')} />
+          </div>
+          <div data-when-source="embed" hidden={source !== 'embed'}>
+            <div class="a-doc-embed" data-embed-preview hidden={!embed}>
+              {embed && <iframe src={embed.src} title="Video preview" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen />}
+            </div>
+            <input id={id('url')} name={at('url')} type="url" value={b.url ?? ''} class="a-doc-input a-doc-url" placeholder="Paste a YouTube or Vimeo link" aria-label="Video link" data-embed-url />
+            {err('url') && <p class="a-error">{err('url')}</p>}
+          </div>
+          <input id={id('caption')} name={at('caption')} value={b.caption ?? ''} class="a-doc-input a-doc-caption" placeholder="Add a caption (optional)" aria-label="Caption" />
+        </div>
+      )
+    }
+
+    {
+      b.type === 'results' && (
+        <div class="a-doc-results-block">
+          <input id={id('label')} name={at('label')} value={b.label ?? ''} class="a-doc-input a-doc-tag" placeholder="Results" aria-label="Label" />
+          <div class="a-doc-results">
+            {items.map((r, j) => (
+              <div class="a-doc-result">
+                <input id={id(`items.${j}.value`)} name={at(`items.${j}.value`)} value={r.value ?? ''} class="a-doc-input a-doc-num" placeholder={j === 0 ? '+52%' : '—'} aria-label={`Number ${j + 1}`} />
+                <input id={id(`items.${j}.label`)} name={at(`items.${j}.label`)} value={r.label ?? ''} class="a-doc-input a-doc-num-label" placeholder="What it means" aria-label={`What number ${j + 1} means`} />
+                {(err(`items.${j}.value`) || err(`items.${j}.label`)) && <p class="a-error">{err(`items.${j}.value`) ?? err(`items.${j}.label`)}</p>}
+              </div>
+            ))}
+          </div>
+          {err('items') && <p class="a-error">{err('items')}</p>}
+        </div>
+      )
+    }
+
+    {
+      b.type === 'quote' && (
+        <div class="a-doc-quote-block">
+          <textarea id={id('quote')} name={at('quote')} rows="2" class="a-doc-input a-doc-quote" placeholder="“What the client said…”" aria-label="Quote" data-autogrow>{b.quote ?? ''}</textarea>
+          {err('quote') && <p class="a-error">{err('quote')}</p>}
+          <div class="a-doc-byline">
+            <input id={id('name')} name={at('name')} value={b.name ?? ''} class="a-doc-input" placeholder="Name" aria-label="Name" />
+            <input id={id('role')} name={at('role')} value={b.role ?? ''} class="a-doc-input a-doc-muted" placeholder="Role, company" aria-label="Role" />
+          </div>
+          {err('name') && <p class="a-error">{err('name')}</p>}
+        </div>
+      )
+    }
+  </div>
+
+  <div class="a-doc-gap">
+    <button type="button" class="a-doc-plus" data-insert title="Insert a block here" aria-label="Insert a block here"><Icon name="plus" size={14} /></button>
+  </div>
+</article>

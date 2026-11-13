@@ -4,6 +4,7 @@ import { countWords, readTime } from './read-time';
 import { sanitizeArticle } from './sanitize';
 import { cloudinaryUrl, hasImage, imagePosition, imageSrc, imageSrcset, signUploadParams } from './cloudinary';
 import { cropRegion, frameLayout, MAX_ZOOM, normalizeCrop, parseAspect } from './crop';
+import { cloudinaryVideo, videoEmbed } from './blocks';
 
 describe('slugify', () => {
   it('lowercases, strips accents and joins with hyphens', () => {
@@ -96,5 +97,20 @@ describe('image crop', () => {
     expect(imagePosition({ ...img, crop: null })).toBeUndefined();
     // Placeholders cannot be zoomed: only the point is used.
     expect(imagePosition({ url: '/x.jpg', width: 2400, height: 1600, alt: '', crop: { x: 0.25, y: 0.5, zoom: 2 } })).toBe('25.00% 50.00%');
+  });
+});
+
+describe('blocks', () => {
+  it('turns YouTube and Vimeo links into embeds and rejects anything else', () => {
+    expect(videoEmbed('https://www.youtube.com/watch?v=dQw4w9WgXcQ')?.src).toBe('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0');
+    expect(videoEmbed('https://youtu.be/dQw4w9WgXcQ')?.provider).toBe('youtube');
+    expect(videoEmbed('https://vimeo.com/76979871')?.src).toBe('https://player.vimeo.com/video/76979871?dnt=1');
+    expect(videoEmbed('https://example.com/video.mp4')).toBeNull();
+    expect(videoEmbed('not a url')).toBeNull();
+  });
+  it('builds Cloudinary video and poster URLs no wider than the clip', () => {
+    const v = cloudinaryVideo('demo', { publicId: 'p/clip', width: 1280, height: 720 }, 1600);
+    expect(v.src).toBe('https://res.cloudinary.com/demo/video/upload/q_auto,c_limit,w_1280/p/clip.mp4');
+    expect(v.poster).toBe('https://res.cloudinary.com/demo/video/upload/so_0,q_auto,c_limit,w_1280/p/clip.jpg');
   });
 });

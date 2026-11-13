@@ -10,34 +10,48 @@ const img = JSON.stringify({ url: '/placeholders/x.jpg', width: 1200, height: 80
 
 const projectForm = {
   slug: 'rasakota', title: 'Rasakota', sector: 'Hospitality', year: '2026', summary: 's', services: 'x', client: 'c', role: 'r',
-  challenge: 'ch', approach: 'ap', cover: img, cover_alt: 'Kitchen',
-  'results.0.value': '+52%', 'results.0.label': 'bookings', 'results.1.value': '4', 'results.1.label': 'venues', 'results.2.value': '3×', 'results.2.label': 'reach',
-  'gallery.0': img, 'gallery.0_alt': 'Menus', 'gallery.1': img, 'gallery.1_alt': 'Phone', published: 'on',
+  cover: img, cover_alt: 'Kitchen', published: 'on',
+  'blocks.0.type': 'text', 'blocks.0.label': 'The challenge', 'blocks.0.text': 'Four venues, four looks.', 'blocks.0.size': 'statement',
+  'blocks.1.type': 'results', 'blocks.1.label': 'Results',
+  'blocks.1.items.0.value': '+52%', 'blocks.1.items.0.label': 'bookings', 'blocks.1.items.1.value': '4', 'blocks.1.items.1.label': 'venues',
+  'blocks.2.type': 'gallery', 'blocks.2.images.0': img, 'blocks.2.images.0_alt': 'Menus', 'blocks.2.images.1': img, 'blocks.2.images.1_alt': 'Phone',
+  'blocks.3.type': 'image', 'blocks.3.image': img, 'blocks.3.image_alt': 'Dining room', 'blocks.3.width': 'full', 'blocks.3.caption': 'The room',
+  'blocks.4.type': 'video', 'blocks.4.source': 'embed', 'blocks.4.url': 'https://youtu.be/dQw4w9WgXcQ',
+  'blocks.5.type': 'quote', 'blocks.5.quote': 'They got us.', 'blocks.5.name': 'Rina', 'blocks.5.role': 'Owner',
 };
 
 describe('project form', () => {
-  it('accepts a complete project', () => {
+  it('accepts a complete project with blocks in order', () => {
     const r = validate(projectSchema, readers.project(fd(projectForm)));
     expect(r.ok).toBe(true);
     if (r.ok) {
-      expect(r.data.results).toHaveLength(3);
+      expect(r.data.blocks.map((b) => b.type)).toEqual(['text', 'results', 'gallery', 'image', 'video', 'quote']);
+      expect(r.data.blocks[1]).toMatchObject({ items: [{ value: '+52%' }, { value: '4' }] });
+      expect(r.data.blocks[3]).toMatchObject({ width: 'full', caption: 'The room', image: { alt: 'Dining room' } });
       expect(r.data.cover).toMatchObject({ url: '/placeholders/x.jpg', width: 1200, alt: 'Kitchen' });
       expect(r.data.published).toBe(true);
     }
   });
-  it('reports nested field errors by path', () => {
-    const r = validate(projectSchema, readers.project(fd({ ...projectForm, 'results.1.label': '', 'gallery.1': '', cover_alt: '', slug: 'Bad Slug' })));
+  it('reports block errors by path', () => {
+    const r = validate(
+      projectSchema,
+      readers.project(fd({ ...projectForm, 'blocks.0.text': '', 'blocks.2.images.1': '', 'blocks.4.url': 'https://example.com/x', 'blocks.1.items.1.label': '', cover_alt: '', slug: 'Bad Slug' })),
+    );
     expect(r.ok).toBe(false);
     if (!r.ok) {
-      expect(r.errors['results.1.label']).toBe('Label is required');
-      expect(r.errors['gallery.1.width']).toMatch(/Upload/);
+      expect(r.errors['blocks.0.text']).toBe('Text is required');
+      expect(r.errors['blocks.2.images']).toMatch(/two images/);
+      expect(r.errors['blocks.4.url']).toMatch(/YouTube or Vimeo/);
+      expect(r.errors['blocks.1.items.1.label']).toBe('Label is required');
       expect(r.errors['cover.alt']).toMatch(/screen readers/);
       expect(r.errors.slug).toMatch(/lowercase/);
     }
   });
-  it('treats an unchecked published box as a draft', () => {
+  it('allows a project with no blocks and treats an unchecked published box as a draft', () => {
     const { published, ...rest } = projectForm;
-    const r = validate(projectSchema, readers.project(fd(rest)));
+    const noBlocks = Object.fromEntries(Object.entries(rest).filter(([k]) => !k.startsWith('blocks.')));
+    const r = validate(projectSchema, readers.project(fd(noBlocks)));
+    expect(r.ok && r.data.blocks).toEqual([]);
     expect(r.ok && r.data.published).toBe(false);
   });
 });

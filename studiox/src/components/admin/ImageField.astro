@@ -22,9 +22,12 @@ interface Props {
    * adds a "Use built-in image" button that clears the upload.
    */
   fallback?: string;
+  /** No frame and no Adjust: for images shown at their natural shape (image blocks). */
+  noAdjust?: boolean;
 }
 
-const { name, label, value, folder, errors = {}, recommended, hint, contain = false, fallback } = Astro.props;
+const { name, label, value, folder, errors = {}, recommended, hint, contain = false, fallback, noAdjust = false } = Astro.props;
+const framed = !contain && !noAdjust;
 const ready = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
 const crop = value?.crop && !isDefaultCrop(value.crop) ? normalizeCrop(value.crop) : null;
 const source =
@@ -34,7 +37,7 @@ const source =
 // The field shows the whole original laid out in the slot's frame shape, so the preview matches
 // the website; the Adjust dialog moves and zooms it (logos are shown whole and cannot be adjusted).
 const [aspectW, aspectH] = parseAspect(recommended);
-const adjustable = !contain && !!source?.width && !!source?.height;
+const adjustable = framed && !!source?.width && !!source?.height;
 const zoomable = !!(source?.publicId && CLOUDINARY_CLOUD_NAME);
 const original = source
   ? source.publicId && CLOUDINARY_CLOUD_NAME
@@ -56,43 +59,51 @@ const id = `f-${name.replace(/[^a-z0-9]+/gi, '-')}`;
   data-image-field
   data-folder={folder}
   data-fallback={fallback}
-  data-aspect={contain ? undefined : `${aspectW}x${aspectH}`}
+  data-aspect={framed ? `${aspectW}x${aspectH}` : undefined}
   data-original={adjustable ? original : undefined}
   data-zoomable={zoomable ? 'true' : undefined}
-  style={contain ? undefined : `--frame:${aspectW} / ${aspectH}`}>
+  style={framed ? `--frame:${aspectW} / ${aspectH}` : undefined}>
   <span class="a-label">{label}</span>
   <label class:list={['a-drop', !ready && 'is-off', preview && 'has-image', contain && 'is-contain']} data-drop>
     <input type="file" accept="image/*" class="sr-only" data-image-file disabled={!ready} />
     <span class="a-drop-preview" data-preview-box>{preview && <img src={preview} alt="" data-preview style={layoutStyle} class:list={[layout && 'is-placed']} />}</span>
+    <!-- With an image: small buttons inside the frame (on hover; always on touch screens). -->
+    <span class="a-drop-tools">
+      {
+        ready && (
+          <span class="a-drop-tool" aria-hidden="true">
+            <Icon name="upload" size={14} />
+            Replace
+          </span>
+        )
+      }
+      {
+        framed && (
+          <button type="button" class="a-drop-tool" data-image-adjust hidden={!adjustable}>
+            <Icon name="image" size={14} />
+            Adjust
+          </button>
+        )
+      }
+      {
+        fallback && (
+          <button type="button" class="a-drop-tool" data-image-reset hidden={usingBuiltIn}>
+            Use built-in
+          </button>
+        )
+      }
+    </span>
+    <!-- Empty (or uploading): what to do, and the size that fits the frame. -->
     <span class="a-drop-cta">
-      <span class="a-drop-icon"><Icon name={preview ? 'image' : 'upload'} size={18} /></span>
-      <span class="a-drop-text" data-drop-text>
-        {ready ? (preview ? 'Drop a new image or click to replace' : 'Drop an image here or click to upload') : 'Upload is off until Cloudinary is connected'}
-      </span>
-      <span class="a-hint" data-image-status>
-        {usingBuiltIn ? 'Built-in image · ' : ''}{source?.width ? `Current ${source.width} × ${source.height}` : ''}{recommended ? `${source?.width ? ' · ' : ''}Recommended ${recommended}` : ''}
-      </span>
+      <span class="a-drop-icon"><Icon name="upload" size={18} /></span>
+      <span class="a-drop-text" data-drop-text>{ready ? 'Add image' : 'Upload is off until Cloudinary is connected'}</span>
+      <span class="a-hint" data-image-status>{recommended ? recommended : ''}</span>
     </span>
     <span class="a-drop-progress" aria-hidden="true"><span data-progress></span></span>
   </label>
   <input type="hidden" name={name} value={source ? JSON.stringify(source) : ''} data-image-value />
   {
-    !contain && (
-      <div class="a-image-actions">
-        <button type="button" class="a-btn a-btn--ghost a-btn--sm" data-image-adjust hidden={!adjustable}>
-          <Icon name="image" size={15} />
-          Adjust
-        </button>
-        {fallback && (
-          <button type="button" class="a-btn a-btn--ghost a-btn--sm" data-image-reset hidden={usingBuiltIn}>
-            Use built-in image
-          </button>
-        )}
-      </div>
-    )
-  }
-  {
-    !contain && (
+    framed && (
       <dialog class="a-crop" data-crop-dialog aria-label={`Adjust ${label.toLowerCase()}`}>
         <div class="a-crop-head">
           <h2 class="a-crop-title">Adjust image</h2>
@@ -121,19 +132,64 @@ const id = `f-${name.replace(/[^a-z0-9]+/gi, '-')}`;
   {hint && <p class="a-hint">{hint}</p>}
   {imageError && <p class="a-error">{imageError}</p>}
   <label class="a-label a-label--spaced" for={`${id}-alt`}>Describe the image {!fallback && <span class="a-req">*</span>}</label>
-  <input id={`${id}-alt`} name={`${name}_alt`} value={value?.alt ?? ''} class="a-input" placeholder={fallback ? 'Needed when you upload an image. Read aloud by screen readers.' : 'What does the image show? Read aloud by screen readers.'} data-image-alt />
+  <input id={`${id}-alt`} name={`${name}_alt`} value={value?.alt ?? ''} class="a-input" placeholder={fallback ? 'Alt text, needed when you upload an image' : 'Alt text: what the image shows'} data-image-alt />
   {altError && <p class="a-error">{altError}</p>}
 </div>
 
-<style>
-  .a-image-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
-  }
-  .a-image-actions:not(:has(button:not([hidden]))) {
+<style is:global>
+  /* Global: the video field and the block editor reuse the upload box (a-drop) styles. */
+  .a-drop-tools {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
     display: none;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+  .a-drop.has-image .a-drop-tools {
+    display: flex;
+  }
+  @media (hover: hover) {
+    .a-drop.has-image .a-drop-tools {
+      display: none;
+    }
+    .a-drop.has-image:hover .a-drop-tools,
+    .a-drop.has-image:focus-within .a-drop-tools {
+      display: flex;
+    }
+  }
+  .a-drop-tool {
+    display: inline-flex;
+    height: 30px;
+    align-items: center;
+    gap: 6px;
+    padding: 0 10px;
+    background: rgb(255 255 255 / 0.94);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--a-text);
+    box-shadow: 0 1px 3px rgb(0 0 0 / 0.18);
+    cursor: pointer;
+  }
+  .a-drop-tool:hover {
+    background: #fff;
+  }
+  .a-drop-tool[hidden] {
+    display: none;
+  }
+  /* With an image the frame speaks for itself; the text row only shows while uploading. */
+  .a-drop.has-image .a-drop-cta {
+    display: none;
+  }
+  .a-drop.has-image.is-busy .a-drop-cta {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    background: rgb(255 255 255 / 0.86);
   }
   .a-drop {
     position: relative;
@@ -175,19 +231,19 @@ const id = `f-${name.replace(/[^a-z0-9]+/gi, '-')}`;
     height: auto;
     aspect-ratio: var(--frame);
   }
-  .a-drop-preview :global(img) {
+  .a-drop-preview img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
   /* Placed by frameLayout(): the whole original, positioned and sized in % of the frame. */
-  .a-drop-preview :global(img.is-placed),
+  .a-drop-preview img.is-placed,
   .a-crop-frame img {
     position: absolute;
     max-width: none;
     object-fit: fill;
   }
-  .a-drop.is-contain .a-drop-preview :global(img) {
+  .a-drop.is-contain .a-drop-preview img {
     object-fit: contain;
     padding: 24px;
   }

@@ -1,0 +1,149 @@
+---
+/*
+ * The case study below the cover, built from blocks (projects.blocks). Text, results and gallery
+ * keep the look the fixed case study had, so projects migrated from it look unchanged.
+ */
+import { CLOUDINARY_CLOUD_NAME } from 'astro:env/server';
+import CmsImage from '@/components/ui/CmsImage.astro';
+import type { ProjectBlock } from '@/lib/db/schema';
+import { cloudinaryVideo, videoEmbed } from '@/lib/cms/blocks';
+import { hasImage } from '@/lib/cms/cloudinary';
+
+interface Props {
+  blocks: ProjectBlock[];
+}
+
+const { blocks } = Astro.props;
+const pad = 'px-5 md:px-8 lg:px-10';
+---
+
+<div class="project-blocks flex flex-col gap-[72px] bg-paper pt-4 pb-24 md:gap-24 md:pb-[120px] lg:gap-[120px] lg:pb-40">
+  {
+    blocks.map((b, i) => {
+      if (b.type === 'text')
+        return (
+          <section class={pad} data-cursor="The story">
+            <div class="mx-auto flex max-w-[1600px] flex-col gap-6 line-t pt-7 md:flex-row md:gap-10">
+              <p class="tag pt-0 md:flex-1">{b.label}</p>
+              {b.size === 'statement' ? (
+                <h2 class="type-h3 md:flex-[2]" data-text-reveal="line" data-tr-blur="10" data-tr-y="28" data-tr-stagger="0.05">
+                  {b.text}
+                </h2>
+              ) : (
+                <p class="type-body max-w-[760px] whitespace-pre-line text-muted md:flex-[2]">{b.text}</p>
+              )}
+            </div>
+          </section>
+        );
+
+      if (b.type === 'image' && hasImage(b.image))
+        return (
+          <figure class:list={['flex flex-col gap-3', b.width === 'contained' && pad]}>
+            <div class:list={['relative overflow-clip', b.width === 'contained' && 'mx-auto w-full max-w-[1600px]']} data-img-reveal>
+              <CmsImage
+                image={b.image}
+                widths={b.width === 'full' ? [828, 1440, 2400] : [828, 1440, 2000]}
+                sizes={b.width === 'full' ? '100vw' : '(min-width: 1680px) 1600px, 100vw'}
+                class="block h-auto w-full"
+                loading={i === 0 ? 'eager' : 'lazy'}
+              />
+            </div>
+            {b.caption && <figcaption class:list={['type-small text-muted', b.width === 'full' ? pad : 'mx-auto w-full max-w-[1600px]']}>{b.caption}</figcaption>}
+          </figure>
+        );
+
+      if (b.type === 'gallery' && b.images.length)
+        return (
+          <section class={pad} data-cursor="Gallery">
+            <div class:list={['mx-auto grid max-w-[1600px] grid-cols-1 gap-6 md:gap-4', b.images.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2']}>
+              {b.images.filter(hasImage).map((g, k) => (
+                <div class:list={['relative overflow-clip', b.images.length === 3 ? 'h-[260px] md:h-[360px] lg:h-[520px]' : 'h-[260px] md:h-[420px] lg:h-[640px]']} data-img-reveal data-img-reveal-delay={k * 0.12}>
+                  <CmsImage image={g} widths={[700, 1400]} sizes={b.images.length === 3 ? '(min-width: 810px) 33vw, 100vw' : '(min-width: 810px) 50vw, 100vw'} class="absolute inset-0 size-full object-cover" />
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+
+      if (b.type === 'video') {
+        const embed = b.source === 'embed' ? videoEmbed(b.url) : null;
+        const clip = b.source === 'upload' && b.video && CLOUDINARY_CLOUD_NAME ? cloudinaryVideo(CLOUDINARY_CLOUD_NAME, b.video, b.width === 'full' ? 2400 : 1600) : null;
+        if (!embed && !clip) return null;
+        return (
+          <figure class:list={['flex flex-col gap-3', b.width === 'contained' && pad]}>
+            <div class:list={['relative overflow-clip bg-fog', b.width === 'contained' && 'mx-auto w-full max-w-[1600px]']} data-img-reveal>
+              {clip ? (
+                <video class="block h-auto w-full" src={clip.src} poster={clip.poster} width={b.video!.width} height={b.video!.height} autoplay muted loop playsinline preload="metadata" />
+              ) : (
+                <iframe
+                  class="block aspect-video h-auto w-full"
+                  src={embed!.src}
+                  title={b.caption || 'Video'}
+                  loading="lazy"
+                  allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+                  allowfullscreen
+                />
+              )}
+            </div>
+            {b.caption && <figcaption class:list={['type-small text-muted', b.width === 'full' ? pad : 'mx-auto w-full max-w-[1600px]']}>{b.caption}</figcaption>}
+          </figure>
+        );
+      }
+
+      if (b.type === 'results' && b.items.length)
+        return (
+          <section class={`bg-fog ${pad} py-[72px] md:py-24 lg:py-[120px]`} data-cursor="Results">
+            <div class="mx-auto flex max-w-[1600px] flex-col gap-10">
+              {b.label && <p class="tag">{b.label}</p>}
+              <div class="flex flex-col md:flex-row">
+                {b.items.map((r, k) => (
+                  <div class="flex flex-col gap-3 line-t pt-6 pb-8 md:flex-1 md:line-l md:px-5 md:pt-1 md:pb-0 lg:px-8" data-reveal data-reveal-delay={k * 0.1}>
+                    <p class="result-value text-cobalt">{r.value}</p>
+                    <p class="type-small text-muted">{r.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+
+      if (b.type === 'quote')
+        return (
+          <section class={pad} data-cursor="Kind words">
+            <figure class="mx-auto flex max-w-[1600px] flex-col gap-8 line-t pt-7 md:flex-row md:gap-10">
+              <p class="tag pt-0 md:flex-1">Client</p>
+              <div class="flex flex-col gap-6 md:flex-[2]">
+                <blockquote class="type-h2" data-text-reveal="line" data-tr-blur="10" data-tr-y="28" data-tr-stagger="0.05">
+                  “{b.quote}”
+                </blockquote>
+                <figcaption class="type-small">
+                  {b.name}
+                  {b.role && <span class="text-muted"> · {b.role}</span>}
+                </figcaption>
+              </div>
+            </figure>
+          </section>
+        );
+
+      return null;
+    })
+  }
+</div>
+
+<style>
+  .result-value {
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  @media (width >= 810px) {
+    .result-value {
+      font-size: 64px;
+    }
+  }
+  @media (width >= 1440px) {
+    .result-value {
+      font-size: 88px;
+    }
+  }
+</style>

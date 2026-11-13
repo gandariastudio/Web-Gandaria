@@ -1,0 +1,467 @@
+---
+/*
+ * The case-study block editor, document style (Dribbble, Contra): blocks read as the content
+ * itself, with a "+" between them and an "Add" line at the end. One <template> per block type
+ * holds the markup for new blocks. Behaviour: scripts/admin/blocks.ts.
+ */
+import Icon, { type IconName } from '../Icon.astro';
+import BlockCard from './BlockCard.astro';
+import { BLOCK_TYPES, emptyBlock } from '@/lib/cms/blocks';
+
+interface Props {
+  blocks: Record<string, any>[];
+  errors?: Record<string, string>;
+}
+
+const { blocks, errors = {} } = Astro.props;
+const groups = ['Basic', 'Rich media'] as const;
+---
+
+<div class="a-blocks" data-blocks>
+  <div class="a-doc-gap a-doc-gap--top">
+    <button type="button" class="a-doc-plus" data-insert data-insert-top title="Insert a block at the top" aria-label="Insert a block at the top"><Icon name="plus" size={14} /></button>
+  </div>
+  <div class="a-blocks-list" data-blocks-list>
+    {blocks.map((b, i) => <BlockCard block={b} index={i} errors={errors} />)}
+  </div>
+  <p class="a-blocks-empty" data-blocks-empty hidden={blocks.length > 0}>The case study is empty.</p>
+  <button type="button" class="a-doc-add" data-insert data-insert-end>
+    <Icon name="plus" size={16} />
+    <span>Add text, image, video, gallery, results or a quote</span>
+  </button>
+  {errors.blocks && <p class="a-error">{errors.blocks}</p>}
+
+  <div class="a-insert-menu" data-insert-menu role="menu" aria-label="Insert block" hidden>
+    {
+      groups.map((g) => (
+        <div class="a-insert-group">
+          <p class="a-insert-heading">{g}</p>
+          {BLOCK_TYPES.filter((t) => t.group === g).map((t) => (
+            <button type="button" class="a-insert-item" role="menuitem" data-insert-type={t.type}>
+              <span class="a-insert-icon">
+                <Icon name={t.icon as IconName} size={18} />
+              </span>
+              <span>
+                <span class="a-insert-label">{t.label}</span>
+                <span class="a-insert-desc">{t.description}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+
+  {
+    BLOCK_TYPES.map((t) => (
+      <template data-block-template={t.type}>
+        <BlockCard block={emptyBlock(t.type)} index="__i__" />
+      </template>
+    ))
+  }
+</div>
+
+<style is:global>
+  .a-blocks {
+    position: relative;
+  }
+
+  /* ---------- a block: just its content, outlined on hover/focus ---------- */
+  .a-doc-block {
+    position: relative;
+    margin-inline: -16px;
+    padding: 10px 16px 0;
+  }
+  .a-doc-block:hover {
+    box-shadow: inset 0 0 0 1px var(--a-line);
+  }
+  .a-doc-block:focus-within {
+    box-shadow: inset 0 0 0 1px var(--a-accent);
+  }
+  .a-doc-content {
+    padding-bottom: 10px;
+  }
+
+  /* Toolbar: only while the block is hovered or being edited. */
+  .a-doc-tools {
+    position: absolute;
+    top: -17px;
+    right: 12px;
+    z-index: 5;
+    display: none;
+    align-items: center;
+    gap: 2px;
+    border: 1px solid var(--a-line);
+    background: var(--a-bg);
+    padding: 3px;
+    box-shadow: 0 8px 20px -14px rgb(0 0 0 / 0.4);
+  }
+  .a-doc-block:hover > .a-doc-tools,
+  .a-doc-block:focus-within > .a-doc-tools {
+    display: flex;
+  }
+  .a-doc-kind {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px 0 6px;
+    font-size: 12px;
+    color: var(--a-muted);
+  }
+  .a-doc-sep {
+    width: 1px;
+    height: 18px;
+    margin: 0 3px;
+    background: var(--a-line);
+  }
+  .a-doc-tool {
+    display: grid;
+    width: 28px;
+    height: 28px;
+    place-items: center;
+    color: var(--a-muted);
+    cursor: pointer;
+  }
+  .a-doc-tool:hover {
+    background: var(--a-soft);
+    color: var(--a-text);
+  }
+  .a-doc-tool.is-danger:hover {
+    color: var(--a-danger);
+  }
+  .a-doc-tool:disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+  .a-doc-opts {
+    display: inline-flex;
+    margin-left: 2px;
+  }
+  .a-doc-opt {
+    position: relative;
+    cursor: pointer;
+  }
+  .a-doc-opt input {
+    position: absolute;
+    opacity: 0;
+  }
+  .a-doc-opt span {
+    display: block;
+    padding: 5px 8px;
+    font-size: 12px;
+    color: var(--a-muted);
+  }
+  .a-doc-opt input:checked + span {
+    background: var(--a-text);
+    color: #fff;
+  }
+  .a-doc-opt input:focus-visible + span {
+    outline: 2px solid var(--a-accent);
+    outline-offset: -2px;
+  }
+
+  /* ---------- "+" between blocks and the "Add" line ---------- */
+  .a-doc-gap {
+    position: relative;
+    display: flex;
+    height: 18px;
+    align-items: center;
+    justify-content: center;
+  }
+  .a-doc-gap--top {
+    margin-bottom: 4px;
+  }
+  .a-doc-plus {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    border: 1px solid var(--a-line-strong);
+    background: var(--a-bg);
+    color: var(--a-muted);
+    cursor: pointer;
+    opacity: 0;
+  }
+  .a-doc-gap:hover .a-doc-plus,
+  .a-doc-block:hover > .a-doc-gap .a-doc-plus,
+  .a-doc-plus:focus-visible,
+  .a-doc-plus[aria-expanded='true'] {
+    opacity: 1;
+  }
+  .a-doc-plus:hover {
+    border-color: var(--a-text);
+    color: var(--a-text);
+  }
+  .a-doc-add {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 14px 0;
+    border-top: 1px solid var(--a-line);
+    font-size: 15px;
+    color: var(--a-faint);
+    text-align: left;
+    cursor: text;
+  }
+  .a-doc-add:hover,
+  .a-doc-add[aria-expanded='true'] {
+    color: var(--a-text);
+  }
+  .a-blocks-empty {
+    padding: 4px 0;
+    font-size: 14px;
+    color: var(--a-muted);
+  }
+
+  /* ---------- inputs that look like the page ---------- */
+  .a-doc-input {
+    display: block;
+    width: 100%;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font: inherit;
+    color: var(--a-text);
+    resize: none;
+    outline: none;
+  }
+  .a-doc-input::placeholder {
+    color: var(--a-faint);
+  }
+  .a-doc-tag {
+    align-self: start;
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .a-doc-text-block {
+    display: grid;
+    gap: 10px;
+  }
+  @media (min-width: 810px) {
+    .a-doc-text-block {
+      grid-template-columns: 1fr 2fr;
+      gap: 24px;
+    }
+  }
+  .a-doc-text {
+    overflow: hidden;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: -0.03em;
+  }
+  /* Paragraph size, chosen in the toolbar. */
+  .a-doc-block:has(input[value='paragraph']:checked) .a-doc-text {
+    font-size: 16px;
+    line-height: 1.6;
+    letter-spacing: 0;
+    color: var(--a-muted);
+  }
+  .a-doc-caption {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--a-muted);
+  }
+  .a-doc-note {
+    margin-top: 6px;
+    font-size: 12.5px;
+    color: var(--a-muted);
+  }
+  .a-doc-muted {
+    color: var(--a-muted);
+  }
+
+  /* Media: full-width blocks spill out of the column a little, as a hint. */
+  .a-doc-block:has(input[value='full']:checked) .a-doc-media {
+    margin-inline: -16px;
+  }
+  .a-doc-gallery {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .a-doc-embed {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    margin-bottom: 8px;
+    background: var(--a-soft);
+  }
+  .a-doc-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .a-doc-url {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--a-line);
+    font-size: 15px;
+  }
+
+  .a-doc-results-block {
+    display: grid;
+    gap: 14px;
+    background: var(--a-soft);
+    margin-inline: -16px;
+    padding: 18px 16px;
+  }
+  .a-doc-results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  @media (min-width: 810px) {
+    .a-doc-results {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  .a-doc-result {
+    display: grid;
+    gap: 4px;
+    padding-top: 10px;
+    box-shadow: inset 0 1px 0 var(--a-line-strong);
+  }
+  .a-doc-num {
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    color: var(--a-accent);
+  }
+  .a-doc-num-label {
+    font-size: 13px;
+    color: var(--a-muted);
+  }
+
+  .a-doc-quote-block {
+    display: grid;
+    gap: 10px;
+  }
+  .a-doc-quote {
+    overflow: hidden;
+    font-size: 26px;
+    line-height: 1.25;
+    letter-spacing: -0.03em;
+  }
+  .a-doc-byline {
+    display: flex;
+    gap: 12px;
+    font-size: 14px;
+  }
+
+  /* ---------- image and video fields inside the document (blocks and the cover) ---------- */
+  :is(.a-doc-block, .a-doc-cover) .a-field > .a-label:first-child,
+  :is(.a-doc-block, .a-doc-cover) .a-label--spaced {
+    display: none;
+  }
+  :is(.a-doc-block, .a-doc-cover) .a-drop.has-image {
+    border: 0;
+    background: transparent;
+  }
+  :is(.a-doc-block, .a-doc-cover) .a-drop.has-image .a-drop-cta {
+    justify-content: flex-start;
+    padding: 6px 0 0;
+    border-top: 0;
+    background: transparent;
+  }
+  :is(.a-doc-block, .a-doc-cover) .a-drop.has-image .a-drop-icon {
+    display: none;
+  }
+  :is(.a-doc-block, .a-doc-cover) .a-drop.has-image .a-drop-text {
+    font-size: 12.5px;
+    font-weight: 400;
+    color: var(--a-muted);
+  }
+  /* Image blocks show the picture at its own shape. */
+  .a-doc-block[data-type='image'] .a-drop.has-image .a-drop-preview,
+  .a-doc-block[data-type='video'] .a-drop.has-image .a-drop-preview {
+    height: auto;
+  }
+  .a-doc-block[data-type='image'] .a-drop-preview img,
+  .a-doc-block[data-type='video'] .a-drop-preview video {
+    height: auto;
+  }
+  :is(.a-doc-block, .a-doc-cover) [data-image-alt] {
+    min-height: 0;
+    margin-top: 4px;
+    border: 0;
+    padding: 4px 0;
+    font-size: 12.5px;
+    color: var(--a-muted);
+  }
+  :is(.a-doc-block, .a-doc-cover) [data-image-alt]:focus {
+    box-shadow: none;
+  }
+  .a-doc-gallery .a-drop-cta {
+    padding: 18px 10px;
+  }
+
+  /* ---------- insert menu ---------- */
+  .a-insert-menu {
+    position: absolute;
+    left: 50%;
+    z-index: 40;
+    width: min(340px, 100%);
+    translate: -50% 0;
+    border: 1px solid var(--a-line);
+    background: var(--a-bg);
+    padding: 8px;
+    box-shadow: 0 18px 40px -20px rgb(0 0 0 / 0.35);
+  }
+  .a-insert-group + .a-insert-group {
+    margin-top: 6px;
+    border-top: 1px solid var(--a-line);
+    padding-top: 6px;
+  }
+  .a-insert-heading {
+    padding: 6px 8px 4px;
+    font-size: 12px;
+    color: var(--a-muted);
+  }
+  .a-insert-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .a-insert-item:hover,
+  .a-insert-item:focus-visible {
+    background: var(--a-soft);
+    outline: none;
+  }
+  .a-insert-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    place-items: center;
+    box-shadow: inset 0 0 0 1px var(--a-line);
+    color: var(--a-text);
+  }
+  .a-insert-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .a-insert-desc {
+    display: block;
+    font-size: 12.5px;
+    color: var(--a-muted);
+  }
+
+  @media (max-width: 809.98px) {
+    .a-doc-tools {
+      position: static;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .a-doc-gallery {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

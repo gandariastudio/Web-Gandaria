@@ -1,9 +1,9 @@
 ---
 import AdminLayout from '@/layouts/AdminLayout.astro';
-import EditHeader from '@/components/admin/EditHeader.astro';
-import FormCard from '@/components/admin/FormCard.astro';
+import Icon from '@/components/admin/Icon.astro';
 import Field from '@/components/admin/Field.astro';
 import ImageField from '@/components/admin/ImageField.astro';
+import BlockEditor from '@/components/admin/blocks/BlockEditor.astro';
 import SaveBar from '@/components/admin/SaveBar.astro';
 import DangerZone from '@/components/admin/DangerZone.astro';
 import { getDb } from '@/lib/db';
@@ -19,8 +19,12 @@ if (id !== 'new' && !row) return Astro.rewrite('/404');
 
 const blank = {
   slug: '', title: '', sector: '', year: String(new Date().getFullYear()), summary: '', services: '', client: '', role: '',
-  challenge: '', approach: '', cover: null, results: [{ value: '', label: '' }, { value: '', label: '' }, { value: '', label: '' }],
-  gallery: [null, null], published: true,
+  cover: null, published: true,
+  // A starting point for new case studies; any block can be removed.
+  blocks: [
+    { type: 'text', label: 'The challenge', text: '', size: 'statement' },
+    { type: 'text', label: 'Our approach', text: '', size: 'statement' },
+  ],
 };
 let values: any = row ?? blank;
 let errors: FieldErrors = {};
@@ -41,60 +45,126 @@ if (Astro.request.method === 'POST') {
   Astro.response.status = 422;
 }
 const title = row?.title ?? 'New project';
+const errorCount = Object.keys(errors).filter((k) => k !== '_form').length;
 const self = row ? `/admin/projects/${row.id}` : '/admin/projects/new';
 ---
 
-<AdminLayout title={title} width="narrow">
-  <EditHeader
-    title={title}
-    subtitle={row ? `Last edited ${relativeTime(row.updatedAt)}` : 'Fill in the case study, add images, then save.'}
-    back={{ href: '/admin/projects', label: 'Projects' }}
-    viewHref={row?.published ? `/work/${row.slug}` : undefined}
-    errors={errors}
-  />
+<AdminLayout title={title}>
+  <header class="a-doc-head">
+    <a href="/admin/projects" class="a-back"><Icon name="back" size={15} />Projects</a>
+    <span class="a-doc-meta">{row ? `Last edited ${relativeTime(row.updatedAt)}` : 'New project'}</span>
+    {
+      row?.published && (
+        <a class="a-btn a-btn--ghost a-btn--sm" href={`/work/${row.slug}`} target="_blank" rel="noopener">
+          View on site <Icon name="external" size={15} />
+        </a>
+      )
+    }
+  </header>
+  {errors._form && <p class="a-alert" role="alert">{errors._form}</p>}
+  {errorCount > 0 && <p class="a-alert" role="alert">Please fix {errorCount === 1 ? 'the highlighted field' : `the ${errorCount} highlighted fields`}, then save again.</p>}
 
-  <form method="post" class="a-form" data-edit-form data-start-dirty={String(Astro.request.method === 'POST')}>
-    <FormCard title="Basics" description="Shown on the project card and at the top of the case study.">
-      <Field name="title" label="Project name" value={values.title} error={errors.title} required attrs={{ 'data-slug-source': true }} />
-      <Field name="summary" type="textarea" rows={2} label="Summary" value={values.summary} error={errors.summary} required hint="One or two sentences about what you made." />
+  <form method="post" class="a-doc-layout" data-edit-form data-start-dirty={String(Astro.request.method === 'POST')}>
+    <!-- The case study as a document: cover, title, summary, then the blocks. -->
+    <div class="a-doc">
+      <div class="a-doc-cover">
+        <ImageField name="cover" label="Cover" value={values.cover} folder="projects" errors={errors} recommended="2400 × 1350 (16:9)" />
+      </div>
+      <div class="a-doc-heading">
+        <textarea name="title" rows="1" class="a-doc-input a-doc-title" placeholder="Project name" aria-label="Project name" data-slug-source data-autogrow data-single-line>{values.title}</textarea>
+        {errors.title && <p class="a-error">{errors.title}</p>}
+        <textarea name="summary" rows="2" class="a-doc-input a-doc-summary" placeholder="One or two sentences about what you made." aria-label="Summary" data-autogrow>{values.summary}</textarea>
+        {errors.summary && <p class="a-error">{errors.summary}</p>}
+      </div>
+      <BlockEditor blocks={values.blocks ?? []} errors={errors} />
+    </div>
+
+    <!-- Everything that is not the story itself. -->
+    <aside class="a-doc-aside">
+      <h2 class="a-section-title">Details</h2>
+      <Field name="client" label="Client" value={values.client} error={errors.client} required />
+      <Field name="role" label="Our role" value={values.role} error={errors.role} required placeholder="Brand strategy, identity, website" />
       <div class="a-fields">
-        <Field name="client" label="Client" value={values.client} error={errors.client} required />
-        <Field name="role" label="Our role" value={values.role} error={errors.role} required placeholder="Brand strategy, identity, website" />
         <Field name="sector" label="Sector" value={values.sector} error={errors.sector} required placeholder="Hospitality" />
         <Field name="year" label="Year" value={values.year} error={errors.year} required />
       </div>
-      <Field name="services" label="Services tag" value={values.services} error={errors.services} required hint="Shown on the card, for example: Brand identity · Website" />
-    </FormCard>
-
-    <FormCard title="Images" description="Keep the subject near the centre: frames crop differently on phones and desktops.">
-      <ImageField name="cover" label="Cover image" value={values.cover} folder="projects" errors={errors} recommended="2400 × 1350 (16:9)" />
-      <div class="a-fields">
-        {[0, 1].map((i) => <ImageField name={`gallery.${i}`} label={`Gallery image ${i + 1}`} value={values.gallery?.[i]} folder="projects" errors={errors} recommended="1600 × 1280 (5:4)" />)}
-      </div>
-    </FormCard>
-
-    <FormCard title="Case study" description="The two paragraphs under the cover image.">
-      <Field name="challenge" type="textarea" rows={4} label="The challenge" value={values.challenge} error={errors.challenge} required />
-      <Field name="approach" type="textarea" rows={4} label="Our approach" value={values.approach} error={errors.approach} required />
-    </FormCard>
-
-    <FormCard title="Results" description="Exactly three, shown as large numbers on the case study.">
-      {
-        [0, 1, 2].map((i) => (
-          <div class="a-fields">
-            <Field name={`results.${i}.value`} label={`Result ${i + 1}`} value={values.results?.[i]?.value} error={errors[`results.${i}.value`]} placeholder="+52%" />
-            <Field name={`results.${i}.label`} label="Description" value={values.results?.[i]?.label} error={errors[`results.${i}.label`]} placeholder="online bookings" />
-          </div>
-        ))
-      }
-    </FormCard>
-
-    <FormCard title="Page address" description="The link to this case study.">
-      <Field name="slug" label="Address" value={values.slug} error={errors.slug} required hint={row ? `gandariastudio.com/work/${row.slug}. Changing it breaks links that already point here.` : 'Filled in from the project name: gandariastudio.com/work/your-address'} attrs={{ 'data-slug-target': true, 'data-autoslug': String(!row) }} />
-    </FormCard>
+      <Field name="services" label="Services tag" value={values.services} error={errors.services} required hint="On the project card, e.g. Brand identity · Website" />
+      <Field name="slug" label="Page address" value={values.slug} error={errors.slug} required hint={row ? `gandariastudio.com/work/${row.slug}. Changing it breaks existing links.` : 'Filled in from the project name.'} attrs={{ 'data-slug-target': true, 'data-autoslug': String(!row) }} />
+    </aside>
 
     <SaveBar published={values.published} saveLabel={row ? 'Save changes' : 'Create project'} isNew={!row} resetHref={self} />
   </form>
 
   {row && <DangerZone action="/admin/projects" id={row.id} noun="project" />}
 </AdminLayout>
+
+<style is:global>
+  .a-doc-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .a-doc-head .a-back {
+    margin: 0;
+  }
+  .a-doc-meta {
+    font-size: 13px;
+    color: var(--a-muted);
+  }
+  .a-doc-head .a-btn {
+    margin-left: auto;
+  }
+  .a-doc-layout {
+    display: grid;
+    gap: 40px;
+    align-items: start;
+  }
+  @media (min-width: 1200px) {
+    .a-doc-layout {
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 56px;
+    }
+    .a-doc-layout > .a-savebar {
+      grid-column: 1 / -1;
+    }
+    .a-doc-aside {
+      position: sticky;
+      top: 24px;
+    }
+  }
+  .a-doc {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    min-width: 0;
+  }
+  .a-doc-cover .a-field > .a-label:first-child {
+    display: none;
+  }
+  .a-doc-heading {
+    display: grid;
+    gap: 10px;
+  }
+  .a-doc-title {
+    overflow: hidden;
+    font-size: 40px;
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+  }
+  .a-doc-summary {
+    overflow: hidden;
+    font-size: 18px;
+    line-height: 1.45;
+    color: var(--a-muted);
+  }
+  .a-doc-aside {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 4px;
+  }
+  .a-doc-aside .a-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+</style>

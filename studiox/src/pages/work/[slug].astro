@@ -2,6 +2,7 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import NextStep from '@/components/sections/shared/NextStep.astro';
 import CmsImage from '@/components/ui/CmsImage.astro';
+import ProjectBlocks from '@/components/sections/project/ProjectBlocks.astro';
 import { getDb } from '@/lib/db';
 import { getProject } from '@/lib/db/queries';
 
@@ -45,49 +46,7 @@ const facts = [
     </div>
   </section>
 
-  <section class="bg-paper px-5 pb-24 md:px-8 md:pb-[120px] lg:px-10 lg:pb-40" data-cursor="The story">
-    <div class="mx-auto flex max-w-[1600px] flex-col gap-[72px]">
-      {
-        [
-          ['The challenge', p.challenge],
-          ['Our approach', p.approach],
-        ].map(([label, text]) => (
-          <div class="flex flex-col gap-6 line-t pt-7 md:flex-row md:gap-10">
-            <p class="tag pt-0 md:flex-1">{label}</p>
-            <h2 class="type-h3 md:flex-[2]" data-text-reveal="line" data-tr-blur="10" data-tr-y="28" data-tr-stagger="0.05">{text}</h2>
-          </div>
-        ))
-      }
-    </div>
-  </section>
-
-  <section class="bg-fog px-5 py-[72px] md:px-8 md:py-24 lg:px-10 lg:py-[120px]" data-cursor="Results">
-    <div class="mx-auto flex max-w-[1600px] flex-col gap-10">
-      <p class="tag">Results</p>
-      <div class="flex flex-col md:flex-row">
-        {
-          p.results.map((r, i) => (
-            <div class="flex flex-col gap-3 line-t pt-6 pb-8 md:flex-1 md:line-l md:px-5 md:pt-1 md:pb-0 lg:px-8" data-reveal data-reveal-delay={i * 0.1}>
-              <p class="result-value text-cobalt">{r.value}</p>
-              <p class="type-small text-muted">{r.label}</p>
-            </div>
-          ))
-        }
-      </div>
-    </div>
-  </section>
-
-  <section class="bg-paper px-5 pt-20 pb-24 md:px-8 md:pt-28 md:pb-[120px] lg:px-10 lg:pt-[140px] lg:pb-40" data-cursor="Gallery">
-    <div class="mx-auto flex max-w-[1600px] flex-col gap-6 md:flex-row md:gap-4">
-      {
-        p.gallery.map((g, i) => (
-          <div class="relative h-[260px] overflow-clip md:h-[420px] md:flex-1 lg:h-[640px]" data-img-reveal data-img-reveal-delay={i * 0.12}>
-            <CmsImage image={g} widths={[700, 1400]} sizes="(min-width: 810px) 50vw, 100vw" class="absolute inset-0 size-full object-cover" />
-          </div>
-        ))
-      }
-    </div>
-  </section>
+  <ProjectBlocks blocks={p.blocks} />
 
   <NextStep wide />
 </BaseLayout>
@@ -107,21 +66,6 @@ const facts = [
   @media (width >= 1440px) {
     .project-hero-title {
       font-size: 150px;
-    }
-  }
-  .result-value {
-    font-size: 56px;
-    line-height: 1;
-    letter-spacing: -0.05em;
-  }
-  @media (width >= 810px) {
-    .result-value {
-      font-size: 64px;
-    }
-  }
-  @media (width >= 1440px) {
-    .result-value {
-      font-size: 88px;
     }
   }
 </style>

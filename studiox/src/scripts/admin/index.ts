@@ -3,6 +3,8 @@ import { initCountdownDelete, initDirtyTracking, initMenus, initSearch, initSlug
 import { initSortable } from './sortable';
 import { initImageFields } from './image-field';
 import { initRichText } from './rich-text';
+import { initVideoFields } from './video-field';
+import { initBlocks } from './blocks';
 
 initFlash();
 initMenus();
@@ -12,4 +14,6 @@ initCountdownDelete();
 initSlugAutofill();
 initDirtyTracking();
 initImageFields();
+initVideoFields();
+initBlocks();
 initRichText();

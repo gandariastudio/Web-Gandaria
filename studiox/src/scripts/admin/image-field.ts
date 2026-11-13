@@ -6,7 +6,7 @@ type UploadResult = { public_id: string; width: number; height: number; secure_u
 
 const MAX_BYTES = 20 * 1024 * 1024;
 
-async function sign(folder: string): Promise<Signature> {
+export async function sign(folder: string): Promise<Signature> {
   const res = await fetch('/api/admin/cloudinary-signature', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -16,7 +16,8 @@ async function sign(folder: string): Promise<Signature> {
   return res.json();
 }
 
-function upload(file: File, s: Signature, onProgress: (pct: number) => void): Promise<UploadResult> {
+/** Signed upload straight from the browser to Cloudinary (`resource` is "image" or "video"). */
+export function upload(file: File, s: Signature, onProgress: (pct: number) => void, resource: 'image' | 'video' = 'image'): Promise<UploadResult> {
   return new Promise((resolve, reject) => {
     const body = new FormData();
     body.append('file', file);
@@ -25,7 +26,7 @@ function upload(file: File, s: Signature, onProgress: (pct: number) => void): Pr
     body.append('folder', s.folder);
     body.append('signature', s.signature);
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `https://api.cloudinary.com/v1_1/${s.cloudName}/image/upload`);
+    xhr.open('POST', `https://api.cloudinary.com/v1_1/${s.cloudName}/${resource}/upload`);
     xhr.upload.addEventListener('progress', (e) => e.lengthComputable && onProgress(Math.round((e.loaded / e.total) * 100)));
     xhr.addEventListener('load', () => {
       const data = JSON.parse(xhr.responseText || '{}');
@@ -38,12 +39,18 @@ function upload(file: File, s: Signature, onProgress: (pct: number) => void): Pr
 }
 
 /** Image fields: click or drop a file, upload straight to Cloudinary, preview it, store the result in the hidden input. */
-export function initImageFields() {
-  document.querySelectorAll<HTMLElement>('[data-image-field]').forEach((field) => {
+export function initImageFields(root: ParentNode = document) {
+  root.querySelectorAll<HTMLElement>('[data-image-field]').forEach(initImageField);
+}
+
+/** Set up one image field (also used for fields in blocks inserted after the page loaded). */
+export function initImageField(field: HTMLElement) {
+  if (field.dataset.ready) return;
+  field.dataset.ready = '1';
+  {
     const drop = field.querySelector<HTMLElement>('[data-drop]')!;
     const fileInput = field.querySelector<HTMLInputElement>('[data-image-file]')!;
     const valueInput = field.querySelector<HTMLInputElement>('[data-image-value]')!;
-    const status = field.querySelector<HTMLElement>('[data-image-status]')!;
     const text = field.querySelector<HTMLElement>('[data-drop-text]')!;
     const box = field.querySelector<HTMLElement>('[data-preview-box]')!;
     const bar = field.querySelector<HTMLElement>('[data-progress]')!;
@@ -118,7 +125,9 @@ export function initImageFields() {
         return hi;
       };
 
-      adjust.addEventListener('click', () => {
+      adjust.addEventListener('click', (e) => {
+        // The button sits inside the upload label: do not open the file picker.
+        e.preventDefault();
         value = readValue();
         if (!value) return;
         crop = normalizeCrop(value.crop);
@@ -178,18 +187,17 @@ export function initImageFields() {
         valueInput.value = JSON.stringify(stored);
         const preview = box.querySelector<HTMLImageElement>('img');
         if (preview) place(preview, stored, stored.crop);
-        status.textContent = 'Framing changed. Save to apply.';
         dialog.close();
         form?.dispatchEvent(new Event('change'));
       });
     }
 
     // Optional slots (site images): go back to the built-in image by clearing the upload.
-    reset?.addEventListener('click', () => {
+    reset?.addEventListener('click', (e) => {
+      e.preventDefault();
       valueInput.value = '';
       if (alt) alt.value = '';
       if (field.dataset.fallback) showPreview(field.dataset.fallback);
-      status.textContent = 'Using the built-in image. Save to apply.';
       reset.hidden = true;
       if (adjust) adjust.hidden = true;
       form?.dispatchEvent(new Event('change'));
@@ -200,6 +208,7 @@ export function initImageFields() {
       if (!file.type.startsWith('image/')) return showToast('Choose an image file (JPG, PNG, WebP or SVG).', { error: true });
       if (file.size > MAX_BYTES) return showToast('That image is larger than 20 MB. Export a smaller version first.', { error: true });
       busy = true;
+      drop.classList.add('is-busy');
       save?.setAttribute('disabled', '');
       text.textContent = 'Uploading…';
       bar.style.width = '4%';
@@ -218,14 +227,14 @@ export function initImageFields() {
         showPreview(original, stored);
         if (reset) reset.hidden = false;
         if (adjust) adjust.hidden = !aspectW;
-        text.textContent = 'Drop a new image or click to replace';
-        status.textContent = `Uploaded ${result.width} × ${result.height}. Save to apply.`;
+        text.textContent = 'Add image';
         form?.dispatchEvent(new Event('change'));
       } catch (error) {
         text.textContent = 'Upload failed. Try again.';
         showToast(error instanceof Error ? error.message : 'Upload failed', { error: true });
       } finally {
         busy = false;
+        drop.classList.remove('is-busy');
         bar.style.width = '0';
         save?.removeAttribute('disabled');
         fileInput.value = '';
@@ -245,5 +254,5 @@ export function initImageFields() {
       e.preventDefault();
       handle((e as DragEvent).dataTransfer?.files?.[0]);
     });
-  });
+  }
 }
