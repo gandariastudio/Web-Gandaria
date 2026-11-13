@@ -1,5 +1,6 @@
 import { initImageFields } from './image-field';
 import { initVideoFields } from './video-field';
+import { initRichText } from './rich-text';
 import { videoEmbed } from '../../lib/cms/blocks';
 
 /**
@@ -77,6 +78,7 @@ export function initBlocks() {
   const wire = (block: HTMLElement) => {
     initImageFields(block);
     initVideoFields(block);
+    initRichText(block);
     syncSource(block);
     block.querySelectorAll<HTMLTextAreaElement>('textarea[data-autogrow]').forEach(grow);
   };
@@ -143,6 +145,7 @@ export function initBlocks() {
         else if (el.type !== 'file') to[k].value = el.value;
       });
       copy.querySelectorAll('[data-ready]').forEach((el) => el.removeAttribute('data-ready'));
+      copy.removeAttribute('data-rich-ready');
       copy.querySelectorAll('dialog[open]').forEach((d) => d.removeAttribute('open'));
       setIndex(copy, 'new');
       block.after(copy);

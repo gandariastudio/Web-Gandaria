@@ -36,6 +36,13 @@ const pad = 'px-5 md:px-8 lg:px-10';
           </section>
         );
 
+      if (b.type === 'richtext')
+        return (
+          <section class={pad} data-cursor="The story">
+            <div class="block-text mx-auto max-w-[1600px]" set:html={b.body} />
+          </section>
+        );
+
       if (b.type === 'image' && hasImage(b.image))
         return (
           <figure class:list={['flex flex-col gap-3', b.width === 'contained' && pad]}>

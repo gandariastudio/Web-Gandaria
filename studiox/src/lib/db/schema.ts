@@ -30,7 +30,10 @@ export type BlockWidth = 'contained' | 'full';
  * editor. Rendered by components/sections/project/ProjectBlocks.astro.
  */
 export type ProjectBlock =
+  /** "Label & text": a small label beside a statement or a paragraph. */
   | { type: 'text'; label: string; text: string; size: 'statement' | 'paragraph' }
+  /** Notion-style text: headings, paragraphs, lists, quotes, dividers. Sanitised HTML (lib/cms/sanitize.ts#sanitizeBlockText). */
+  | { type: 'richtext'; body: string }
   | { type: 'image'; image: CmsImage; width: BlockWidth; caption: string }
   | { type: 'gallery'; images: CmsImage[] }
   | { type: 'video'; source: 'upload' | 'embed'; video: CmsVideo | null; url: string; width: BlockWidth; caption: string }

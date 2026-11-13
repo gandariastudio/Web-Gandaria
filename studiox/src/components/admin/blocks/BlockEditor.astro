@@ -252,6 +252,173 @@ const groups = ['Basic', 'Rich media'] as const;
     line-height: 1.25;
     letter-spacing: -0.03em;
   }
+  /* Text block (Notion style). Heading 2 matches the project title above the blocks. */
+  .a-doc-rich {
+    display: grid;
+    gap: 8px;
+  }
+  .a-doc-rt {
+    position: relative;
+    font-size: 18px;
+    line-height: 1.45;
+    color: var(--a-muted);
+  }
+  .a-doc-rt .ProseMirror {
+    display: flex;
+    min-height: 1.45em;
+    flex-direction: column;
+    gap: 0.8em;
+    outline: none;
+  }
+  .a-doc-rt[data-empty='true']::before {
+    position: absolute;
+    content: attr(data-placeholder);
+    color: var(--a-faint);
+    pointer-events: none;
+  }
+  .a-doc-rt :is(h1, h2, h3) {
+    font-weight: 400;
+    color: var(--a-text);
+  }
+  .a-doc-rt :is(h1, h2, h3):not(:first-child) {
+    margin-top: 0.4em;
+  }
+  .a-doc-rt h1 {
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .a-doc-rt h2 {
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+  }
+  .a-doc-rt h3 {
+    font-size: 28px;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+  }
+  .a-doc-rt strong {
+    font-weight: 600;
+    color: var(--a-text);
+  }
+  .a-doc-rt em {
+    font-style: italic;
+  }
+  .a-doc-rt a {
+    color: var(--a-text);
+    text-decoration: underline;
+  }
+  .a-doc-rt ul,
+  .a-doc-rt ol {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    padding-left: 1.3em;
+  }
+  .a-doc-rt ul {
+    list-style: disc;
+  }
+  .a-doc-rt ol {
+    list-style: decimal;
+  }
+  .a-doc-rt blockquote {
+    border-left: 2px solid var(--a-accent);
+    padding-left: 0.8em;
+    font-size: 24px;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    color: var(--a-text);
+  }
+  .a-doc-rt hr {
+    height: 1px;
+    border: 0;
+    margin-block: 0.6em;
+    background: var(--a-line-strong);
+  }
+  .a-doc-rt hr.ProseMirror-selectednode {
+    box-shadow: 0 0 0 3px var(--a-accent);
+  }
+
+  /* "/" menu and selection toolbar (scripts/admin/slash-menu.ts). */
+  .a-rt-slash,
+  .a-rt-bubble {
+    position: fixed;
+    z-index: 40;
+    border: 1px solid var(--a-line);
+    background: var(--a-bg);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.12);
+  }
+  .a-rt-slash[hidden],
+  .a-rt-bubble[hidden] {
+    display: none;
+  }
+  .a-rt-slash {
+    display: grid;
+    width: 260px;
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 6px;
+  }
+  .a-rt-slash-head {
+    padding: 6px 8px 4px;
+    font-size: 12px;
+    color: var(--a-muted);
+  }
+  .a-rt-slash-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .a-rt-slash-item.is-active {
+    background: var(--a-soft);
+  }
+  .a-rt-slash-glyph {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    place-items: center;
+    border: 1px solid var(--a-line);
+    background: var(--a-bg);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--a-text);
+  }
+  .a-rt-slash-label {
+    display: block;
+    font-size: 14px;
+    color: var(--a-text);
+  }
+  .a-rt-slash-hint {
+    display: block;
+    font-size: 12px;
+    color: var(--a-muted);
+  }
+  .a-rt-bubble {
+    display: flex;
+    padding: 3px;
+  }
+  .a-rt-bubble-btn {
+    display: grid;
+    width: 30px;
+    height: 30px;
+    place-items: center;
+    color: var(--a-muted);
+    cursor: pointer;
+  }
+  .a-rt-bubble-btn:hover {
+    background: var(--a-soft);
+    color: var(--a-text);
+  }
+  .a-rt-bubble-btn.is-active {
+    background: var(--a-text);
+    color: #fff;
+  }
+
   /* Paragraph size, chosen in the toolbar. */
   .a-doc-block:has(input[value='paragraph']:checked) .a-doc-text {
     font-size: 16px;

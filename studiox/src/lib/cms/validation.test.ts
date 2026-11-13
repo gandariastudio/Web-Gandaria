@@ -47,6 +47,19 @@ describe('project form', () => {
       expect(r.errors.slug).toMatch(/lowercase/);
     }
   });
+  it('reads a Text block, sanitises its body and rejects an empty one', () => {
+    const text = (body: string) => {
+      const noBlocks = Object.fromEntries(Object.entries(projectForm).filter(([k]) => !k.startsWith('blocks.')));
+      return validate(projectSchema, readers.project(fd({ ...noBlocks, 'blocks.0.type': 'richtext', 'blocks.0.body': body })));
+    };
+    const ok = text('<h2>What changed</h2><p>Now <strong>bold</strong>.</p><h4>Small</h4><h1>Up</h1><blockquote><p>Said</p></blockquote><hr><ul><li>One</li></ul><script>x</script><img src=x>');
+    expect(ok.ok && ok.data.blocks[0]).toEqual({
+      type: 'richtext',
+      body: '<h2>What changed</h2><p>Now <strong>bold</strong>.</p><h4>Small</h4><h2>Up</h2><blockquote><p>Said</p></blockquote><hr /><ul><li>One</li></ul>',
+    });
+    const empty = text('<p></p><hr>');
+    expect(!empty.ok && empty.errors['blocks.0.body']).toBe('Write something, or delete this block');
+  });
   it('allows a project with no blocks and treats an unchecked published box as a draft', () => {
     const { published, ...rest } = projectForm;
     const noBlocks = Object.fromEntries(Object.entries(rest).filter(([k]) => !k.startsWith('blocks.')));

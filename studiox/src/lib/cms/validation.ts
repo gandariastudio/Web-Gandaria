@@ -1,6 +1,6 @@
 import { z } from 'astro/zod';
 import type { CmsImage } from '../db/schema';
-import { sanitizeArticle } from './sanitize';
+import { sanitizeArticle, sanitizeBlockText } from './sanitize';
 import { countWords } from './read-time';
 import { SLUG_PATTERN } from './slugify';
 import { MAX_ZOOM } from './crop';
@@ -32,6 +32,14 @@ const blockSchema = z.discriminatedUnion('type', [
     label: z.string().trim().max(80).default(''),
     text: required('Text'),
     size: z.enum(['statement', 'paragraph']).default('statement'),
+  }),
+  z.object({
+    type: z.literal('richtext'),
+    body: z
+      .string()
+      .default('')
+      .transform(sanitizeBlockText)
+      .refine((html) => countWords(html) > 0, 'Write something, or delete this block'),
   }),
   z.object({
     type: z.literal('image'),
@@ -186,6 +194,9 @@ export function readBlocks(f: FormData) {
     switch (type) {
       case 'text':
         blocks.push({ type, label: str(f, at('label')), text: str(f, at('text')), size: str(f, at('size')) || 'statement' });
+        break;
+      case 'richtext':
+        blocks.push({ type, body: str(f, at('body')) });
         break;
       case 'image':
         blocks.push({ type, image: readImage(f, at('image')), width: str(f, at('width')) || 'contained', caption: str(f, at('caption')) });

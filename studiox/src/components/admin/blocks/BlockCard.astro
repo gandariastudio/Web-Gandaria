@@ -28,9 +28,16 @@ const source = b.source === 'embed' ? 'embed' : 'upload';
 const items: { value?: string; label?: string }[] = Array.from({ length: 4 }, (_, j) => b.items?.[j] ?? {});
 const images: unknown[] = Array.from({ length: 3 }, (_, j) => b.images?.[j] ?? null);
 const embed = b.type === 'video' && b.url ? videoEmbed(b.url) : null;
+const rich = b.type === 'richtext';
+/** Selection toolbar of the Text block (commands in scripts/admin/rich-text.ts). */
+const FORMAT: [string, IconName, string][] = [
+  ['bold', 'bold', 'Bold (⌘B)'],
+  ['italic', 'italic', 'Italic (⌘I)'],
+  ['link', 'link', 'Link'],
+];
 ---
 
-<article class="a-doc-block" data-block data-type={b.type}>
+<article class="a-doc-block" data-block data-type={b.type} data-rich-text={rich ? '' : undefined} data-rich-mode={rich ? 'block' : undefined}>
   <div class="a-doc-tools" role="toolbar" aria-label={`${meta.label} block`}>
     <span class="a-doc-kind"><Icon name={meta.icon as IconName} size={14} />{meta.label}</span>
     {
@@ -91,6 +98,24 @@ const embed = b.type === 'video' && b.url ? videoEmbed(b.url) : null;
           <div class="a-doc-text-wrap">
             <textarea id={id('text')} name={at('text')} rows="2" class="a-doc-input a-doc-text" placeholder="Write something…" aria-label="Text" data-autogrow>{b.text ?? ''}</textarea>
             {err('text') && <p class="a-error">{err('text')}</p>}
+          </div>
+        </div>
+      )
+    }
+
+    {
+      rich && (
+        <div class="a-doc-rich">
+          <div class="a-doc-rt" data-editor data-placeholder="Type / for headings, lists, quotes and more" />
+          <input type="hidden" name={at('body')} value={b.body ?? ''} data-rich-value />
+          {err('body') && <p class="a-error">{err('body')}</p>}
+          <div class="a-rt-slash" role="listbox" aria-label="Turn into" data-slash hidden />
+          <div class="a-rt-bubble" role="toolbar" aria-label="Formatting" data-bubble hidden>
+            {FORMAT.map(([cmd, icon, title]) => (
+              <button type="button" class="a-rt-bubble-btn" data-cmd={cmd} title={title} aria-label={title}>
+                <Icon name={icon} size={15} />
+              </button>
+            ))}
           </div>
         </div>
       )

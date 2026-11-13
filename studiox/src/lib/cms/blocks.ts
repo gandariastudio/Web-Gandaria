@@ -9,7 +9,8 @@ export type { ProjectBlock, ProjectBlockType };
 
 /** The "Insert block" menu, in Dribbble's groups. Icon names are from components/admin/Icon.astro. */
 export const BLOCK_TYPES: { type: ProjectBlockType; label: string; description: string; group: 'Basic' | 'Rich media'; icon: string }[] = [
-  { type: 'text', label: 'Text', description: 'A heading-size statement or a paragraph', group: 'Basic', icon: 'text' },
+  { type: 'richtext', label: 'Text', description: 'Headings, paragraphs, lists and quotes. Type / for options', group: 'Basic', icon: 'text' },
+  { type: 'text', label: 'Label & text', description: 'A small label beside a statement or a paragraph', group: 'Basic', icon: 'heading' },
   { type: 'image', label: 'Image', description: 'One image, in the column or full width', group: 'Basic', icon: 'image' },
   { type: 'video', label: 'Video', description: 'Upload a clip or paste a YouTube or Vimeo link', group: 'Basic', icon: 'video' },
   { type: 'gallery', label: 'Gallery', description: 'Two or three images side by side', group: 'Rich media', icon: 'gallery' },
@@ -24,6 +25,8 @@ export function emptyBlock(type: ProjectBlockType): ProjectBlock {
   switch (type) {
     case 'text':
       return { type, label: '', text: '', size: 'statement' };
+    case 'richtext':
+      return { type, body: '' };
     case 'image':
       return { type, image: null as unknown as CmsImage, width: 'contained', caption: '' };
     case 'gallery':
