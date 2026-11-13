@@ -1,8 +1,9 @@
 ---
 /*
  * The case-study block editor, document style (Dribbble, Contra): blocks read as the content
- * itself, with a "+" between them and an "Add" line at the end. One <template> per block type
- * holds the markup for new blocks. Behaviour: scripts/admin/blocks.ts.
+ * itself, with a "+" above and between them (the top one stays visible while there are no
+ * blocks). One <template> per block type holds the markup for new blocks. Behaviour:
+ * scripts/admin/blocks.ts.
  */
 import Icon, { type IconName } from '../Icon.astro';
 import BlockCard from './BlockCard.astro';
@@ -24,10 +25,6 @@ const groups = ['Basic', 'Rich media'] as const;
   <div class="a-blocks-list" data-blocks-list>
     {blocks.map((b, i) => <BlockCard block={b} index={i} errors={errors} />)}
   </div>
-  <button type="button" class="a-doc-add" data-insert data-insert-end>
-    <Icon name="plus" size={16} />
-    <span>Add text, image, video, gallery, results, a quote or a divider</span>
-  </button>
   {errors.blocks && <p class="a-error">{errors.blocks}</p>}
 
   <div class="a-insert-menu" data-insert-menu role="menu" aria-label="Insert block" hidden>
@@ -181,6 +178,7 @@ const groups = ['Basic', 'Rich media'] as const;
     cursor: pointer;
     opacity: 0;
   }
+  .a-blocks:not(:has([data-block])) .a-doc-plus,
   .a-doc-gap:hover .a-doc-plus,
   .a-doc-block:hover > .a-doc-gap .a-doc-plus,
   .a-doc-plus:focus-visible,
@@ -189,22 +187,6 @@ const groups = ['Basic', 'Rich media'] as const;
   }
   .a-doc-plus:hover {
     border-color: var(--a-text);
-    color: var(--a-text);
-  }
-  .a-doc-add {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-    padding: 14px 0;
-    font-size: 15px;
-    color: var(--a-faint);
-    text-align: left;
-    cursor: text;
-  }
-  .a-doc-add:hover,
-  .a-doc-add[aria-expanded='true'] {
     color: var(--a-text);
   }
   /* ---------- inputs that look like the page ---------- */

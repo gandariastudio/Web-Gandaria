@@ -106,7 +106,6 @@ export function initBlocks() {
     if (!node || !anchor) return;
     const after = anchor.closest<HTMLElement>('[data-block]');
     if (after) after.after(node);
-    else if (anchor.hasAttribute('data-insert-end')) list.append(node);
     else list.prepend(node);
     closeMenu();
     changed();
