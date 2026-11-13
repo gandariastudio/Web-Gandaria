@@ -11,7 +11,7 @@ const START = 300;
 <section class="relative h-[260vh] bg-fog md:h-[300vh] xl:h-[340vh]" data-cursor="Keep scrolling" data-zoom>
   <div class="sticky top-0 h-screen w-full overflow-hidden">
     <div class="absolute inset-0 overflow-hidden" style={`clip-path:inset(calc(50% - ${(START * 1.25) / 2}px) calc(50% - ${START / 2}px) round 2px)`} data-zoom-clip>
-      <div class="absolute inset-0 origin-center scale-[1.35]" data-zoom-scale>
+      <div class="absolute inset-0" data-zoom-scale>
         {
           zoomImages.map((img, i) => (
             <SiteImage
