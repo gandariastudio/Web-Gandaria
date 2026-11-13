@@ -13,7 +13,7 @@ import { SITE_IMAGE_SLOTS } from '@/data/site-images';
   <PageHero {...about.hero} />
 
   <section class="bg-paper pb-24 md:pb-[120px] xl:pb-40" data-cursor="Our studio">
-    <div class="relative h-80 overflow-clip md:h-[520px] xl:h-[760px]" data-img-reveal>
+    <div class="relative aspect-[40/21] overflow-clip" data-img-reveal>
       <SiteImage image={Astro.locals.settings.siteImages.about} builtIn={SITE_IMAGE_SLOTS.about.builtIn} widths={[828, 1440, 2400]} sizes="100vw" class="absolute inset-0 size-full object-cover" />
     </div>
   </section>

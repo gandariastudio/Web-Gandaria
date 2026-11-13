@@ -23,7 +23,7 @@ const projects = await listProjects(await getDb());
       <a href="/work" class="text-link type-small w-max">All work →</a>
     </div>
 
-    <div class="flex w-full flex-col gap-2.5 md:grid md:grid-cols-2 md:gap-3 xl:gap-[15px]">
+    <div class="flex w-full flex-col gap-10 md:grid md:grid-cols-2 md:gap-x-3 md:gap-y-12 lg:gap-3 xl:gap-[15px]">
       {projects.map((project) => <ProjectCard project={project} />)}
     </div>
   </div>

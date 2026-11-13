@@ -21,7 +21,7 @@ const fmt = (d: Date) => d.toLocaleString('en-US', { dateStyle: 'medium', timeZo
           const p = post;
           return (
             <a href={`/journal/${post.slug}`} class="flex flex-col gap-[18px] self-start">
-              <div class="cover relative h-60 overflow-clip md:h-80 lg:h-[520px]" data-cover data-img-reveal>
+              <div class="cover relative aspect-[16/9] overflow-clip" data-cover data-img-reveal>
                 <CmsImage image={p.cover} widths={[700, 1400]} sizes="(min-width: 810px) 50vw, 100vw" class="cover__img absolute inset-0 size-full object-cover" />
               </div>
               <p class="type-label flex items-center gap-2.5">

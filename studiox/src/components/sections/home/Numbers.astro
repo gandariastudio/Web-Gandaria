@@ -7,7 +7,7 @@ const { siteImages } = Astro.locals.settings;
 ---
 
 <section class="flex flex-col gap-16 bg-fog pb-24 md:pb-[120px] xl:pb-[180px]" data-cursor="In numbers">
-  <div class="relative h-[56vh] overflow-clip md:h-[60vh] xl:h-[88vh]" data-img-reveal>
+  <div class="relative aspect-[16/10] overflow-clip" data-img-reveal>
     <SiteImage image={siteImages.numbers} builtIn={SITE_IMAGE_SLOTS.numbers.builtIn} widths={[828, 1440, 2400]} sizes="100vw" class="absolute inset-0 size-full object-cover grayscale" />
   </div>
 

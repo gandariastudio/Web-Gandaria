@@ -53,7 +53,7 @@ const shipped = [...projects].sort((a, b) => Number(b.year) - Number(a.year) || 
           shipped && (
             <div class="flex flex-col gap-[14px]">
               <p class="tag">Recently shipped</p>
-              <a href={`/work/${shipped.slug}`} class="relative block h-[220px] overflow-hidden" data-img-reveal>
+              <a href={`/work/${shipped.slug}`} class="relative block aspect-[16/9] overflow-hidden" data-img-reveal>
                 <CmsImage image={shipped.cover} widths={[400, 800]} sizes="(min-width: 1440px) 400px, (min-width: 810px) 320px, 100vw" class="size-full object-cover" />
                 <span class="type-label absolute inset-x-3 bottom-3 flex justify-between">
                   <span>{shipped.title}</span>

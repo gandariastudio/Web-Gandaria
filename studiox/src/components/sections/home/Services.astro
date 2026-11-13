@@ -36,7 +36,7 @@ const previews = services.map((s) => imageSrc(s.image, CLOUDINARY_CLOUD_NAME, 72
                 <p class="type-label text-muted">{s.deliverables}</p>
               </div>
             </div>
-            <div class="relative mt-6 ml-14 h-[220px] overflow-clip md:hidden" data-img-reveal>
+            <div class="relative mt-6 ml-14 aspect-[4/3] overflow-clip md:hidden" data-img-reveal>
               <CmsImage image={s.image} widths={[400, 800]} sizes="calc(100vw - 88px)" class="absolute inset-0 size-full object-cover" />
             </div>
             <div class="hidden h-px w-[200px] shrink-0 md:block xl:w-[280px]" data-media-slot />

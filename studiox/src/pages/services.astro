@@ -20,7 +20,7 @@ const services = await listServices(await getDb());
       {
         services.map((s, i) => (
           <article class="flex flex-col gap-6 line-t py-12 md:flex-row md:gap-14">
-            <div class="relative h-60 overflow-clip md:h-80 md:flex-[5] xl:h-[440px]" data-img-reveal>
+            <div class="relative aspect-[4/3] self-start overflow-clip md:flex-[5]" data-img-reveal>
               <CmsImage image={s.image} widths={[600, 1200]} sizes="(min-width: 810px) 42vw, 100vw" class="absolute inset-0 size-full object-cover" />
             </div>
             <div class="flex flex-col gap-5 md:flex-[6]" data-reveal>

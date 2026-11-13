@@ -57,7 +57,7 @@ const pad = 'px-5 md:px-8 lg:px-10';
           <section class={pad} data-cursor="Gallery">
             <div class:list={['mx-auto grid max-w-[1600px] grid-cols-1 gap-6 md:gap-4', b.images.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2']}>
               {b.images.filter(hasImage).map((g, k) => (
-                <div class:list={['relative overflow-clip', b.images.length === 3 ? 'h-[260px] md:h-[360px] lg:h-[520px]' : 'h-[260px] md:h-[420px] lg:h-[640px]']} data-img-reveal data-img-reveal-delay={k * 0.12}>
+                <div class:list={['relative overflow-clip', 'aspect-[5/4]']} data-img-reveal data-img-reveal-delay={k * 0.12}>
                   <CmsImage image={g} widths={[700, 1400]} sizes={b.images.length === 3 ? '(min-width: 810px) 33vw, 100vw' : '(min-width: 810px) 50vw, 100vw'} class="absolute inset-0 size-full object-cover" />
                 </div>
               ))}
