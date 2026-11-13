@@ -13,6 +13,7 @@ export const BLOCK_TYPES: { type: ProjectBlockType; label: string; description: 
   { type: 'text', label: 'Label & text', description: 'A small label beside a statement or a paragraph', group: 'Basic', icon: 'heading' },
   { type: 'image', label: 'Image', description: 'One image, in the column or full width', group: 'Basic', icon: 'image' },
   { type: 'video', label: 'Video', description: 'Upload a clip or paste a YouTube or Vimeo link', group: 'Basic', icon: 'video' },
+  { type: 'divider', label: 'Divider', description: 'A thin line between sections', group: 'Basic', icon: 'divider' },
   { type: 'gallery', label: 'Gallery', description: 'Two or three images side by side', group: 'Rich media', icon: 'gallery' },
   { type: 'results', label: 'Results', description: 'Up to four numbers with a short line each', group: 'Rich media', icon: 'results' },
   { type: 'quote', label: 'Quote', description: 'A line from the client, with their name', group: 'Rich media', icon: 'quote' },
@@ -37,6 +38,8 @@ export function emptyBlock(type: ProjectBlockType): ProjectBlock {
       return { type, label: 'Results', items: [] };
     case 'quote':
       return { type, quote: '', name: '', role: '' };
+    case 'divider':
+      return { type };
   }
 }
 

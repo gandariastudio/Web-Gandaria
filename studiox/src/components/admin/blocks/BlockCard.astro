@@ -106,7 +106,7 @@ const FORMAT: [string, IconName, string][] = [
     {
       rich && (
         <div class="a-doc-rich">
-          <div class="a-doc-rt" data-editor data-placeholder="Type / for headings, lists, quotes and more" />
+          <div class="a-doc-rt" data-editor data-placeholder="Type / for headings, lists and quotes" />
           <input type="hidden" name={at('body')} value={b.body ?? ''} data-rich-value />
           {err('body') && <p class="a-error">{err('body')}</p>}
           <div class="a-rt-slash" role="listbox" aria-label="Turn into" data-slash hidden />
@@ -189,6 +189,14 @@ const FORMAT: [string, IconName, string][] = [
             <input id={id('role')} name={at('role')} value={b.role ?? ''} class="a-doc-input a-doc-muted" placeholder="Role, company" aria-label="Role" />
           </div>
           {err('name') && <p class="a-error">{err('name')}</p>}
+        </div>
+      )
+    }
+
+    {
+      b.type === 'divider' && (
+        <div class="a-doc-divider">
+          <hr />
         </div>
       )
     }

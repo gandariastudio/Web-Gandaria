@@ -7,7 +7,7 @@ export const ARTICLE_TAGS = ['p', 'h2', 'h3', 'strong', 'em', 'a', 'ul', 'ol', '
  * Tags a case-study Text block can produce. Its "Heading 1/2/3" are stored as h2/h3/h4 so the
  * project title stays the page's only h1.
  */
-export const BLOCK_TEXT_TAGS = ['p', 'h2', 'h3', 'h4', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'hr', 'br'];
+export const BLOCK_TEXT_TAGS = ['p', 'h2', 'h3', 'h4', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'blockquote', 'br'];
 
 export const sanitizeArticle = (html: string) => clean(html, ARTICLE_TAGS, { h4: 'h3' });
 export const sanitizeBlockText = (html: string) => clean(html, BLOCK_TEXT_TAGS, { h5: 'h4', h6: 'h4' });

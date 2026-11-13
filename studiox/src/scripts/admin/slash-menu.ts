@@ -18,7 +18,6 @@ const ITEMS: Item[] = [
   { label: 'Bulleted list', hint: 'A simple list', glyph: '•', keys: 'bulleted list bullet unordered ul', run: (e, r) => e.chain().focus().deleteRange(r).clearNodes().toggleBulletList().run() },
   { label: 'Numbered list', hint: 'A list with numbers', glyph: '1.', keys: 'numbered list ordered ol number', run: (e, r) => e.chain().focus().deleteRange(r).clearNodes().toggleOrderedList().run() },
   { label: 'Quote', hint: 'Set a line apart', glyph: '“', keys: 'quote blockquote citation', run: (e, r) => e.chain().focus().deleteRange(r).clearNodes().toggleBlockquote().run() },
-  { label: 'Divider', hint: 'A line between sections', glyph: '—', keys: 'divider line separator rule hr', run: (e, r) => e.chain().focus().deleteRange(r).setHorizontalRule().run() },
 ];
 
 const SLASH = /(?:^|\s)\/([^\s/]{0,24})$/;

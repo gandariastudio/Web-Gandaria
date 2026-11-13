@@ -6,7 +6,7 @@ import { attachBlockMenus } from './slash-menu';
  * TipTap editors on `[data-rich-text]`.
  * - The journal article editor (default) has a toolbar and allows sanitize.ts#ARTICLE_TAGS.
  * - `data-rich-mode="block"` is the case-study Text block, Notion style: "/" opens a menu of
- *   headings, lists, quote and divider, and selecting text shows a bold/italic/link toolbar
+ *   headings, lists and quote, and selecting text shows a bold/italic/link toolbar
  *   (slash-menu.ts). Its "Heading 1/2/3" are h1/h2/h3 in the editor (so Markdown's "# " works) and
  *   are stored one level down, as h2/h3/h4 (sanitize.ts#BLOCK_TEXT_TAGS).
  * Keep the extensions here in sync with the sanitiser.
@@ -38,7 +38,7 @@ export function initRichTextField(root: HTMLElement) {
     extensions: [
       StarterKit.configure({
         heading: { levels: block ? [1, 2, 3] : [2, 3] },
-        horizontalRule: block ? undefined : false,
+        horizontalRule: false,
         code: false,
         codeBlock: false,
         strike: false,

@@ -24,10 +24,9 @@ const groups = ['Basic', 'Rich media'] as const;
   <div class="a-blocks-list" data-blocks-list>
     {blocks.map((b, i) => <BlockCard block={b} index={i} errors={errors} />)}
   </div>
-  <p class="a-blocks-empty" data-blocks-empty hidden={blocks.length > 0}>The case study is empty.</p>
   <button type="button" class="a-doc-add" data-insert data-insert-end>
     <Icon name="plus" size={16} />
-    <span>Add text, image, video, gallery, results or a quote</span>
+    <span>Add text, image, video, gallery, results, a quote or a divider</span>
   </button>
   {errors.blocks && <p class="a-error">{errors.blocks}</p>}
 
@@ -199,7 +198,6 @@ const groups = ['Basic', 'Rich media'] as const;
     gap: 10px;
     margin-top: 10px;
     padding: 14px 0;
-    border-top: 1px solid var(--a-line);
     font-size: 15px;
     color: var(--a-faint);
     text-align: left;
@@ -209,12 +207,6 @@ const groups = ['Basic', 'Rich media'] as const;
   .a-doc-add[aria-expanded='true'] {
     color: var(--a-text);
   }
-  .a-blocks-empty {
-    padding: 4px 0;
-    font-size: 14px;
-    color: var(--a-muted);
-  }
-
   /* ---------- inputs that look like the page ---------- */
   .a-doc-input {
     display: block;
@@ -329,15 +321,6 @@ const groups = ['Basic', 'Rich media'] as const;
     line-height: 1.3;
     letter-spacing: -0.02em;
     color: var(--a-text);
-  }
-  .a-doc-rt hr {
-    height: 1px;
-    border: 0;
-    margin-block: 0.6em;
-    background: var(--a-line-strong);
-  }
-  .a-doc-rt hr.ProseMirror-selectednode {
-    box-shadow: 0 0 0 3px var(--a-accent);
   }
 
   /* "/" menu and selection toolbar (scripts/admin/slash-menu.ts). */
@@ -500,6 +483,16 @@ const groups = ['Basic', 'Rich media'] as const;
   .a-doc-num-label {
     font-size: 13px;
     color: var(--a-muted);
+  }
+
+  .a-doc-divider {
+    padding-block: 18px;
+  }
+  .a-doc-divider hr {
+    height: 1px;
+    border: 0;
+    margin: 0;
+    background: var(--a-line-strong);
   }
 
   .a-doc-quote-block {

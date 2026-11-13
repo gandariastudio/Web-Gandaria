@@ -20,11 +20,8 @@ if (id !== 'new' && !row) return Astro.rewrite('/404');
 const blank = {
   slug: '', title: '', sector: '', year: String(new Date().getFullYear()), summary: '', services: '', client: '', role: '',
   cover: null, published: true,
-  // A starting point for new case studies; any block can be removed.
-  blocks: [
-    { type: 'text', label: 'The challenge', text: '', size: 'statement' },
-    { type: 'text', label: 'Our approach', text: '', size: 'statement' },
-  ],
+  // A new case study starts with just its cover, title and summary.
+  blocks: [],
 };
 let values: any = row ?? blank;
 let errors: FieldErrors = {};

@@ -32,13 +32,15 @@ export type BlockWidth = 'contained' | 'full';
 export type ProjectBlock =
   /** "Label & text": a small label beside a statement or a paragraph. */
   | { type: 'text'; label: string; text: string; size: 'statement' | 'paragraph' }
-  /** Notion-style text: headings, paragraphs, lists, quotes, dividers. Sanitised HTML (lib/cms/sanitize.ts#sanitizeBlockText). */
+  /** Notion-style text: headings, paragraphs, lists and quotes. Sanitised HTML (lib/cms/sanitize.ts#sanitizeBlockText). */
   | { type: 'richtext'; body: string }
   | { type: 'image'; image: CmsImage; width: BlockWidth; caption: string }
   | { type: 'gallery'; images: CmsImage[] }
   | { type: 'video'; source: 'upload' | 'embed'; video: CmsVideo | null; url: string; width: BlockWidth; caption: string }
   | { type: 'results'; label: string; items: ProjectResult[] }
-  | { type: 'quote'; quote: string; name: string; role: string };
+  | { type: 'quote'; quote: string; name: string; role: string }
+  /** A thin line between sections. */
+  | { type: 'divider' };
 
 export type ProjectBlockType = ProjectBlock['type'];
 export type SocialLink = { label: string; href: string };

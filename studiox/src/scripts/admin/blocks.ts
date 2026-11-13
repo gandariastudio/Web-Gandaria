@@ -13,7 +13,6 @@ export function initBlocks() {
   if (!root) return;
   const list = root.querySelector<HTMLElement>('[data-blocks-list]')!;
   const menu = root.querySelector<HTMLElement>('[data-insert-menu]')!;
-  const empty = root.querySelector<HTMLElement>('[data-blocks-empty]')!;
   const form = root.closest('form');
   const blocks = () => Array.from(list.querySelectorAll<HTMLElement>(':scope > [data-block]'));
 
@@ -34,7 +33,6 @@ export function initBlocks() {
       block.querySelector<HTMLButtonElement>('[data-block-up]')!.disabled = n === 0;
       block.querySelector<HTMLButtonElement>('[data-block-down]')!.disabled = n === all.length - 1;
     });
-    empty.hidden = all.length > 0;
   };
 
   const changed = () => {

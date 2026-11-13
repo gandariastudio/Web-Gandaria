@@ -18,6 +18,7 @@ const projectForm = {
   'blocks.3.type': 'image', 'blocks.3.image': img, 'blocks.3.image_alt': 'Dining room', 'blocks.3.width': 'full', 'blocks.3.caption': 'The room',
   'blocks.4.type': 'video', 'blocks.4.source': 'embed', 'blocks.4.url': 'https://youtu.be/dQw4w9WgXcQ',
   'blocks.5.type': 'quote', 'blocks.5.quote': 'They got us.', 'blocks.5.name': 'Rina', 'blocks.5.role': 'Owner',
+  'blocks.6.type': 'divider',
 };
 
 describe('project form', () => {
@@ -25,7 +26,7 @@ describe('project form', () => {
     const r = validate(projectSchema, readers.project(fd(projectForm)));
     expect(r.ok).toBe(true);
     if (r.ok) {
-      expect(r.data.blocks.map((b) => b.type)).toEqual(['text', 'results', 'gallery', 'image', 'video', 'quote']);
+      expect(r.data.blocks.map((b) => b.type)).toEqual(['text', 'results', 'gallery', 'image', 'video', 'quote', 'divider']);
       expect(r.data.blocks[1]).toMatchObject({ items: [{ value: '+52%' }, { value: '4' }] });
       expect(r.data.blocks[3]).toMatchObject({ width: 'full', caption: 'The room', image: { alt: 'Dining room' } });
       expect(r.data.cover).toMatchObject({ url: '/placeholders/x.jpg', width: 1200, alt: 'Kitchen' });
@@ -55,7 +56,7 @@ describe('project form', () => {
     const ok = text('<h2>What changed</h2><p>Now <strong>bold</strong>.</p><h4>Small</h4><h1>Up</h1><blockquote><p>Said</p></blockquote><hr><ul><li>One</li></ul><script>x</script><img src=x>');
     expect(ok.ok && ok.data.blocks[0]).toEqual({
       type: 'richtext',
-      body: '<h2>What changed</h2><p>Now <strong>bold</strong>.</p><h4>Small</h4><h2>Up</h2><blockquote><p>Said</p></blockquote><hr /><ul><li>One</li></ul>',
+      body: '<h2>What changed</h2><p>Now <strong>bold</strong>.</p><h4>Small</h4><h2>Up</h2><blockquote><p>Said</p></blockquote><ul><li>One</li></ul>',
     });
     const empty = text('<p></p><hr>');
     expect(!empty.ok && empty.errors['blocks.0.body']).toBe('Write something, or delete this block');

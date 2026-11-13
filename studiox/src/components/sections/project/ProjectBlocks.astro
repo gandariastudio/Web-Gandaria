@@ -132,6 +132,13 @@ const pad = 'px-5 md:px-8 lg:px-10';
           </section>
         );
 
+      if (b.type === 'divider')
+        return (
+          <div class={pad}>
+            <hr class="mx-auto h-px w-full max-w-[1600px] border-0 bg-line" />
+          </div>
+        );
+
       return null;
     })
   }

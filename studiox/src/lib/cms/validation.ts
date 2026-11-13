@@ -78,6 +78,7 @@ const blockSchema = z.discriminatedUnion('type', [
     name: required('Name'),
     role: z.string().trim().max(120).default(''),
   }),
+  z.object({ type: z.literal('divider') }),
 ]);
 
 export const projectSchema = z.object({
