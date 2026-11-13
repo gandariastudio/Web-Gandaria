@@ -127,23 +127,38 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
 <style is:global>
   html.admin {
     --a-bg: #ffffff;
-    --a-soft: #f5f5f4;
-    --a-softer: #fafaf9;
-    --a-line: #ebebe8;
-    --a-line-strong: #dddcd8;
-    --a-text: #161616;
-    --a-muted: #85857f;
-    --a-faint: #b4b4ae;
+    /* Website palette (src/styles/variable.css): ink, muted, line, fog, orange accent. */
+    --a-soft: #f6f6f6;
+    --a-softer: #fafafa;
+    --a-line: #dcdbd7;
+    --a-line-strong: #c9c7c2;
+    --a-text: #252320;
+    --a-muted: #6f6c67;
+    --a-faint: #a9a6a0;
+    --a-accent: #f15822;
+    --a-gradient: linear-gradient(90deg, #f68a1e 0%, #f15822 100%);
+    --a-gradient-deep: linear-gradient(90deg, #e8731a 0%, #d9441a 100%);
     --a-danger: #d92d20;
     --a-danger-soft: #fdecea;
     --a-ok: #15803d;
     --a-ok-soft: #e8f6ed;
-    --a-r-card: 20px;
-    --a-r-input: 12px;
+    --a-r-card: 0;
+    --a-r-input: 0;
     --a-rail: 72px;
     background: var(--a-bg);
     color: var(--a-text);
     scrollbar-width: auto;
+  }
+  /*
+   * No motion in the admin: hovers, menus, the switch, tooltips and toasts change instantly.
+   * (toast.ts removes toasts on a timer rather than waiting for an animation to end.)
+   */
+  html.admin *,
+  html.admin *::before,
+  html.admin *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
   }
   html.admin body {
     background: var(--a-bg);
@@ -172,7 +187,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     place-items: center;
     width: 40px;
     height: 40px;
-    border-radius: 999px;
+    border-radius: 0;
     color: var(--a-text);
   }
   .a-rail-list {
@@ -193,7 +208,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     place-items: center;
     width: 42px;
     height: 42px;
-    border-radius: 999px;
+    border-radius: 0;
     color: var(--a-muted);
     transition:
       background-color 0.2s ease,
@@ -206,7 +221,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     min-width: 17px;
     height: 17px;
     padding: 0 4px;
-    border-radius: 999px;
+    border-radius: 0;
     background: #f15822;
     color: #fff;
     font-size: 10.5px;
@@ -224,6 +239,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
   .a-rail-link.is-active {
     background: var(--a-soft);
     color: var(--a-text);
+    box-shadow: inset 2px 0 0 var(--a-accent);
   }
   .a-rail-link[data-tip]::after {
     content: attr(data-tip);
@@ -232,7 +248,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     top: 50%;
     translate: -4px -50%;
     padding: 6px 11px;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--a-text);
     color: #fff;
     font-size: 13px;
@@ -274,7 +290,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--a-soft);
     padding: 6px 13px 6px 10px;
     font-size: 13px;
@@ -299,19 +315,42 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     color: var(--a-text);
   }
   .a-title {
-    font-size: 28px;
-    line-height: 1.15;
-    letter-spacing: -0.025em;
+    font-size: 32px;
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+  @media (min-width: 810px) {
+    .a-title {
+      font-size: 40px;
+    }
   }
   .a-sub {
     margin-top: 6px;
     font-size: 14px;
     color: var(--a-muted);
   }
+  /* Section and card headings: the website's tag (7px square + small label). */
+  .a-section-title,
+  .a-card-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.3;
+    letter-spacing: 0;
+  }
   .a-section-title {
     margin-top: 12px;
-    font-size: 19px;
-    letter-spacing: -0.015em;
+  }
+  .a-section-title::before,
+  .a-card-head h2::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    flex: none;
+    background: currentColor;
   }
 
   /* ---------- cards & fields ---------- */
@@ -320,16 +359,12 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     flex-direction: column;
     gap: 18px;
     border: 1px solid var(--a-line);
-    border-radius: var(--a-r-card);
+    border-radius: 0;
     background: var(--a-bg);
     padding: 24px;
   }
-  .a-card-head h2 {
-    font-size: 15px;
-    font-weight: 500;
-  }
   .a-card-head p {
-    margin-top: 2px;
+    margin-top: 6px;
     font-size: 13px;
     color: var(--a-muted);
   }
@@ -355,7 +390,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     width: 100%;
     min-height: 46px;
     border: 1px solid var(--a-line-strong);
-    border-radius: var(--a-r-input);
+    border-radius: 0;
     background: var(--a-bg);
     padding: 11px 14px;
     font-size: 15px;
@@ -371,7 +406,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
   .a-input:focus {
     outline: none;
     border-color: var(--a-text);
-    box-shadow: 0 0 0 3px rgb(0 0 0 / 0.06);
+    box-shadow: inset 0 -1px 0 var(--a-text);
   }
   textarea.a-input {
     resize: vertical;
@@ -388,7 +423,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     border-color: var(--a-danger);
   }
   .a-alert {
-    border-radius: 14px;
+    border-radius: 0;
     background: var(--a-danger-soft);
     padding: 12px 16px;
     font-size: 14px;
@@ -398,17 +433,20 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
   /* ---------- buttons ---------- */
   .a-btn {
     display: inline-flex;
-    height: 40px;
+    height: 42px;
     flex: none;
     align-items: center;
     justify-content: center;
     gap: 7px;
-    border-radius: 999px;
-    background: var(--a-text);
-    padding: 0 18px;
+    border-radius: 0;
+    background-color: var(--a-accent);
+    background-image: var(--a-gradient);
+    padding: 0 20px;
     font-size: 14px;
     font-weight: 500;
+    letter-spacing: -0.01em;
     color: #fff;
+    box-shadow: -6px 10px 20px 0 rgb(0 0 0 / 0.12);
     white-space: nowrap;
     cursor: pointer;
     transition:
@@ -417,7 +455,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
       box-shadow 0.15s ease;
   }
   .a-btn:hover {
-    background: #000;
+    background-image: var(--a-gradient-deep);
   }
   .a-btn:focus-visible,
   .a-icon-btn:focus-visible,
@@ -427,27 +465,32 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
   }
   .a-btn--ghost {
     background: var(--a-bg);
+    background-image: none;
     color: var(--a-text);
-    box-shadow: inset 0 0 0 1px var(--a-line-strong);
+    box-shadow: inset 0 0 0 1px var(--a-text);
   }
   .a-btn--ghost:hover {
     background: var(--a-soft);
+    background-image: none;
   }
   .a-btn--danger {
     background: var(--a-bg);
+    background-image: none;
     color: var(--a-danger);
     box-shadow: inset 0 0 0 1px #f3c3be;
   }
   .a-btn--danger:hover {
     background: var(--a-danger-soft);
+    background-image: none;
   }
   .a-btn--danger.is-armed {
     background: var(--a-danger);
+    background-image: none;
     color: #fff;
     box-shadow: none;
   }
   .a-btn--sm {
-    height: 34px;
+    height: 36px;
     padding: 0 14px;
     font-size: 13px;
   }
@@ -461,7 +504,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     height: 34px;
     flex: none;
     place-items: center;
-    border-radius: 999px;
+    border-radius: 0;
     color: var(--a-muted);
     cursor: pointer;
   }
@@ -482,7 +525,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     content: '';
     width: 7px;
     height: 7px;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--a-faint);
   }
   .a-status.is-live {
@@ -509,7 +552,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     width: 38px;
     height: 22px;
     flex: none;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--a-line-strong);
     transition: background-color 0.2s ease;
   }
@@ -520,13 +563,13 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     left: 3px;
     width: 16px;
     height: 16px;
-    border-radius: 999px;
+    border-radius: 0;
     background: #fff;
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
     transition: translate 0.2s ease;
   }
   .a-switch input:checked + .a-switch-track {
-    background: var(--a-text);
+    background: var(--a-accent);
   }
   .a-switch input:checked + .a-switch-track::after {
     translate: 16px 0;
@@ -547,11 +590,11 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     justify-content: space-between;
     gap: 12px;
     border: 1px solid var(--a-line);
-    border-radius: 999px;
-    background: rgb(255 255 255 / 0.92);
+    border-radius: 0;
+    background: rgb(255 255 255 / 0.95);
     backdrop-filter: blur(10px);
     padding: 8px 8px 8px 20px;
-    box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.18);
+    box-shadow: 0 12px 28px -18px rgb(0 0 0 / 0.25);
   }
   .a-savebar-left {
     display: flex;
@@ -570,7 +613,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     content: '';
     width: 7px;
     height: 7px;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--a-faint);
   }
   .a-dirty.is-dirty {
@@ -610,7 +653,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     align-items: center;
     gap: 14px;
     padding: 10px 6px;
-    border-radius: 14px;
+    border-radius: 0;
   }
   .a-recent:hover {
     background: var(--a-soft);
@@ -641,7 +684,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     justify-content: space-between;
     gap: 14px;
     border: 1px solid var(--a-line);
-    border-radius: var(--a-r-card);
+    border-radius: 0;
     padding: 20px 24px;
   }
   .a-danger h2 {
@@ -678,7 +721,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     width: 100%;
     height: 40px;
     border: 1px solid var(--a-line-strong);
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--a-bg);
     padding: 0 16px 0 40px;
     font-size: 14px;
@@ -701,7 +744,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     display: flex;
     flex-direction: column;
     border: 1px solid var(--a-line);
-    border-radius: 18px;
+    border-radius: 0;
     background: var(--a-bg);
     padding: 8px;
     transition:
@@ -716,7 +759,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     display: block;
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: 0;
     background: var(--a-soft);
   }
   .a-item-media img {
@@ -749,7 +792,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: 18px;
+    border-radius: 0;
   }
   .a-item-foot {
     position: relative;
@@ -763,7 +806,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
   .a-rows {
     overflow: visible;
     border: 1px solid var(--a-line);
-    border-radius: var(--a-r-card);
+    border-radius: 0;
   }
   .a-row {
     position: relative;
@@ -815,7 +858,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     height: 34px;
     flex: none;
     place-items: center;
-    border-radius: 8px;
+    border-radius: 0;
     color: var(--a-faint);
     cursor: grab;
   }
@@ -860,7 +903,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     align-items: center;
     gap: 12px;
     border: 1px dashed var(--a-line-strong);
-    border-radius: var(--a-r-card);
+    border-radius: 0;
     padding: 48px 24px;
     text-align: center;
     color: var(--a-muted);
@@ -885,7 +928,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     min-width: 190px;
     flex-direction: column;
     border: 1px solid var(--a-line);
-    border-radius: 16px;
+    border-radius: 0;
     background: var(--a-bg);
     padding: 6px;
     box-shadow: 0 16px 40px -16px rgb(0 0 0 / 0.25);
@@ -898,7 +941,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     width: 100%;
     align-items: center;
     gap: 10px;
-    border-radius: 10px;
+    border-radius: 0;
     padding: 9px 10px;
     font-size: 14px;
     color: var(--a-text);
@@ -945,31 +988,15 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     display: inline-flex;
     align-items: center;
     gap: 9px;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--a-text);
     padding: 10px 18px 10px 14px;
     font-size: 14px;
     color: #fff;
     box-shadow: 0 12px 30px -10px rgb(0 0 0 / 0.4);
-    animation: a-toast-in 0.25s ease both;
   }
   .a-toast.is-error {
     background: var(--a-danger);
-  }
-  .a-toast.is-leaving {
-    animation: a-toast-out 0.25s ease both;
-  }
-  @keyframes a-toast-in {
-    from {
-      opacity: 0;
-      translate: 0 8px;
-    }
-  }
-  @keyframes a-toast-out {
-    to {
-      opacity: 0;
-      translate: 0 8px;
-    }
   }
 
   /* ---------- dashboard ---------- */
@@ -983,7 +1010,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     flex-direction: column;
     gap: 14px;
     border: 1px solid var(--a-line);
-    border-radius: 18px;
+    border-radius: 0;
     padding: 16px;
     transition: border-color 0.15s ease;
   }
@@ -995,7 +1022,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     width: 34px;
     height: 34px;
     place-items: center;
-    border-radius: 999px;
+    border-radius: 0;
     background: var(--a-soft);
   }
   .a-tile-count {
@@ -1013,7 +1040,7 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     height: 44px;
     flex: none;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: 0;
     background: var(--a-soft);
   }
   .a-thumb img {
@@ -1060,12 +1087,16 @@ const cloudinaryReady = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDI
     .a-rail-link[data-tip]::after {
       display: none;
     }
+    /* In the bottom bar the active marker sits on top instead of on the left. */
+    .a-rail-link.is-active {
+      box-shadow: inset 0 2px 0 var(--a-accent);
+    }
     .a-main {
       padding: 24px 16px 200px;
     }
     .a-savebar {
       bottom: 76px;
-      border-radius: 22px;
+      border-radius: 0;
     }
     .a-toasts {
       bottom: 150px;
