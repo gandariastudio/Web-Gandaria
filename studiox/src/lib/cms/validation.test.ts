@@ -76,3 +76,13 @@ describe('site images', () => {
     expect(ok.ok && ok.data.about).toMatchObject({ width: 1200, height: 800, alt: 'The studio' });
   });
 });
+
+describe('image crop in forms', () => {
+  it('keeps a valid crop from the hidden field and rejects an out-of-range zoom', () => {
+    const withCrop = JSON.stringify({ url: '/placeholders/x.jpg', width: 1200, height: 800, crop: { x: 0.3, y: 0.6, zoom: 1.5 } });
+    const ok = validate(siteImagesSchema, readers.siteImages(fd({ about: withCrop, about_alt: 'Studio' })));
+    expect(ok.ok && ok.data.about?.crop).toEqual({ x: 0.3, y: 0.6, zoom: 1.5 });
+    const bad = JSON.stringify({ url: '/placeholders/x.jpg', width: 1200, height: 800, crop: { x: 0.3, y: 0.6, zoom: 12 } });
+    expect(validate(siteImagesSchema, readers.siteImages(fd({ about: bad, about_alt: 'Studio' }))).ok).toBe(false);
+  });
+});

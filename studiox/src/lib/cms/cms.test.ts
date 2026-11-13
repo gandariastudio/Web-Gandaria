@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { slugify } from './slugify';
 import { countWords, readTime } from './read-time';
 import { sanitizeArticle } from './sanitize';
-import { cloudinaryUrl, hasImage, imageSrc, imageSrcset, signUploadParams } from './cloudinary';
+import { cloudinaryUrl, hasImage, imagePosition, imageSrc, imageSrcset, signUploadParams } from './cloudinary';
+import { cropRegion, frameLayout, MAX_ZOOM, normalizeCrop, parseAspect } from './crop';
 
 describe('slugify', () => {
   it('lowercases, strips accents and joins with hyphens', () => {
@@ -67,5 +68,33 @@ describe('cloudinary', () => {
     expect(hasImage({ url: '/a.jpg', width: 1, height: 1, alt: '' })).toBe(true);
     expect(hasImage({ width: 1, height: 1, alt: '' })).toBe(false);
     expect(hasImage(null)).toBe(false);
+  });
+});
+
+describe('image crop', () => {
+  it('keeps the chosen point in view and clamps the region to the image', () => {
+    expect(cropRegion(2400, 1600, { x: 0.5, y: 0.5, zoom: 2 })).toEqual({ left: 600, top: 400, width: 1200, height: 800, fx: 0.5, fy: 0.5 });
+    const corner = cropRegion(2400, 1600, { x: 0.95, y: 0.05, zoom: 2 });
+    expect([corner.left, corner.top]).toEqual([1200, 0]);
+    expect(corner.fx).toBeCloseTo(0.9);
+    expect(normalizeCrop({ x: 3, y: -1, zoom: 9 })).toEqual({ x: 1, y: 0, zoom: MAX_ZOOM });
+  });
+  it('lays the original out in a frame like object-fit: cover', () => {
+    // A 2:1 image in a square frame, centred, no zoom: twice as wide as the frame, centred.
+    expect(frameLayout(2000, 1000, null, 100, 100)).toMatchObject({ left: -50, top: 0, width: 200, height: 100 });
+    // Moved to the left edge.
+    expect(frameLayout(2000, 1000, { x: 0, y: 0.5, zoom: 1 }, 100, 100).left).toBeCloseTo(0);
+    expect(parseAspect('2400 × 1350 (16:9)')).toEqual([2400, 1350]);
+    expect(parseAspect(undefined)).toEqual([16, 10]);
+  });
+  it('asks Cloudinary for the zoomed region and positions it', () => {
+    const img = { publicId: 'p', width: 2400, height: 1600, alt: '', crop: { x: 0.25, y: 0.5, zoom: 2 } };
+    expect(imageSrc(img, 'demo', 800)).toBe('https://res.cloudinary.com/demo/image/upload/c_crop,x_0,y_400,w_1200,h_800/f_auto,q_auto,c_limit,w_800/p');
+    expect(imageSrcset(img, 'demo', [800, 1600])).toContain('w_800/p 800w');
+    expect(imageSrcset(img, 'demo', [800, 1600])).not.toContain('1600w');
+    expect(imagePosition(img)).toBe('50.00% 50.00%');
+    expect(imagePosition({ ...img, crop: null })).toBeUndefined();
+    // Placeholders cannot be zoomed: only the point is used.
+    expect(imagePosition({ url: '/x.jpg', width: 2400, height: 1600, alt: '', crop: { x: 0.25, y: 0.5, zoom: 2 } })).toBe('25.00% 50.00%');
   });
 });

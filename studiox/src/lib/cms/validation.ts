@@ -3,6 +3,7 @@ import type { CmsImage } from '../db/schema';
 import { sanitizeArticle } from './sanitize';
 import { countWords } from './read-time';
 import { SLUG_PATTERN } from './slugify';
+import { MAX_ZOOM } from './crop';
 
 const required = (label: string) => z.string().trim().min(1, `${label} is required`);
 const slug = z.string().trim().min(1, 'Slug is required').max(80).regex(SLUG_PATTERN, 'Use lowercase letters, numbers and hyphens only');
@@ -15,6 +16,9 @@ const image = (label: string) =>
       width: z.coerce.number({ error: `Upload ${label}` }).int().positive(`Upload ${label}`),
       height: z.coerce.number({ error: `Upload ${label}` }).int().positive(`Upload ${label}`),
       alt: z.string().trim().min(1, 'Describe the image for screen readers'),
+      crop: z
+        .object({ x: z.coerce.number().min(0).max(1), y: z.coerce.number().min(0).max(1), zoom: z.coerce.number().min(1).max(MAX_ZOOM) })
+        .nullish(),
     })
     .refine((i) => !!(i.publicId || i.url), { message: `Upload ${label}`, path: ['width'] });
 
@@ -108,7 +112,7 @@ export type SiteImagesInput = z.infer<typeof siteImagesSchema>;
 const str = (form: FormData, name: string) => String(form.get(name) ?? '').trim();
 const bool = (form: FormData, name: string) => form.get(name) === 'on' || form.get(name) === 'true';
 
-/** Image fields post a hidden JSON value `{publicId,url,width,height}` plus `<name>_alt`. */
+/** Image fields post a hidden JSON value `{publicId,url,width,height,crop}` plus `<name>_alt`. */
 export function readImage(form: FormData, name: string): Partial<CmsImage> {
   let base: Partial<CmsImage> = {};
   try {

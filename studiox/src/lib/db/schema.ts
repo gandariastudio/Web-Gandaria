@@ -10,7 +10,12 @@ export type CmsImage = {
   width: number;
   height: number;
   alt: string;
+  /** Framing from the admin's Adjust dialog (see src/lib/cms/crop.ts); absent means centred, no zoom. */
+  crop?: ImageCrop | null;
 };
+
+/** A point of the original to keep in view (0–1 across and down) and a zoom level (1–4). */
+export type ImageCrop = { x: number; y: number; zoom: number };
 
 export type ProjectResult = { value: string; label: string };
 export type SocialLink = { label: string; href: string };

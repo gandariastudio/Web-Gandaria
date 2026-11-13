@@ -56,13 +56,13 @@ export function initServicesPreview() {
     if (!raf) raf = requestAnimationFrame(tick);
   };
 
-  const wipeIn = (src: string) => {
+  const wipeIn = (src: string, position = '') => {
     const layer = document.createElement('div');
     const img = document.createElement('img');
     img.src = src;
     img.alt = '';
     Object.assign(layer.style, { position: 'absolute', inset: '0', overflow: 'hidden', clipPath: 'inset(100% 0% 0% 0%)' });
-    Object.assign(img.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', objectFit: 'cover', display: 'block', transform: 'scale(1.18)' });
+    Object.assign(img.style, { position: 'absolute', inset: '0', width: '100%', height: '100%', objectFit: 'cover', objectPosition: position || '50% 50%', display: 'block', transform: 'scale(1.18)' });
     layer.append(img);
     card.append(layer);
     const opts: KeyframeAnimationOptions = { duration: reduced ? 1 : 750, easing: EASE, fill: 'forwards' };
@@ -111,7 +111,7 @@ export function initServicesPreview() {
     if (row && row !== currentRow) {
       currentRow = row;
       const src = srcOf(row);
-      if (src) wipeIn(src);
+      if (src) wipeIn(src, row.dataset.previewPos);
     }
     run();
   };
