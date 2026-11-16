@@ -1,10 +1,11 @@
 ---
+import { breadcrumbLd } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHero from '@/components/sections/shared/PageHero.astro';
 import { privacy } from '@/data/pages';
 ---
 
-<BaseLayout title="Privacy policy" description={privacy.intro}>
+<BaseLayout title="Privacy policy" description={privacy.intro} jsonLd={breadcrumbLd([['Privacy policy', '/privacy']])}>
   <PageHero tag={privacy.tag} meta={privacy.meta} lines={privacy.lines} intro={privacy.intro} />
 
   <section class="bg-fog px-5 pb-24 md:px-8 md:pb-[120px] xl:px-10 xl:pb-40" data-cursor="Privacy">

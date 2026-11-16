@@ -1,4 +1,5 @@
 ---
+import { breadcrumbLd } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHero from '@/components/sections/shared/PageHero.astro';
 import ContactForm from '@/components/ui/ContactForm.astro';
@@ -9,7 +10,7 @@ const description = 'Tell us about the project, the timing and what success look
 const { email: EMAIL, socialLinks: elsewhere } = Astro.locals.settings;
 ---
 
-<BaseLayout title="Start a Project" description={description}>
+<BaseLayout title="Start a Project" description={description} jsonLd={breadcrumbLd([['Contact', '/contact']])}>
   <PageHero tag="Contact" meta="(Reply within 1 business day)" lines={['Let’s make', 'something.']} intro={intro} />
 
   <section class="bg-fog px-5 pb-24 md:px-8 md:pb-[120px] xl:px-10 xl:pb-40" data-cursor="Say hello">

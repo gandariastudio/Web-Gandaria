@@ -5,9 +5,30 @@ import CmsImage from '@/components/ui/CmsImage.astro';
 import ProjectBlocks from '@/components/sections/project/ProjectBlocks.astro';
 import { getDb } from '@/lib/db';
 import { getProject } from '@/lib/db/queries';
+import { CLOUDINARY_CLOUD_NAME } from 'astro:env/server';
+import { hasImage, imageSrc } from '@/lib/cms/cloudinary';
+import { breadcrumbLd, caseStudyLd } from '@/utils/seo';
 
-const p = await getProject(await getDb(), Astro.params.slug ?? '');
-if (!p) return Astro.rewrite('/404');
+/**
+ * Old project URLs → their new slug. Used only once the old slug no longer exists and the new one
+ * does, so an entry can be added before the slug is renamed in the admin.
+ */
+const MOVED: Record<string, string> = {
+  'urbn-hoops-urbn-hoops-basketball-culture-brand-identity-basketball-culture-brand': 'urbn-hoops-brand-identity',
+};
+
+const db = await getDb();
+const slug = Astro.params.slug ?? '';
+const p = await getProject(db, slug);
+if (!p) {
+  const to = MOVED[slug];
+  if (to && (await getProject(db, to))) return Astro.redirect(`/work/${to}`, 301);
+  return Astro.rewrite('/404');
+}
+const jsonLd = [
+  caseStudyLd({ ...p, image: hasImage(p.cover) ? imageSrc(p.cover, CLOUDINARY_CLOUD_NAME, 1600) : undefined }),
+  breadcrumbLd([['Work', '/work'], [p.title, `/work/${p.slug}`]]),
+];
 const facts = [
   ['Client', p.client],
   ['Role', p.role],
@@ -16,7 +37,7 @@ const facts = [
 ];
 ---
 
-<BaseLayout title={p.title} description={p.summary}>
+<BaseLayout title={p.title} description={p.summary} jsonLd={jsonLd}>
   <section class="bg-fog px-5 pt-28 pb-12 md:px-8 md:pt-[136px] md:pb-16 lg:px-10 lg:pt-40 lg:pb-20" data-cursor="Scroll">
     <div class="mx-auto flex max-w-[1600px] flex-col gap-10">
       <a href="/work" class="text-link type-small w-max">← All work</a>

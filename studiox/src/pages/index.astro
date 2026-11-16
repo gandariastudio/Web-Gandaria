@@ -13,10 +13,15 @@ import Testimonials from '@/components/sections/home/Testimonials.astro';
 import Journal from '@/components/sections/home/Journal.astro';
 import Faq from '@/components/sections/home/Faq.astro';
 import Contact from '@/components/sections/home/Contact.astro';
-import { organizationLd } from '@/utils/seo';
+import { getDb } from '@/lib/db';
+import { listFaqs } from '@/lib/db/queries';
+import { faqLd, organizationLd } from '@/utils/seo';
+
+const faqs = await listFaqs(await getDb());
+const jsonLd = [organizationLd(Astro.locals.settings), ...(faqs.length ? [faqLd(faqs)] : [])];
 ---
 
-<BaseLayout jsonLd={organizationLd(Astro.locals.settings)}>
+<BaseLayout jsonLd={jsonLd}>
   <Hero />
   <Manifesto />
   <Studio />

@@ -1,7 +1,9 @@
 ---
 import CmsImage from '@/components/ui/CmsImage.astro';
 import { getDb } from '@/lib/db';
-import { listServices } from '@/lib/db/queries';
+import { listFaqs, listProjects, listServices } from '@/lib/db/queries';
+import { projectsForService } from '@/lib/cms/service-work';
+import { breadcrumbLd, faqLd, servicesLd } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHero from '@/components/sections/shared/PageHero.astro';
 import NextStep from '@/components/sections/shared/NextStep.astro';
@@ -9,10 +11,14 @@ import Faq from '@/components/sections/home/Faq.astro';
 import SectionHead from '@/components/ui/SectionHead.astro';
 import { servicesPage } from '@/data/pages';
 
-const services = await listServices(await getDb());
+const db = await getDb();
+const [services, faqs, projects] = await Promise.all([listServices(db), listFaqs(db), listProjects(db)]);
+/** "PizzaNova - Restaurant Website…" → "PizzaNova": the name before the first separator. */
+const shortName = (title: string) => title.split(/\s+[-–—]\s+|:\s/)[0];
+const jsonLd = [breadcrumbLd([['Services', '/services']]), servicesLd(services), ...(faqs.length ? [faqLd(faqs)] : [])];
 ---
 
-<BaseLayout title={servicesPage.seo.title} description={servicesPage.seo.description}>
+<BaseLayout title={servicesPage.seo.title} description={servicesPage.seo.description} jsonLd={jsonLd}>
   <PageHero {...servicesPage.hero} />
 
   <section class="bg-paper px-5 py-10 md:px-8 md:py-12 xl:px-10 xl:py-16" data-cursor="Our services">
@@ -31,6 +37,23 @@ const services = await listServices(await getDb());
                 <p class="type-label text-muted">Deliverables</p>
                 <p class="type-body">{s.deliverables}</p>
               </div>
+              {(() => {
+                const work = projectsForService(s.title, projects);
+                return (
+                  work.length > 0 && (
+                    <div class="flex flex-col gap-2 pt-2">
+                      <p class="type-label text-muted">Selected work</p>
+                      <p class="type-body flex flex-wrap gap-x-5 gap-y-1">
+                        {work.map((p) => (
+                          <a href={`/work/${p.slug}`} class="text-link">
+                            {shortName(p.title)}
+                          </a>
+                        ))}
+                      </p>
+                    </div>
+                  )
+                );
+              })()}
             </div>
           </article>
         ))

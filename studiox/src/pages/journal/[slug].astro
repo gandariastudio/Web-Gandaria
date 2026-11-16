@@ -5,11 +5,11 @@ import { getDb } from '@/lib/db';
 import { getPost } from '@/lib/db/queries';
 import { CLOUDINARY_CLOUD_NAME } from 'astro:env/server';
 import { imageSrc } from '@/lib/cms/cloudinary';
-import { articleLd } from '@/utils/seo';
+import { articleLd, breadcrumbLd } from '@/utils/seo';
 
 const p = await getPost(await getDb(), Astro.params.slug ?? '');
 if (!p) return Astro.rewrite('/404');
-const ld = articleLd({ ...p, image: imageSrc(p.cover, CLOUDINARY_CLOUD_NAME, 1200) });
+const ld = [articleLd({ ...p, image: imageSrc(p.cover, CLOUDINARY_CLOUD_NAME, 1200) }), breadcrumbLd([['Journal', '/journal'], [p.title, `/journal/${p.slug}`]])];
 const date = p.publishedAt.toLocaleString('en-US', { dateStyle: 'medium', timeZone: 'UTC' });
 ---
 

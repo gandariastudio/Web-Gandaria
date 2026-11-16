@@ -76,3 +76,64 @@ export function articleLd(post: { title: string; excerpt: string; slug: string; 
     publisher: { '@id': absolute('/#organization'), '@type': 'Organization', name: SITE_NAME, logo: absolute('/web-app-manifest-512x512.png') },
   };
 }
+
+/** Questions and answers, for the FAQ sections on the home and Services pages. */
+export function faqLd(faqs: { question: string; answer: string }[]): JsonLd {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.question, acceptedAnswer: { '@type': 'Answer', text: f.answer } })),
+  };
+}
+
+/** The services the studio offers, each provided by the organization on the home page. */
+export function servicesLd(services: { title: string; summary: string; deliverables: string }[]): JsonLd {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Services',
+    itemListElement: services.map((s, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Service',
+        name: s.title,
+        description: s.summary,
+        serviceOutput: s.deliverables,
+        areaServed: 'Worldwide',
+        provider: { '@id': absolute('/#organization') },
+      },
+    })),
+  };
+}
+
+/** A project case study. `image` is an absolute or root-relative cover URL. */
+export function caseStudyLd(p: { slug: string; title: string; summary: string; client: string; sector: string; year: string; services: string; image?: string }): JsonLd {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: p.title,
+    description: p.summary,
+    url: absolute(`/work/${p.slug}`),
+    ...(p.image ? { image: absolute(p.image) } : {}),
+    dateCreated: p.year,
+    genre: p.sector,
+    keywords: p.services,
+    ...(p.client ? { sourceOrganization: { '@type': 'Organization', name: p.client } } : {}),
+    creator: { '@id': absolute('/#organization'), '@type': 'Organization', name: SITE_NAME },
+  };
+}
+
+/** Home › … › this page, for inner pages. Each crumb is [name, path]. */
+export function breadcrumbLd(crumbs: [string, string][]): JsonLd {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [['Home', '/'] as [string, string], ...crumbs].map(([name, path], i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name,
+      item: absolute(path),
+    })),
+  };
+}

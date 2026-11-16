@@ -1,4 +1,5 @@
 ---
+import { breadcrumbLd } from '@/utils/seo';
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import PageHero from '@/components/sections/shared/PageHero.astro';
 import NextStep from '@/components/sections/shared/NextStep.astro';
@@ -9,7 +10,7 @@ import SiteImage from '@/components/ui/SiteImage.astro';
 import { SITE_IMAGE_SLOTS } from '@/data/site-images';
 ---
 
-<BaseLayout title={about.seo.title} description={about.seo.description}>
+<BaseLayout title={about.seo.title} description={about.seo.description} jsonLd={breadcrumbLd([['About', '/about']])}>
   <PageHero {...about.hero} />
 
   <section class="bg-paper pb-24 md:pb-[120px] xl:pb-40" data-cursor="Our studio">
