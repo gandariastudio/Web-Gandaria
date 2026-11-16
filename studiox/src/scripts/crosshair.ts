@@ -23,7 +23,9 @@ export function initCrosshair() {
     y += (py - y) * SMOOTHING;
     v.style.transform = `translate3d(${x}px,0,0)`;
     h.style.transform = `translate3d(0,${y}px,0)`;
-    plus.style.transform = `translate3d(${x - 7}px,${y - 7}px,0)`;
+    // The size change below 810px lives in the same transform, after the move: a separate CSS
+    // `scale` would also shrink the move and pull the plus away from where the lines cross.
+    plus.style.transform = `translate3d(${x - 7}px,${y - 7}px,0) scale(var(--kc-plus-scale, 1))`;
     if (active || Math.abs(px - x) > 0.3 || Math.abs(py - y) > 0.3) raf = requestAnimationFrame(tick);
   };
   const run = () => {

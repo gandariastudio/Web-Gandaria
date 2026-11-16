@@ -15,12 +15,16 @@ const p = project;
   is too small to carry the caption over the image, so the caption sits under it instead. The
   caption is one column so a long services list wraps instead of squeezing the title.
 -->
-<a href={`/work/${project.slug}`} class="relative flex w-full flex-col gap-4 lg:block" data-project-card>
+<a href={`/work/${project.slug}`} class="group relative flex w-full flex-col gap-4 lg:block" data-project-card>
   <div class="project-media relative aspect-[4/3] w-full overflow-hidden rounded-[10px] bg-[#f3f3f5]" data-cursor-zone-target data-img-reveal>
     <div class="absolute inset-0" data-parallax-img>
       <CmsImage image={p.cover} widths={[700, 1100, 1400]} sizes="(min-width: 810px) 50vw, 100vw" class="size-full object-cover" />
     </div>
     <div class="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(#0000_45%,#000000b8_100%)] lg:block"></div>
+    <!-- On hover the bottom darkens further so the caption stays readable over busy covers. -->
+    <div
+      class="pointer-events-none absolute inset-0 hidden bg-[linear-gradient(#0000_25%,#000000e6_100%)] opacity-0 transition-opacity duration-500 ease-out group-hover:opacity-100 group-focus-visible:opacity-100 lg:block">
+    </div>
   </div>
   <div class="pointer-events-none flex flex-col items-start gap-3 px-1 lg:absolute lg:inset-x-0 lg:bottom-0 lg:px-6 lg:pb-6 lg:text-paper xl:px-7 xl:pb-7">
     <p class="type-label flex flex-wrap items-center gap-1.5 text-muted lg:text-paper/70">
