@@ -97,11 +97,18 @@ describe('client and settings forms', () => {
 describe('site images', () => {
   it('treats empty slots as "keep the built-in image" and requires alt text for uploads', () => {
     const empty = validate(siteImagesSchema, readers.siteImages(fd({})));
-    expect(empty.ok && empty.data).toEqual({ zoom: [null, null, null, null, null, null], numbers: null, about: null });
+    expect(empty.ok && empty.data).toEqual({ zoom: [null, null, null, null, null, null], numbers: null, about: null, heroVideo: null, hero: null });
     const missingAlt = validate(siteImagesSchema, readers.siteImages(fd({ 'zoom.2': img })));
     expect(!missingAlt.ok && missingAlt.errors['zoom.2.alt']).toMatch(/Describe/);
     const ok = validate(siteImagesSchema, readers.siteImages(fd({ about: img, about_alt: 'The studio' })));
     expect(ok.ok && ok.data.about).toMatchObject({ width: 1200, height: 800, alt: 'The studio' });
+  });
+  it('keeps an uploaded hero clip and ignores a broken one', () => {
+    const clip = JSON.stringify({ publicId: 'site/reel', width: 1920, height: 1080 });
+    const ok = validate(siteImagesSchema, readers.siteImages(fd({ heroVideo: clip })));
+    expect(ok.ok && ok.data.heroVideo).toEqual({ publicId: 'site/reel', width: 1920, height: 1080 });
+    const broken = validate(siteImagesSchema, readers.siteImages(fd({ heroVideo: '{not json' })));
+    expect(broken.ok && broken.data.heroVideo).toBe(null);
   });
 });
 

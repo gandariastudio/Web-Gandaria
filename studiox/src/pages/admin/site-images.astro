@@ -4,6 +4,7 @@ import AdminLayout from '@/layouts/AdminLayout.astro';
 import EditHeader from '@/components/admin/EditHeader.astro';
 import FormCard from '@/components/admin/FormCard.astro';
 import ImageField from '@/components/admin/ImageField.astro';
+import VideoField from '@/components/admin/VideoField.astro';
 import SaveBar from '@/components/admin/SaveBar.astro';
 import { getDb } from '@/lib/db';
 import { saveSiteImages } from '@/lib/db/admin';
@@ -41,12 +42,25 @@ const aboutPreview = await preview(SITE_IMAGE_SLOTS.about.builtIn);
 <AdminLayout title="Site images" width="narrow">
   <EditHeader
     title="Site images"
-    subtitle="Photos on the home and About pages that are not part of a project or article. Empty slots use the built-in image."
+    subtitle="Photos and the hero video on the home and About pages that are not part of a project or article. Empty slots use the built-in one."
     back={{ href: '/admin', label: 'Dashboard' }}
     errors={errors}
   />
 
   <form method="post" class="a-form" data-edit-form data-start-dirty={String(Astro.request.method === 'POST')}>
+    <FormCard title="Home: hero" description="The big frame under the headline that grows to full screen as visitors scroll. A video plays if there is one; otherwise the photo shows; with neither, the built-in video plays.">
+      <VideoField
+        name="heroVideo"
+        label="Video"
+        value={values.heroVideo}
+        folder="site"
+        error={errors.heroVideo}
+        removable
+        hint="A short loop, landscape (1920 × 1080 or larger). It plays muted."
+      />
+      <ImageField name="hero" label="Photo (used when there is no video)" value={values.hero} folder="site" errors={errors} recommended="2400 × 1350 (16:9)" removable />
+    </FormCard>
+
     <FormCard title="Home: scrolling zoom" description="The six photos that change as visitors scroll through the “Strategy … Craft” section, in this order.">
       {
         zoomPreviews.map((fallback, i) => (

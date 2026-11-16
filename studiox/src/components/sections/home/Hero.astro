@@ -1,7 +1,17 @@
 ---
 import KineticWordmark from '@/components/ui/KineticWordmark.astro';
 import Button from '@/components/ui/Button.astro';
+import CmsImage from '@/components/ui/CmsImage.astro';
+import { CLOUDINARY_CLOUD_NAME } from 'astro:env/server';
 import { heroMeta } from '@/data/home';
+import { cloudinaryVideo } from '@/lib/cms/blocks';
+import { hasImage } from '@/lib/cms/cloudinary';
+
+// The big media under the headline (admin: Site images → Home: hero). An uploaded clip wins, then
+// an uploaded photo; with neither, the built-in loop plays.
+const { heroVideo, hero } = Astro.locals.settings.siteImages;
+const clip = heroVideo && CLOUDINARY_CLOUD_NAME ? cloudinaryVideo(CLOUDINARY_CLOUD_NAME, heroVideo, 2400) : null;
+const photo = !clip && hasImage(hero) ? hero : null;
 ---
 
 <section class="relative bg-fog" data-cursor="Scroll">
@@ -48,7 +58,13 @@ import { heroMeta } from '@/data/home';
   <div class="relative h-[70vh] md:h-[80vh] xl:h-screen" data-cursor-dark data-expand>
     <div class="absolute inset-0 overflow-hidden" data-expand-frame>
       <div class="absolute inset-0 origin-center" data-expand-media>
-        <video class="absolute inset-0 size-full object-cover" src="/videos/hero.mp4" autoplay muted loop playsinline preload="auto"></video>
+        {
+          photo ? (
+            <CmsImage image={photo} widths={[828, 1440, 2400]} sizes="100vw" class="absolute inset-0 size-full object-cover" loading="eager" />
+          ) : (
+            <video class="absolute inset-0 size-full object-cover" src={clip?.src ?? '/videos/hero.mp4'} poster={clip?.poster} autoplay muted loop playsinline preload="auto" />
+          )
+        }
       </div>
     </div>
   </div>

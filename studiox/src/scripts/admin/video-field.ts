@@ -17,6 +17,7 @@ export function initVideoField(field: HTMLElement) {
   const text = field.querySelector<HTMLElement>('[data-drop-text]')!;
   const box = field.querySelector<HTMLElement>('[data-preview-box]')!;
   const bar = field.querySelector<HTMLElement>('[data-progress]')!;
+  const reset = field.querySelector<HTMLButtonElement>('[data-video-reset]');
   const form = field.closest('form');
   const save = form?.querySelector<HTMLButtonElement>('[data-save]');
   let busy = false;
@@ -48,6 +49,7 @@ export function initVideoField(field: HTMLElement) {
       video.src = `https://res.cloudinary.com/${signature.cloudName}/video/upload/q_auto,c_limit,w_960/${result.public_id}.mp4`;
       box.append(video);
       drop.classList.add('has-image');
+      if (reset) reset.hidden = false;
       text.textContent = 'Add a video';
       form?.dispatchEvent(new Event('change'));
     } catch (error) {
@@ -61,6 +63,16 @@ export function initVideoField(field: HTMLElement) {
       fileInput.value = '';
     }
   }
+
+  // Optional slots: clear the clip (the page then uses its fallback).
+  reset?.addEventListener('click', (e) => {
+    e.preventDefault();
+    valueInput.value = '';
+    box.innerHTML = '';
+    drop.classList.remove('has-image');
+    reset.hidden = true;
+    form?.dispatchEvent(new Event('change'));
+  });
 
   fileInput.addEventListener('change', () => handle(fileInput.files?.[0]));
   drop.addEventListener('dragover', (e) => {

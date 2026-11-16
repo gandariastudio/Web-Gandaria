@@ -148,10 +148,18 @@ const optionalImage = z.preprocess(
   image('an image').nullable(),
 );
 
+/** A replaceable clip: empty means "keep the built-in video", so it becomes null. */
+const optionalVideo = z.preprocess(
+  (v) => (v && typeof v === 'object' && (v as { publicId?: string }).publicId ? v : null),
+  z.object({ publicId: z.string().min(1), width: z.coerce.number().int().positive(), height: z.coerce.number().int().positive() }).nullable(),
+);
+
 export const siteImagesSchema = z.object({
   zoom: z.array(optionalImage).length(6),
   numbers: optionalImage,
   about: optionalImage,
+  heroVideo: optionalVideo,
+  hero: optionalImage,
 });
 
 export type ProjectInput = z.infer<typeof projectSchema>;
@@ -180,6 +188,16 @@ export function readImage(form: FormData, name: string): Partial<CmsImage> {
   return { ...base, alt: str(form, `${name}_alt`) };
 }
 
+/** A hidden JSON field (video uploads), or null when empty or unreadable. */
+function readJson(form: FormData, name: string): unknown {
+  try {
+    const raw = str(form, name);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 const hasUpload = (img: Partial<CmsImage>) => !!(img.publicId || img.url);
 
 /**
@@ -206,13 +224,7 @@ export function readBlocks(f: FormData) {
         blocks.push({ type, images: [0, 1, 2].map((j) => readImage(f, at(`images.${j}`))).filter(hasUpload) });
         break;
       case 'video': {
-        let video: unknown = null;
-        try {
-          const raw = str(f, at('video'));
-          if (raw) video = JSON.parse(raw);
-        } catch {
-          video = null;
-        }
+        const video = readJson(f, at('video'));
         blocks.push({ type, source: str(f, at('source')) || 'upload', video, url: str(f, at('url')), width: str(f, at('width')) || 'contained', caption: str(f, at('caption')) });
         break;
       }
@@ -276,6 +288,8 @@ export const readers = {
     zoom: [0, 1, 2, 3, 4, 5].map((i) => readImage(f, `zoom.${i}`)),
     numbers: readImage(f, 'numbers'),
     about: readImage(f, 'about'),
+    heroVideo: readJson(f, 'heroVideo'),
+    hero: readImage(f, 'hero'),
   }),
   settings: (f: FormData) => ({
     email: str(f, 'email'),

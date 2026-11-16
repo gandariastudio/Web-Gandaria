@@ -157,6 +157,9 @@ export type SiteImages = {
   zoom?: (CmsImage | null)[];
   numbers?: CmsImage | null;
   about?: CmsImage | null;
+  /** The big media under the home hero: a clip wins over a photo; with neither, public/videos/hero.mp4 plays. */
+  heroVideo?: CmsVideo | null;
+  hero?: CmsImage | null;
 };
 
 export type ProjectRow = typeof projects.$inferSelect;

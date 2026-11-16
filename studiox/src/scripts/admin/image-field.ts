@@ -192,12 +192,16 @@ export function initImageField(field: HTMLElement) {
       });
     }
 
-    // Optional slots (site images): go back to the built-in image by clearing the upload.
+    // Optional slots (site images): clear the upload, back to the built-in image or to empty.
     reset?.addEventListener('click', (e) => {
       e.preventDefault();
       valueInput.value = '';
       if (alt) alt.value = '';
       if (field.dataset.fallback) showPreview(field.dataset.fallback);
+      else {
+        box.innerHTML = '';
+        drop.classList.remove('has-image');
+      }
       reset.hidden = true;
       if (adjust) adjust.hidden = true;
       form?.dispatchEvent(new Event('change'));

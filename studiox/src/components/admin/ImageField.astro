@@ -22,11 +22,15 @@ interface Props {
    * adds a "Use built-in image" button that clears the upload.
    */
   fallback?: string;
+  /** Optional with nothing built in to fall back to: adds a "Remove" button and no required alt. */
+  removable?: boolean;
   /** No frame and no Adjust: for images shown at their natural shape (image blocks). */
   noAdjust?: boolean;
 }
 
-const { name, label, value, folder, errors = {}, recommended, hint, contain = false, fallback, noAdjust = false } = Astro.props;
+const { name, label, value, folder, errors = {}, recommended, hint, contain = false, fallback, removable = false, noAdjust = false } = Astro.props;
+/** The slot may stay empty. */
+const optional = !!fallback || removable;
 const framed = !contain && !noAdjust;
 const ready = !!(CLOUDINARY_CLOUD_NAME && CLOUDINARY_API_KEY && CLOUDINARY_API_SECRET);
 const crop = value?.crop && !isDefaultCrop(value.crop) ? normalizeCrop(value.crop) : null;
@@ -86,9 +90,9 @@ const id = `f-${name.replace(/[^a-z0-9]+/gi, '-')}`;
         )
       }
       {
-        fallback && (
-          <button type="button" class="a-drop-tool" data-image-reset hidden={usingBuiltIn}>
-            Use built-in
+        optional && (
+          <button type="button" class="a-drop-tool" data-image-reset hidden={usingBuiltIn || !uploaded}>
+            {fallback ? 'Use built-in' : 'Remove'}
           </button>
         )
       }
@@ -131,8 +135,8 @@ const id = `f-${name.replace(/[^a-z0-9]+/gi, '-')}`;
   }
   {hint && <p class="a-hint">{hint}</p>}
   {imageError && <p class="a-error">{imageError}</p>}
-  <label class="a-label a-label--spaced" for={`${id}-alt`}>Describe the image {!fallback && <span class="a-req">*</span>}</label>
-  <input id={`${id}-alt`} name={`${name}_alt`} value={value?.alt ?? ''} class="a-input" placeholder={fallback ? 'Alt text, needed when you upload an image' : 'Alt text: what the image shows'} data-image-alt />
+  <label class="a-label a-label--spaced" for={`${id}-alt`}>Describe the image {!optional && <span class="a-req">*</span>}</label>
+  <input id={`${id}-alt`} name={`${name}_alt`} value={value?.alt ?? ''} class="a-input" placeholder={optional ? 'Alt text, needed when you upload an image' : 'Alt text: what the image shows'} data-image-alt />
   {altError && <p class="a-error">{altError}</p>}
 </div>
 
