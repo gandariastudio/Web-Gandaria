@@ -9,7 +9,7 @@ import SiteImage from '@/components/ui/SiteImage.astro';
 import { SITE_IMAGE_SLOTS } from '@/data/site-images';
 ---
 
-<BaseLayout title="Studio" description={about.hero.intro}>
+<BaseLayout title={about.seo.title} description={about.seo.description}>
   <PageHero {...about.hero} />
 
   <section class="bg-paper pb-24 md:pb-[120px] xl:pb-40" data-cursor="Our studio">

@@ -10,7 +10,7 @@ import { workPage } from '@/data/pages';
 const projects = await listProjects(await getDb());
 ---
 
-<BaseLayout title="Work" description={workPage.intro}>
+<BaseLayout title={workPage.seo.title} description={workPage.seo.description}>
   <PageHero {...workPage} />
 
   <section class="bg-paper px-5 pt-12 pb-24 md:px-8 md:pt-16 md:pb-[120px] xl:px-10 xl:pt-20 xl:pb-40" data-cursor="View project" data-cursor-zone="[data-cover]">

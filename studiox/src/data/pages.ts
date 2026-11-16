@@ -1,17 +1,26 @@
+/**
+ * `seo` is the search-result title (" | Gandaria Studio" is added) and meta description, kept apart
+ * from the on-page copy so each can be the right length: titles 50-60 characters with the suffix,
+ * descriptions 140-160.
+ */
 export const about = {
+  seo: {
+    title: 'About Our Independent Design Studio',
+    description: 'A small senior team of strategists, designers and developers based in Semarang, Indonesia. The people on your kickoff call are the people who do the work.',
+  },
   hero: {
     tag: 'Studio',
-    meta: '(Est. 2020 — Semarang)',
+    meta: '(Est. 2020, Semarang)',
     lines: ['Small studio,', 'senior hands.'] as [string, string],
     intro:
       'Gandaria Studio is a small team of strategists, designers and developers in Semarang who care more about what we make than how big we look. The people in your kickoff are the people who make it.',
   },
   story: {
-    title: 'A few friends with one stubborn idea: a business in Semarang should get Jakarta-level design without going to Jakarta.',
+    title: 'A few friends with one stubborn idea: a small studio in Semarang can make work that holds up anywhere.',
     paragraphs: [
-      'Gandaria Studio began in 2020 around a shared desk in Semarang. We had worked for agencies and clients in Jakarta and abroad, and kept seeing the same thing — great local businesses with brands that undersold them, and good ideas lost between the pitch and the launch.',
+      'Gandaria Studio began in 2020 around a shared desk in Semarang. We had worked for agencies and clients in Jakarta and abroad, and kept seeing the same thing: great businesses with brands that undersold them, and good ideas lost between the pitch and the launch.',
       'So we kept the studio small on purpose. The same senior people run every project from the first workshop to launch day, and we take on only a handful of clients at a time.',
-      'Today we partner with founders, family businesses and growing brands across Indonesia, from Central Java to Bali and beyond. The desk is bigger; the idea hasn’t changed.',
+      'Today we work with founders, family businesses and growing brands in Indonesia and abroad. The desk is bigger, but the idea hasn’t changed.',
     ],
   },
   values: [
@@ -23,6 +32,10 @@ export const about = {
 };
 
 export const servicesPage = {
+  seo: {
+    title: 'Brand Identity, Web Design & Development',
+    description: 'Brand identity, UI/UX design, web development and content design for growing companies, run by one senior team from the first call to launch day.',
+  },
   hero: {
     tag: 'Services',
     meta: '(4 disciplines, 1 team)',
@@ -38,13 +51,21 @@ export const servicesPage = {
 };
 
 export const workPage = {
+  seo: {
+    title: 'Brand & Website Case Studies',
+    description: 'Case studies from Gandaria Studio: brand identities, e-commerce sites and web apps for restaurants, fashion labels, fitness and outdoor brands.',
+  },
   tag: 'Work',
-  meta: '(Selected 2020—26)',
+  meta: '(Selected, 2020–2026)',
   lines: ['Selected', 'work.'] as [string, string],
-  intro: 'Brands, websites and content for founders and growing businesses across Indonesia.',
+  intro: 'Brands, websites and content for founders and growing businesses, in Indonesia and abroad.',
 };
 
 export const journalPage = {
+  seo: {
+    title: 'Notes on Branding & Web Design',
+    description: 'Short reads on brand identity, website design and how we run client projects, written by the designers and developers who do the work at Gandaria Studio.',
+  },
   tag: 'Journal',
   meta: '(Notes, 2026)',
   lines: ['Notes from', 'the studio.'] as [string, string],

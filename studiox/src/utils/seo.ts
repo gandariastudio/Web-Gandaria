@@ -1,8 +1,8 @@
 export const SITE_URL = import.meta.env.SITE ?? 'https://www.gandariastudio.com';
 export const SITE_NAME = 'Gandaria Studio';
-export const DEFAULT_TITLE = 'Gandaria Studio - Independent Creative Studio in Semarang';
+export const DEFAULT_TITLE = 'Gandaria Studio | Brand Identity & Website Design Studio';
 export const DEFAULT_DESCRIPTION =
-  'Gandaria Studio is an independent creative studio in Semarang, Indonesia. We build brands, websites and content for businesses that have outgrown how they look.';
+  'Independent brand and website design studio based in Indonesia, working with clients worldwide. Brand identity, websites and content from one senior team.';
 export const DEFAULT_IMAGE = '/og-image.jpg';
 
 export interface PageMeta {

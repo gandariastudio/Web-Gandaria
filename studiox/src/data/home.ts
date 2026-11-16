@@ -9,7 +9,7 @@ import zoom6 from '@/assets/images/zoom-6.jpg';
 export const heroMeta = [
   'Independent creative studio',
   'Brand, digital and content in one studio',
-  // the third line ("Semarang & remote — booking …") is built in Hero.astro from the CMS setting
+  // the third line ("Semarang & remote · booking …") is built in Hero.astro from the CMS setting
 ];
 
 export const zoomImages: { src: ImageMetadata; alt: string }[] = [
@@ -82,7 +82,7 @@ export const capabilities = [
 
 export const stats = [
   { index: '01', meta: 'Since 2020', value: 80, suffix: '+', filled: 80, label: 'brands and websites launched since 2020', delay: 0 },
-  { index: '02', meta: 'Across Indonesia', value: 12, suffix: '', filled: 12, label: 'cities our clients call home', delay: 0.14 },
+  { index: '02', meta: 'Client cities', value: 12, suffix: '', filled: 12, label: 'cities our clients call home', delay: 0.14 },
   { index: '03', meta: 'Retention', value: 90, suffix: '%', filled: 90, label: 'of clients come back for a second project', delay: 0.28 },
 ];
 

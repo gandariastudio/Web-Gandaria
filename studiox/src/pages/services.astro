@@ -12,7 +12,7 @@ import { servicesPage } from '@/data/pages';
 const services = await listServices(await getDb());
 ---
 
-<BaseLayout title="Services" description={servicesPage.hero.intro}>
+<BaseLayout title={servicesPage.seo.title} description={servicesPage.seo.description}>
   <PageHero {...servicesPage.hero} />
 
   <section class="bg-paper px-5 py-10 md:px-8 md:py-12 xl:px-10 xl:py-16" data-cursor="Our services">
