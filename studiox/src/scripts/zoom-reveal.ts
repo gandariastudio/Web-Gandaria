@@ -1,7 +1,9 @@
 import { clamp01, inOutCubic, prefersReducedMotion } from './lib/dom';
 import { smoothing } from './smooth-scroll';
 
-const START_SIZE = 300;
+/** The small frame the photos start in: 4:3, up to 360 px wide (Manifesto.astro repeats this for the first paint). */
+const START_SIZE = 360;
+const START_RATIO = 3 / 4;
 const HOLD = 0.06;
 const END = 0.9;
 
@@ -76,8 +78,8 @@ export function initZoomReveal() {
     const h = stage.offsetHeight;
     const e = inOutCubic(p);
     const phone = w < 810;
-    const s = Math.min(START_SIZE, w * (phone ? 0.5 : 0.24));
-    const sh = s * 1.25;
+    const s = Math.min(START_SIZE, w * (phone ? 0.72 : 0.26));
+    const sh = s * START_RATIO;
     const iy = ((h - sh) / 2) * (1 - e);
     const ix = ((w - s) / 2) * (1 - e);
     clip.style.clipPath = `inset(${iy.toFixed(2)}px ${ix.toFixed(2)}px ${iy.toFixed(2)}px ${ix.toFixed(2)}px round ${(2 * (1 - e)).toFixed(2)}px)`;

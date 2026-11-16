@@ -25,7 +25,8 @@ export function initServicesPreview() {
   let hideTimer = 0;
 
   const size = () => (slotLeft >= 0 ? slotWidth : Math.min(380, Math.max(180, window.innerWidth * 0.24)));
-  const height = () => (slotLeft >= 0 ? Math.round(slotWidth * 1.2) : size());
+  /** 4:3, the shape the service images are uploaded in, so the hover preview shows them whole. */
+  const height = () => Math.round((size() * 3) / 4);
 
   const layout = () => {
     const slot = visible(section.querySelectorAll('[data-media-slot]'))[0];

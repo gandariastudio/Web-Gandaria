@@ -5,12 +5,13 @@ import { SITE_IMAGE_SLOTS } from '@/data/site-images';
 const zoomImages = SITE_IMAGE_SLOTS.zoom.builtIn;
 const uploads = Astro.locals.settings.siteImages.zoom ?? [];
 
-const START = 300;
+/** The first paint of the 4:3 start frame; scripts/zoom-reveal.ts takes over from here. */
+const START = 360;
 ---
 
 <section class="relative h-[260vh] bg-fog md:h-[300vh] xl:h-[340vh]" data-cursor="Keep scrolling" data-zoom>
   <div class="sticky top-0 h-screen w-full overflow-hidden">
-    <div class="absolute inset-0 overflow-hidden" style={`clip-path:inset(calc(50% - ${(START * 1.25) / 2}px) calc(50% - ${START / 2}px) round 2px)`} data-zoom-clip>
+    <div class="absolute inset-0 overflow-hidden" style={`clip-path:inset(calc(50% - ${(START * 3) / 4 / 2}px) calc(50% - ${START / 2}px) round 2px)`} data-zoom-clip>
       <div class="absolute inset-0" data-zoom-scale>
         {
           zoomImages.map((img, i) => (
