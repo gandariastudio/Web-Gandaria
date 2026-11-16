@@ -21,7 +21,7 @@ const items = (await adminListProjects(db)).map((p) => ({
 ---
 
 <AdminLayout title="Projects">
-  <ListPage title="Projects" description="Case studies shown on the home page and on /work, in this order." newHref="/admin/projects/new" newLabel="New project" count={items.length} noun="project" sortable>
+  <ListPage title="Projects" description="Case studies, in this order. The first four published ones are shown on the home page; /work shows them all." newHref="/admin/projects/new" newLabel="New project" count={items.length} noun="project" sortable>
     <ItemGrid items={items} base="/admin/projects" noun="project" sortable />
   </ListPage>
 </AdminLayout>

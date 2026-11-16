@@ -3,7 +3,9 @@ import { getDb } from '@/lib/db';
 import { listProjects } from '@/lib/db/queries';
 import ProjectCard from '@/components/ui/ProjectCard.astro';
 
-const projects = await listProjects(await getDb());
+/** The home page shows a selection: the first four published projects in the admin's order. /work lists them all. */
+const HOME_LIMIT = 4;
+const projects = (await listProjects(await getDb())).slice(0, HOME_LIMIT);
 ---
 
 <section id="work" class="bg-fog pt-[88px] pb-24 md:pt-[110px] md:pb-[120px] xl:pt-[140px] xl:pb-40" data-cursor="View project" data-cursor-zone="[data-project-card]" data-parallax>
