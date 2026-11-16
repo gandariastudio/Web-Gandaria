@@ -16,11 +16,11 @@ describe('enquiry', () => {
   });
   const ctx = { messageUrl: 'https://x/admin/inbox/7', logoUrl: 'https://x/logo.png', sentAt: new Date('2026-11-12T08:39:00Z') };
   it('writes the notification email as text and HTML', () => {
-    const e = enquirySchema.parse({ name: 'Rina Kusuma', email: 'rina@example.com', budget: 'Rp150 jt+', message: 'Hello\nthere', page: '/contact' });
+    const e = enquirySchema.parse({ name: 'Rina Kusuma', email: 'rina@example.com', budget: '$1,000–2,000', message: 'Hello\nthere', page: '/contact' });
     expect(enquirySubject(e)).toBe('New enquiry from Rina Kusuma');
     expect(formatSentAt(ctx.sentAt)).toBe('12 Nov 2026, 15:39 WIB');
     const text = enquiryEmailText(e, ctx);
-    expect(text).toContain('Budget: Rp150 jt+');
+    expect(text).toContain('Budget: $1,000–2,000');
     expect(text).not.toContain('Company:');
     expect(text).toContain('https://x/admin/inbox/7');
     const html = enquiryEmailHtml(e, ctx);

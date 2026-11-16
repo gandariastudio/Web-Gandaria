@@ -2,7 +2,8 @@
 const EMAIL = Astro.locals.settings.email;
 
 const services = ['Brand', 'Website', 'Content design', 'Not sure yet'];
-const budgets = ['Under Rp50 jt', 'Rp50–150 jt', 'Rp150 jt+', 'Not sure yet'];
+/** In USD, centred on the usual project size ($1,000–2,000). Stored as the label, so changing these is safe. */
+const budgets = ['Under $1,000', '$1,000–2,000', '$2,000–5,000', '$5,000+', 'Not sure yet'];
 const inputs: { name: string; label: string; required: boolean; type: 'text' | 'email'; placeholder: string; auto: string; full: boolean }[] = [
   { name: 'name', label: 'Your name', required: true, type: 'text', placeholder: 'Jane Doe', auto: 'name', full: false },
   { name: 'email', label: 'Email', required: true, type: 'email', placeholder: 'jane@company.com', auto: 'email', full: false },

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository layout
 
-This repo started as a distributable Astro theme ("Studiox") and is now the Gandaria Studio site (Semarang, Indonesia; English copy, WIB clock, IDR budgets) with its own admin CMS. The app lives in `studiox/`; the repo root holds `credits.txt`, `documentation/index.html` (the original theme's buyer docs, still describing Studiox and the pre-CMS content setup) and `docs/superpowers/specs/` (design records, including the CMS spec).
+This repo started as a distributable Astro theme ("Studiox") and is now the Gandaria Studio site (Semarang, Indonesia; English copy, WIB clock, USD budgets) with its own admin CMS. The app lives in `studiox/`; the repo root holds `credits.txt`, `documentation/index.html` (the original theme's buyer docs, still describing Studiox and the pre-CMS content setup) and `docs/superpowers/specs/` (design records, including the CMS spec).
 
 **All commands run from `studiox/`.** There is no root `package.json`.
 
