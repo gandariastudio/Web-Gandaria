@@ -65,7 +65,7 @@ const self = row ? `/admin/projects/${row.id}` : '/admin/projects/new';
     <!-- The case study as a document: cover, title, summary, then the blocks. -->
     <div class="a-doc">
       <div class="a-doc-cover">
-        <ImageField name="cover" label="Cover" value={values.cover} folder="projects" errors={errors} recommended="2400 × 1350 (16:9)" />
+        <ImageField name="cover" label="Cover" value={values.cover} folder="projects" errors={errors} recommended="2400 × 1800 (4:3)" />
       </div>
       <div class="a-doc-heading">
         <textarea name="title" rows="1" class="a-doc-input a-doc-title" placeholder="Project name" aria-label="Project name" data-slug-source data-autogrow data-single-line>{values.title}</textarea>
